@@ -1130,6 +1130,11 @@ body.in-webapp .tg-cta {
   cursor: pointer;
 }
 
+/* атрибут hidden должен побеждать display:inline-flex выше */
+.nav__close[hidden] {
+  display: none;
+}
+
 .webapp-actions {
   display: flex;
   gap: 12px;
