@@ -897,3 +897,8 @@ main {
     animation-duration: 0.01ms !important;
   }
 }
+
+/* Внутри Telegram WebApp кнопки «Открыть бота» бессмысленны — прячем */
+body.in-webapp .tg-cta {
+  display: none !important;
+}

@@ -10,7 +10,7 @@ description: Use when working on the TARO web app visual design, layout, CSS, HT
 - **Palette:** deep-space background `#05060f`, accents cyan `#54f1ff`, violet `#8b5cf6`, pink `#ff5fb2`. Gradient = cyan → violet → pink.
 - **Fonts:** `Orbitron` for display/headings (futuristic), `Manrope` for body text.
 - **Signature effects:** glassmorphism cards (backdrop-filter blur + `rgba(255,255,255,.05)` fill + `1px` light border), neon text-shadows, dashed orbit rings, Roman-numeral arcane badges, gradient borders, shine-sweep buttons.
-- **Environment:** fixed full-screen Three.js canvas (`web/js/space.js`) renders starfield, 3D moon, rings, meteors, nebulas. It sits at `z-index:0`; content lives at `z-index:4`. Two pseudo-element overlays on `body` add aurora glows (`z-index:0`, `mix-blend-mode:screen`) and a vignette (`z-index:3`).
+- **Environment:** fixed full-screen Three.js canvas (`js/space.js`) renders starfield, 3D moon, rings, meteors, nebulas. It sits at `z-index:0`; content lives at `z-index:4`. Two pseudo-element overlays on `body` add aurora glows (`z-index:0`, `mix-blend-mode:screen`) and a vignette (`z-index:3`).
 
 ## Rules for edits
 
@@ -25,7 +25,7 @@ description: Use when working on the TARO web app visual design, layout, CSS, HT
 
 ## Before/after any visual change
 
-1. Edit files under `web/`.
+1. Edit files under repo root (`index.html`, `css/style.css`, `js/app.js`, `js/space.js`).
 2. Serve: `python -m http.server 8000 --directory web`.
 3. Run the automated check: `node tools/browser-check/check.cjs` (expect 11/11).
 4. If a new breakpoint/behavior was touched, the puppeteer script may need a new assertion — add it rather than removing coverage.

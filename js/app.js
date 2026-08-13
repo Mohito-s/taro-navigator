@@ -241,4 +241,13 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
+// Telegram WebApp: прячем лишние «открыть бота» CTA и адаптируем интерфейс
+(function initTelegram() {
+  const tg = window.Telegram && window.Telegram.WebApp;
+  if (!tg) return;
+  tg.ready();
+  tg.expand();
+  document.body.classList.add("in-webapp");
+})();
+
 renderResult(12, 5, 1998);
