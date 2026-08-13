@@ -251,8 +251,13 @@ document.addEventListener("keydown", (e) => {
 function initTelegram() {
   if (window.__taroInited) return;
   const tg = window.Telegram && window.Telegram.WebApp;
-  // Скрываем CTA только в РЕАЛЬНОМ WebApp (initData заполнен), на публичном сайте — нет
-  if (!tg || !tg.initData) return;
+  // Скрываем CTA только в РЕАЛЬНОМ WebApp (initData заполнен), на публичном сайте — нет.
+  // Скрипт Telegram иногда инъектируется позже загрузки страницы — опрашиваем.
+  if (!tg || !tg.initData) {
+    window.__taroTgTries = (window.__taroTgTries || 0) + 1;
+    if (window.__taroTgTries <= 50) setTimeout(initTelegram, 200);
+    return;
+  }
   window.__taroInited = true;
   window.__taroWebApp = true;
   tg.ready();
