@@ -134,6 +134,10 @@ function renderResult(day, month, year) {
   const sign = SIGNS[signName];
   const arc = arcana(day, month, year);
   lastArc = arc;
+  window.__taroCalc = { day, month, year };
+
+  const wa = document.getElementById("webapp-actions");
+  if (wa && window.__taroWebApp) wa.hidden = false;
 
   $("zodiac-card").innerHTML = `
     <div class="zodiac__ring">
@@ -209,6 +213,7 @@ const io = new IntersectionObserver(
 document.querySelectorAll(".reveal").forEach((el) => io.observe(el));
 
 let lastArc = [];
+let lastModalArcana = null;
 const modal = $("arcana-modal");
 
 function closeModal() {
@@ -217,6 +222,7 @@ function closeModal() {
 }
 
 function openModal(item) {
+  lastModalArcana = item.n;
   $("modal-num").textContent = `АРКАН ${ROMAN[item.n]}`;
   $("modal-pos").textContent = item.pos;
   $("modal-card").textContent = item.card;
@@ -241,13 +247,53 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
-// Telegram WebApp: прячем лишние «открыть бота» CTA и адаптируем интерфейс
+// Telegram WebApp: прячем лишние «открыть бота» CTA, применяем тему и мост к боту
 (function initTelegram() {
   const tg = window.Telegram && window.Telegram.WebApp;
   if (!tg) return;
+  window.__taroWebApp = true;
   tg.ready();
   tg.expand();
   document.body.classList.add("in-webapp");
+
+  // Тема Telegram
+  const tp = tg.themeParams || {};
+  const root = document.documentElement;
+  const setVar = (name, val) => val && root.style.setProperty(name, val);
+  setVar("--tg-bg", tp.bg_color);
+  setVar("--tg-text", tp.text_color);
+  setVar("--tg-hint", tp.hint_color);
+  setVar("--tg-btn", tp.button_color);
+  setVar("--tg-btn-text", tp.button_text_color);
+
+  // Кнопка «Закрыть»
+  const closeBtn = document.getElementById("webapp-close");
+  if (closeBtn) {
+    closeBtn.hidden = false;
+    closeBtn.addEventListener("click", () => tg.close());
+  }
+
+  // Действия: сохранить профиль / купить разбор
+  const sendToBot = (type) => {
+    const c = window.__taroCalc || {};
+    tg.sendData(JSON.stringify(Object.assign({ type }, c)));
+  };
+  const saveBtn = document.getElementById("wa-save");
+  const buyBtn = document.getElementById("wa-buy");
+  if (saveBtn) saveBtn.addEventListener("click", () => sendToBot("save"));
+  if (buyBtn) buyBtn.addEventListener("click", () => sendToBot("buy"));
 })();
+
+// Внутри WebApp кнопка аркана отправляет данные боту вместо ссылки
+document.addEventListener("click", (e) => {
+  const cta = e.target.closest("#modal-cta");
+  if (cta && window.__taroWebApp) {
+    e.preventDefault();
+    const c = window.__taroCalc || {};
+    window.Telegram.WebApp.sendData(
+      JSON.stringify(Object.assign({ type: "buy", arcana_n: lastModalArcana }, c))
+    );
+  }
+});
 
 renderResult(12, 5, 1998);

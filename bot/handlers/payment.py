@@ -7,7 +7,7 @@ from bot.handlers.report import send_report
 router = Router()
 
 PAYMENT_PAYLOAD = "full-report-v1"
-PRICE_STARS = 150
+PRICE_STARS = 10
 
 MENU_AFTER_PAY = InlineKeyboardMarkup(
     inline_keyboard=[

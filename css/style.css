@@ -902,3 +902,42 @@ main {
 body.in-webapp .tg-cta {
   display: none !important;
 }
+
+/* Переменные темы Telegram (заполняются из tg.themeParams) */
+:root {
+  --tg-bg: transparent;
+  --tg-text: #e8ecff;
+  --tg-hint: #8b93c0;
+  --tg-btn: #7c5cff;
+  --tg-btn-text: #ffffff;
+}
+
+.nav__close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  margin-left: auto;
+  border: none;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--tg-text, #e8ecff);
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.webapp-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin: 24px auto 8px;
+  max-width: 540px;
+  padding: 0 16px;
+}
+
+.webapp-actions .btn--primary {
+  background: var(--tg-btn, #7c5cff);
+  color: var(--tg-btn-text, #fff);
+}

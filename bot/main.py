@@ -7,7 +7,7 @@ from aiogram.types import BotCommand, MenuButtonWebApp, WebAppInfo
 
 from bot.config import BOT_TOKEN, MINI_APP_URL
 from bot.db import db as db_module
-from bot.handlers import daily, payment, report, start, wizard
+from bot.handlers import daily, payment, report, start, webapp, wizard
 
 
 async def main():
@@ -30,7 +30,7 @@ async def main():
             menu_button=MenuButtonWebApp(text="🪐 Мини-апп", web_app=WebAppInfo(url=MINI_APP_URL))
         )
 
-    dp.include_routers(start.router, wizard.router, daily.router, payment.router)
+    dp.include_routers(start.router, wizard.router, daily.router, payment.router, webapp.router)
     payment.setup(dp)
 
     logging.info("Bot started")
