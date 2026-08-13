@@ -1259,3 +1259,102 @@ main {
   background: linear-gradient(90deg, var(--cyan), var(--violet), var(--pink));
   box-shadow: 0 0 10px rgba(139, 92, 246, 0.9);
 }
+
+/* === Профиль === */
+.profile {
+  display: grid;
+  grid-template-columns: minmax(260px, 380px) 1fr;
+  gap: 28px;
+  align-items: start;
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 0 24px 40px;
+}
+.profile__card {
+  border-radius: 22px;
+  overflow: hidden;
+}
+.profile__body {
+  padding: 24px;
+  text-align: center;
+}
+.profile__sign {
+  font: 900 42px/1.1 Orbitron, sans-serif;
+  background: linear-gradient(90deg, #54f1ff, #8b5cf6, #ff5fb2);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin: 8px 0 4px;
+}
+.profile__meta {
+  color: var(--tg-hint, #8b93c0);
+  font: 400 14px/1.5 Manrope, sans-serif;
+  margin: 0 0 18px;
+}
+.profile__styles-title {
+  margin: 10px 0 8px;
+  font: 900 22px/1.1 Orbitron, sans-serif;
+  background: linear-gradient(90deg, #54f1ff, #8b5cf6, #ff5fb2);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.profile__style-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 14px;
+}
+.profile__style {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  text-align: left;
+  padding: 18px 18px 16px;
+  border-radius: 18px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--tg-text, #eaf0ff);
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, transform 0.15s, box-shadow 0.2s;
+}
+.profile__style:active {
+  transform: scale(0.97);
+}
+.profile__style .style-emoji {
+  font-size: 26px;
+  line-height: 1;
+}
+.profile__style .style-name {
+  font: 800 15px/1.2 Manrope, sans-serif;
+  color: var(--tg-text, #eaf0ff);
+}
+.profile__style .style-desc {
+  font: 400 13px/1.45 Manrope, sans-serif;
+  color: var(--tg-hint, #8b93c0);
+}
+.profile__style--active {
+  border-color: var(--violet);
+  background: rgba(139, 92, 246, 0.16);
+  box-shadow: 0 0 24px rgba(139, 92, 246, 0.35);
+}
+.profile__style--active .style-name {
+  color: #fff;
+}
+.profile__style--active::after {
+  content: "✓";
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  color: var(--cyan);
+  font-weight: 900;
+  text-shadow: 0 0 8px rgba(84, 241, 255, 0.8);
+}
+@media (max-width: 720px) {
+  .profile {
+    grid-template-columns: 1fr;
+  }
+  .profile__style-grid {
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  }
+}

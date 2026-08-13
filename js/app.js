@@ -398,12 +398,10 @@ if (natalForm) {
     const natal = { day: d, month: m, year: y, time: timeVal, city: cityVal, zodiac: signName, arcana: arc, savedAt: Date.now() };
     try { localStorage.setItem("taro_natal", JSON.stringify(natal)); } catch (err) { /* ignore */ }
 
-    // Отправляем боту, чтобы натальная карта стала фундаментом и для сервера
-    if (window.__taroCanSend && window.Telegram && window.Telegram.WebApp) {
-      window.Telegram.WebApp.sendData(
-        JSON.stringify({ type: "natal", day: d, month: m, year: y, time: timeVal, city: cityVal })
-      );
-    }
+    // Отправляем боту, чтобы натальная карта стала фундаментом и для сервера.
+    // Если Telegram WebView ещё не инициализирован — ставим в очередь,
+    // initTelegram() отправит данные, как только будет готов (см. taroSend).
+    taroSend(JSON.stringify({ type: "natal", day: d, month: m, year: y, time: timeVal, city: cityVal }));
 
     renderNatalChart();
     if (note) {
@@ -451,6 +449,24 @@ if (savedNatal && savedNatal.day) {
   tabs.forEach((t) => t.addEventListener("click", () => activate(t.dataset.tab)));
 })();
 
+// === Telegram WebApp мост ===
+// Отправляет данные боту. Если WebView ещё не готов — кладём в очередь,
+// initTelegram() сбросит её сразу после инициализации.
+let __taroSendQueue = [];
+function taroSend(payload) {
+  const tg = window.Telegram && window.Telegram.WebApp;
+  if (window.__taroCanSend && tg && tg.sendData) {
+    try {
+      tg.sendData(payload);
+      return true;
+    } catch (err) {
+      /* если sendData упал — ставим в очередь и попробуем ещё раз */
+    }
+  }
+  __taroSendQueue.push(payload);
+  return false;
+}
+
 // Telegram WebApp: прячем лишние «открыть бота» CTA, применяем тему и мост к боту
 function initTelegram() {
   if (window.__taroInited) return;
@@ -466,10 +482,22 @@ function initTelegram() {
   }
   window.__taroInited = true;
   window.__taroWebApp = true;
-  window.__taroCanSend = !!tg.initData;
+  window.__taroCanSend = true;
   tg.ready();
   tg.expand();
   document.body.classList.add("in-webapp");
+
+  // Отправляем всё, что накопилось в очереди, пока инициализировался WebView
+  if (__taroSendQueue.length) {
+    const pending = __taroSendQueue.splice(0);
+    pending.forEach((p) => {
+      try {
+        tg.sendData(p);
+      } catch (err) {
+        /* не повезло — сообщение потерялось, следующая отправка создаст новую очередь */
+      }
+    });
+  }
 
   // Тема Telegram
   const tp = tg.themeParams || {};
@@ -485,12 +513,8 @@ function initTelegram() {
 
   // Действия: сохранить профиль / купить разбор
   const sendToBot = (type) => {
-    if (!window.__taroCanSend) {
-      alert("Нет данных сессии Telegram — откройте мини-апп из бота.");
-      return;
-    }
     const c = window.__taroCalc || {};
-    tg.sendData(JSON.stringify(Object.assign({ type }, c)));
+    taroSend(JSON.stringify(Object.assign({ type }, c)));
   };
   const saveBtn = document.getElementById("wa-save");
   const buyBtn = document.getElementById("wa-buy");
@@ -516,23 +540,111 @@ document.addEventListener("click", (e) => {
   const cta = e.target.closest("#modal-cta");
   if (cta && window.__taroWebApp) {
     e.preventDefault();
-    if (!window.__taroCanSend) {
-      alert("Нет данных сессии Telegram — откройте мини-апп из бота.");
-      return;
-    }
     const c = window.__taroCalc || {};
-    window.Telegram.WebApp.sendData(
-      JSON.stringify(Object.assign({ type: "buy", arcana_n: lastModalArcana }, c))
-    );
+    taroSend(JSON.stringify(Object.assign({ type: "buy", arcana_n: lastModalArcana }, c)));
   }
 });
 
 // Открываем с сохранённой натальной картой (фундамент), иначе — демо-дата
 if (savedNatal && savedNatal.day) {
-  $("#day").value = savedNatal.day;
-  $("#month").value = savedNatal.month;
-  $("#year").value = savedNatal.year;
+  $("day").value = savedNatal.day;
+  $("month").value = savedNatal.month;
+  $("year").value = savedNatal.year;
   renderResult(savedNatal.day, savedNatal.month, savedNatal.year);
 } else {
   renderResult(12, 5, 1998);
 }
+
+// === Профиль: стили интерпретации ===
+const TARO_STYLES = [
+  {
+    id: "cosmo",
+    emoji: "🪐",
+    name: "Космо",
+    desc: "Нейтральный голос навигатора: спокойно, по делу.",
+  },
+  {
+    id: "gandalf",
+    emoji: "🧙",
+    name: "Гендальф Серый",
+    desc: "Мудрец Севера: торжественно, притчами и метафорами света.",
+  },
+  {
+    id: "strange",
+    emoji: "🌀",
+    name: "Доктор Стрэндж",
+    desc: "Хранитель Санктума: точно, о времени и тайных течениях.",
+  },
+  {
+    id: "yoda",
+    emoji: "🌿",
+    name: "Мастер Йода",
+    desc: "Джедай: кротко и загадочно, инверсиями и мудростью Силы.",
+  },
+  {
+    id: "dumbledore",
+    emoji: "⚡",
+    name: "Дамблдор",
+    desc: "Директор Хогвартса: тепло, иронично и всегда с намёком.",
+  },
+];
+
+const STYLE_STORAGE_KEY = "taro_style";
+
+function getSavedStyle() {
+  try {
+    const s = localStorage.getItem(STYLE_STORAGE_KEY);
+    return TARO_STYLES.find((x) => x.id === s) || TARO_STYLES[0];
+  } catch (err) {
+    return TARO_STYLES[0];
+  }
+}
+
+function renderProfile() {
+  const signEl = document.getElementById("profile-sign");
+  const metaEl = document.getElementById("profile-meta");
+  const starsEl = document.getElementById("profile-stars");
+
+  if (savedNatal && savedNatal.zodiac) {
+    if (signEl) signEl.textContent = savedNatal.zodiac;
+    if (metaEl) {
+      const arc = savedNatal.arcana && savedNatal.arcana[0];
+      metaEl.textContent = `${savedNatal.day}.${String(savedNatal.month).padStart(2, "0")}.${savedNatal.year}` +
+        (savedNatal.city && savedNatal.city !== "не указано" ? ` · ${savedNatal.city}` : "") +
+        (arc ? ` · Аркан ${arc.n} «${arc.card}»` : "");
+    }
+  }
+  if (starsEl) starsEl.textContent = "0";
+  renderStyleGrid();
+}
+
+function renderStyleGrid() {
+  const grid = document.getElementById("profile-styles");
+  const activeLabel = document.getElementById("profile-style-active");
+  const active = getSavedStyle();
+  if (activeLabel) activeLabel.textContent = active.name;
+  if (!grid) return;
+  grid.innerHTML = "";
+  TARO_STYLES.forEach((s) => {
+    const el = document.createElement("button");
+    el.type = "button";
+    el.className = "profile__style" + (s.id === active.id ? " profile__style--active" : "");
+    el.dataset.style = s.id;
+    el.innerHTML =
+      `<span class="style-emoji">${s.emoji}</span>` +
+      `<span class="style-name">${s.name}</span>` +
+      `<span class="style-desc">${s.desc}</span>`;
+    el.addEventListener("click", () => selectStyle(s));
+    grid.appendChild(el);
+  });
+}
+
+function selectStyle(style) {
+  try { localStorage.setItem(STYLE_STORAGE_KEY, style.id); } catch (err) { /* ignore */ }
+  const activeLabel = document.getElementById("profile-style-active");
+  if (activeLabel) activeLabel.textContent = style.name;
+  renderStyleGrid();
+  taroSend(JSON.stringify({ type: "style", style: style.name }));
+}
+
+renderProfile();

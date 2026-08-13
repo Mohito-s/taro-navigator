@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Manrope:wght@400;600;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=5" />
+  <link rel="stylesheet" href="css/style.css?v=7" />
 </head>
 <body>
   <canvas id="space"></canvas>
@@ -230,19 +230,29 @@
       <div class="screen__head">
         <p class="section__eyebrow">ПРОФИЛЬ</p>
         <h2 class="section__title">Настройки и баланс</h2>
-        <p class="section__subtitle">Баланс Stars, стиль интерпретации, язык, рефералка — в разработке.</p>
+        <p class="section__subtitle">Твой знак, звёзды и голос, которым говорит с тобой навигатор.</p>
       </div>
-      <div class="natal" style="grid-template-columns: 1fr;">
-        <div class="calc__card glass reveal" style="max-width: 520px; margin: 0 auto;">
+      <div class="profile">
+        <div class="profile__card glass reveal">
           <div class="calc__head"><span class="calc__head-ico">👤</span><span>ТВОЙ АККАУНТ</span></div>
-          <div style="padding: 26px 24px;">
+          <div class="profile__body">
+            <div class="profile__sign" id="profile-sign">—</div>
+            <div class="profile__meta" id="profile-meta">Заполни натальную карту, чтобы увидеть свой профиль.</div>
             <div class="zodiac__tags" style="justify-content: center; margin: 0 0 14px;">
-              <span class="zodiac__tag zodiac__tag--elem">⭐ Stars: 0</span>
-              <span class="zodiac__tag zodiac__tag--plnt">Стиль: Космо</span>
+              <span class="zodiac__tag zodiac__tag--elem">⭐ Stars: <b id="profile-stars">0</b></span>
+              <span class="zodiac__tag zodiac__tag--plnt">Стиль: <b id="profile-style-active">Космо</b></span>
             </div>
-            <p style="text-align: center; color: var(--muted); font-size: 14px;">Полный профиль доступен в Telegram-боте.</p>
-            <a class="btn btn--primary btn--wide tg-cta" style="margin-top: 18px;" href="tg://resolve?domain=MyGoodTaro_bot">Открыть в Telegram</a>
+            <a class="btn btn--primary btn--wide tg-cta" href="tg://resolve?domain=MyGoodTaro_bot">Открыть в Telegram</a>
           </div>
+        </div>
+
+        <div class="profile__styles">
+          <div class="section__head reveal">
+            <p class="section__eyebrow">ГОЛОС НАВИГАТОРА</p>
+            <h3 class="profile__styles-title">Стиль интерпретации</h3>
+            <p class="section__subtitle">Выбери образ, в котором звёзды говорят с тобой.</p>
+          </div>
+          <div class="profile__style-grid" id="profile-styles"></div>
         </div>
       </div>
     </section>
@@ -318,7 +328,7 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-  <script src="js/space.js?v=5"></script>
-  <script src="js/app.js?v=5"></script>
+  <script src="js/space.js?v=7"></script>
+  <script src="js/app.js?v=7"></script>
 </body>
 </html>

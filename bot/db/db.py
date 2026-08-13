@@ -15,6 +15,7 @@ CREATE TABLE IF NOT EXISTS users (
     birth_place TEXT DEFAULT '',
     zodiac TEXT DEFAULT '',
     arcana TEXT DEFAULT '[]',
+    style TEXT DEFAULT 'cosmo',
     full_report_paid INTEGER DEFAULT 0,
     created_at TEXT DEFAULT (datetime('now'))
 );
@@ -29,6 +30,11 @@ async def init_db() -> None:
     _ensure_dir()
     async with aiosqlite.connect(DB_PATH) as db:
         await db.execute(SCHEMA)
+        # миграция: добавляем колонку style в уже существующие таблицы
+        cur = await db.execute("PRAGMA table_info(users)")
+        cols = [row[1] for row in await cur.fetchall()]
+        if "style" not in cols:
+            await db.execute("ALTER TABLE users ADD COLUMN style TEXT DEFAULT 'cosmo'")
         await db.commit()
 
 
@@ -78,4 +84,17 @@ async def save_profile(
 async def set_paid(telegram_id: int) -> None:
     async with aiosqlite.connect(DB_PATH) as db:
         await db.execute("UPDATE users SET full_report_paid = 1 WHERE telegram_id = ?", (telegram_id,))
+        await db.commit()
+
+
+async def set_style(telegram_id: int, style: str) -> None:
+    async with aiosqlite.connect(DB_PATH) as db:
+        await db.execute(
+            """
+            INSERT INTO users (telegram_id, username, style)
+            VALUES (?, '', ?)
+            ON CONFLICT(telegram_id) DO UPDATE SET style=excluded.style
+            """,
+            (telegram_id, style),
+        )
         await db.commit()

@@ -70,6 +70,26 @@ function check(name, ok, detail) {
   const mobileScene = await page.evaluate(() => window.__taroScene);
   check("на мобильном луна уходит в центр-верх, не перекрывает форму", Math.abs(mobileScene.moon.x) < 1.2, `moon.x=${mobileScene.moon.x.toFixed(2)}`);
 
+  await page.click('[data-tab="profile"]');
+  await new Promise((r) => setTimeout(r, 400));
+  const styleCount = await page.$$eval("#profile-styles .profile__style", (els) => els.length);
+  check("профиль: 5 стилей интерпретации", styleCount === 5, `найдено ${styleCount}`);
+
+  await page.click('#profile-styles .profile__style[data-style="yoda"]');
+  await new Promise((r) => setTimeout(r, 300));
+  const activeStyle = await page.$eval("#profile-style-active", (el) => el.textContent.trim());
+  const storedStyle = await page.evaluate(() => localStorage.getItem("taro_style"));
+  const queuedPayloads = await page.evaluate(() => {
+    const before = __taroSendQueue.length;
+    taroSend(JSON.stringify({ type: "style", style: "Мастер Йода" }));
+    return { before, after: __taroSendQueue.length };
+  });
+  check(
+    "профиль: выбор стиля сохраняется и уходит в очередь бота",
+    activeStyle === "Мастер Йода" && storedStyle === "yoda" && queuedPayloads.after === queuedPayloads.before + 1,
+    `label=${activeStyle}, ls=${storedStyle}, queue=${queuedPayloads.before}→${queuedPayloads.after}`,
+  );
+
   await browser.close();
   console.log("\nИтого: " + results.filter((r) => r.ok).length + "/" + results.length + " пройдено");
   process.exit(results.every((r) => r.ok) ? 0 : 1);

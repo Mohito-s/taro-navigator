@@ -1,16 +1,25 @@
+import html
 import json
 
 from aiogram import F, Router
 from aiogram.types import Message
 
 from bot.config import TEST_MODE
-from bot.db.db import save_profile, get_user
+from bot.db.db import save_profile, get_user, set_style
 from bot.handlers.payment import send_star_invoice
 from bot.handlers.report import send_report
 from bot.handlers.start import MAIN_MENU
 from bot.services.numerology import get_arcana, get_zodiac
 
 router = Router()
+
+ALLOWED_STYLES = {
+    "Космо",
+    "Гендальф Серый",
+    "Доктор Стрэндж",
+    "Мастер Йода",
+    "Дамблдор",
+}
 
 
 def _valid(day: int, month: int, year: int) -> bool:
@@ -24,6 +33,19 @@ async def on_web_app_data(message: Message):
         data = json.loads(raw)
     except (json.JSONDecodeError, TypeError):
         await message.answer("⚠️ Не удалось разобрать данные из мини-аппа.")
+        return
+
+    if data.get("type") == "style":
+        style = str(data.get("style", "") or "").strip()[:40]
+        if style not in ALLOWED_STYLES:
+            await message.answer(f"⚠️ Стиль «{html.escape(style) or '—'}» не поддерживается.")
+            return
+        await set_style(message.from_user.id, style)
+        await message.answer(
+            f"🎙 Теперь звёзды говорят с тобой голосом <b>{html.escape(style)}</b>.",
+            parse_mode="HTML",
+            reply_markup=MAIN_MENU,
+        )
         return
 
     try:
@@ -59,8 +81,8 @@ async def on_web_app_data(message: Message):
         await message.answer(
             f"🪐 <b>Натальная карта сохранена</b> — теперь это твой фундамент.\n\n"
             f"📅 Дата: {birth_date}\n"
-            f"🕐 Время: {birth_time or 'не указано'}\n"
-            f"📍 Город: {birth_place or 'не указано'}\n"
+            f"🕐 Время: {html.escape(birth_time) or 'не указано'}\n"
+            f"📍 Город: {html.escape(birth_place) or 'не указано'}\n"
             f"♈ Знак: <b>{zodiac}</b>\n"
             f"🃏 Арканов рассчитано: {len(arcana)}\n\n"
             "Она уже используется в раскладах и прогнозах.",
