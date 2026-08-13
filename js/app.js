@@ -388,6 +388,30 @@ if (natalForm) {
   });
 }
 
+// === Нижняя навигация: переключение экранов ===
+(function initTabs() {
+  const tabs = Array.from(document.querySelectorAll(".tabbar__btn"));
+  const screens = Array.from(document.querySelectorAll(".screen"));
+  if (!tabs.length) return;
+  function activate(name) {
+    tabs.forEach((t) => t.classList.toggle("tabbar__btn--active", t.dataset.tab === name));
+    screens.forEach((s) => s.classList.toggle("screen--active", s.id === "screen-" + name));
+    // подсветим reveal-элементы активного экрана (на случай, если они ещё не проявились)
+    const active = document.getElementById("screen-" + name);
+    if (active) {
+      active.querySelectorAll(".reveal").forEach((el) => {
+        if (!el.classList.contains("visible")) {
+          // принудительно покажем, если экран уже в зоне видимости
+          const r = el.getBoundingClientRect();
+          if (r.top < innerHeight) el.classList.add("visible");
+        }
+      });
+    }
+    window.scrollTo(window.__taroWebApp ? 0 : { top: 0, behavior: "smooth" }, 0);
+  }
+  tabs.forEach((t) => t.addEventListener("click", () => activate(t.dataset.tab)));
+})();
+
 // Telegram WebApp: прячем лишние «открыть бота» CTA, применяем тему и мост к боту
 function initTelegram() {
   if (window.__taroInited) return;

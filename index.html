@@ -250,20 +250,52 @@
 
   <!-- НИЖНЯЯ НАВИГАЦИЯ (всегда видна) -->
   <nav class="tabbar">
-    <button class="tabbar__btn tabbar__btn--active" data-tab="reads">
-      <span class="tabbar__ico">🔮</span><span class="tabbar__label">Расклады</span>
+    <button class="tabbar__btn tabbar__btn--active" data-tab="reads" aria-label="Расклады">
+      <span class="tabbar__ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3.5" y="5" width="12.5" height="15.5" rx="2.6"/>
+          <rect x="8" y="2.5" width="12.5" height="15.5" rx="2.6"/>
+        </svg>
+      </span>
+      <span class="tabbar__label">Расклады</span>
     </button>
-    <button class="tabbar__btn" data-tab="natal">
-      <span class="tabbar__ico">🌌</span><span class="tabbar__label">Натал</span>
+    <button class="tabbar__btn" data-tab="natal" aria-label="Натал">
+      <span class="tabbar__ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="8.6"/>
+          <circle cx="12" cy="12" r="4.4" stroke-dasharray="1.6 2.2"/>
+          <circle cx="12" cy="12" r="1.1" fill="currentColor" stroke="none"/>
+        </svg>
+      </span>
+      <span class="tabbar__label">Натал</span>
     </button>
-    <button class="tabbar__btn" data-tab="forecast">
-      <span class="tabbar__ico">🌠</span><span class="tabbar__label">Прогноз</span>
+    <button class="tabbar__btn" data-tab="forecast" aria-label="Прогноз">
+      <span class="tabbar__ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3 L13.7 9.5 L20 11 L13.7 12.5 L12 19 L10.3 12.5 L4 11 L10.3 9.5 Z"/>
+        </svg>
+      </span>
+      <span class="tabbar__label">Прогноз</span>
     </button>
-    <button class="tabbar__btn" data-tab="history">
-      <span class="tabbar__ico">📜</span><span class="tabbar__label">История</span>
+    <button class="tabbar__btn" data-tab="history" aria-label="История">
+      <span class="tabbar__ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="5" y="3" width="14" height="18" rx="2.6"/>
+          <line x1="8.5" y1="8" x2="15.5" y2="8"/>
+          <line x1="8.5" y1="12" x2="15.5" y2="12"/>
+          <line x1="8.5" y1="16" x2="12.5" y2="16"/>
+        </svg>
+      </span>
+      <span class="tabbar__label">История</span>
     </button>
-    <button class="tabbar__btn" data-tab="profile">
-      <span class="tabbar__ico">👤</span><span class="tabbar__label">Профиль</span>
+    <button class="tabbar__btn" data-tab="profile" aria-label="Профиль">
+      <span class="tabbar__ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="8" r="3.6"/>
+          <path d="M5 20 a7 7 0 0 1 14 0"/>
+        </svg>
+      </span>
+      <span class="tabbar__label">Профиль</span>
     </button>
   </nav>
 

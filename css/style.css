@@ -1179,39 +1179,68 @@ main {
 /* === Нижняя навигация === */
 .tabbar {
   position: fixed;
-  left: 0;
-  right: 0;
+  left: 50%;
+  transform: translateX(-50%);
   bottom: 0;
   z-index: 60;
+  width: min(560px, 100%);
   display: flex;
   justify-content: space-around;
   align-items: stretch;
-  background: rgba(8, 10, 24, 0.82);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(10, 12, 28, 0.72);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: none;
+  border-radius: 22px 22px 0 0;
+  box-shadow: 0 -10px 40px rgba(84, 160, 255, 0.12);
   padding-bottom: env(safe-area-inset-bottom);
 }
 .tabbar__btn {
+  position: relative;
   flex: 1;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 3px;
-  padding: 10px 4px 8px;
+  gap: 5px;
+  padding: 12px 4px 10px;
   background: none;
   border: none;
   cursor: pointer;
   color: var(--tg-hint, #8b93c0);
   font: 600 11px/1 Manrope, sans-serif;
+  transition: color 0.2s, transform 0.15s;
+}
+.tabbar__btn:active {
+  transform: scale(0.94);
 }
 .tabbar__ico {
-  font-size: 20px;
-  line-height: 1;
+  width: 24px;
+  height: 24px;
+  display: block;
+  transition: filter 0.25s, transform 0.25s;
+}
+.tabbar__ico svg {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 .tabbar__btn--active {
   color: var(--tg-btn, #7c5cff);
 }
 .tabbar__btn--active .tabbar__ico {
   filter: drop-shadow(0 0 8px var(--tg-btn, #7c5cff));
+  transform: translateY(-1px);
+}
+/* неоновый индикатор активной вкладки */
+.tabbar__btn--active::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 18%;
+  right: 18%;
+  height: 2px;
+  border-radius: 0 0 2px 2px;
+  background: linear-gradient(90deg, var(--cyan), var(--violet), var(--pink));
+  box-shadow: 0 0 10px rgba(139, 92, 246, 0.9);
 }
