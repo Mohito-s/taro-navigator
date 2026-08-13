@@ -18,6 +18,15 @@
 
 html {
   scroll-behavior: smooth;
+  /* скрываем нативный скроллбар, чтобы контент центрировался по ВСЕМУ окну,
+     а не по области минус 15px полосы прокрутки (иначе на Windows всё съезжает влево) */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+html::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
 }
 
 body {
