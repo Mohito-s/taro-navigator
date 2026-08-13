@@ -3,7 +3,7 @@ import logging
 
 from aiogram import Bot, Dispatcher
 from aiogram.fsm.storage.memory import MemoryStorage
-from aiogram.types import BotCommand
+from aiogram.types import BotCommand, MenuButtonWebApp, WebAppInfo
 
 from bot.config import BOT_TOKEN, MINI_APP_URL
 from bot.db import db as db_module
@@ -32,8 +32,13 @@ async def main():
     await bot.set_my_short_description(
         "Таро · Астрология · Нумерология — разбор личности по дате рождения"
     )
-    # Мини-апп открывается обычной кнопкой «🪐 Мини-апп» в меню /start —
-    # персистентный MenuButtonWebApp ставить нельзя: он заменяет меню чата.
+    # Персистентная кнопка «open» — она уже была закреплена на стороне Telegram
+    # от прежних запусков (тайтл «Мини-апп»). Перевыставляем её с простым
+    # именем «open»: отдельная кнопка открывает мини-апп, меню /start — внутри бота.
+    if MINI_APP_URL:
+        await bot.set_chat_menu_button(
+            menu_button=MenuButtonWebApp(text="open", web_app=WebAppInfo(url=MINI_APP_URL))
+        )
 
     dp.include_routers(start.router, wizard.router, daily.router, payment.router, webapp.router)
     payment.setup(dp)

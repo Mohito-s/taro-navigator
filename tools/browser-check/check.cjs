@@ -90,6 +90,39 @@ function check(name, ok, detail) {
     `label=${activeStyle}, ls=${storedStyle}, queue=${queuedPayloads.before}→${queuedPayloads.after}`,
   );
 
+  // Прогноз: клик по блоку «На сегодня» генерирует результат и пишет в историю
+  await page.click('[data-tab="forecast"]');
+  await new Promise((r) => setTimeout(r, 400));
+  const forecastHiddenBefore = await page.$eval("#forecast-result", (el) => el.hidden);
+  await page.click('[data-horizon="day"]');
+  await new Promise((r) => setTimeout(r, 400));
+  const forecastText = await page.$eval("#forecast-result p", (el) => el.textContent.trim().length);
+  const forecastVisible = await page.$eval("#forecast-result", (el) => !el.hidden);
+  check("прогноз: клик по блоку «На сегодня» выдаёт результат", forecastHiddenBefore && forecastVisible && forecastText > 40, `text=${forecastText} симв, hidden=${forecastHiddenBefore}→${!forecastVisible}`);
+
+  const forecastHistory = await page.evaluate(() => {
+    const h = JSON.parse(localStorage.getItem("taro_history") || "[]");
+    return { hasForecast: h.some((x) => x.type === "forecast"), count: h.length };
+  });
+  check("прогноз: сохраняется в историю", forecastHistory.hasForecast && forecastHistory.count >= 1, `count=${forecastHistory.count}`);
+
+  // Расклад уже был посчитан в начале (25.09.1985) — должен лежать в истории
+  const readsHistory = await page.evaluate(() => {
+    const h = JSON.parse(localStorage.getItem("taro_history") || "[]");
+    return h.some((x) => x.type === "reads");
+  });
+  check("расклады: расчёт сохраняется в историю", readsHistory, "type=reads найден");
+
+  // История: вкладка рендерит сохранённые записи и раскрывает детали
+  await page.click('[data-tab="history"]');
+  await new Promise((r) => setTimeout(r, 400));
+  const historyItems = await page.$$eval(".history__item", (els) => els.length);
+  const emptyHidden = await page.$eval("#history-empty", (el) => el.hidden);
+  await page.click('.history__item[data-id]');
+  await new Promise((r) => setTimeout(r, 300));
+  const historyOpen = await page.$$eval(".history__item--open", (els) => els.length);
+  check("история: рендер записей + раскрытие деталей", historyItems >= 2 && emptyHidden && historyOpen >= 1, `items=${historyItems}, emptyHidden=${emptyHidden}, open=${historyOpen}`);
+
   await browser.close();
   console.log("\nИтого: " + results.filter((r) => r.ok).length + "/" + results.length + " пройдено");
   process.exit(results.every((r) => r.ok) ? 0 : 1);

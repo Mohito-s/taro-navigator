@@ -196,6 +196,14 @@ $("run").addEventListener("click", () => {
   }
   $("calc-error").hidden = true;
   renderResult(day, month, year);
+  addHistory({
+    type: "reads",
+    icon: "🔮",
+    title: `Расклад · ${zodiac(day, month)}`,
+    subtitle: `${String(day).padStart(2, "0")}.${String(month).padStart(2, "0")}.${year}`,
+    zodiac: zodiac(day, month),
+    arcana: arcana(day, month, year).slice(0, 4),
+  });
 });
 
 ["day", "month", "year"].forEach((id) => {
@@ -648,3 +656,187 @@ function selectStyle(style) {
 }
 
 renderProfile();
+
+// === История раскладов и прогнозов ===
+const HISTORY_KEY = "taro_history";
+const MAX_HISTORY = 50;
+
+function loadHistory() {
+  try { return JSON.parse(localStorage.getItem(HISTORY_KEY) || "[]"); } catch (err) { return []; }
+}
+
+function saveHistory(list) {
+  try { localStorage.setItem(HISTORY_KEY, JSON.stringify(list.slice(0, MAX_HISTORY))); } catch (err) { /* ignore */ }
+}
+
+function addHistory(entry) {
+  const list = loadHistory();
+  entry.id = "h" + Date.now() + Math.floor(Math.random() * 1000);
+  entry.savedAt = Date.now();
+  list.unshift(entry);
+  saveHistory(list);
+  renderHistory();
+  return entry;
+}
+
+function clearHistory() {
+  saveHistory([]);
+  renderHistory();
+}
+
+function fmtDate(ts, withTime) {
+  const d = new Date(ts);
+  const day = String(d.getDate()).padStart(2, "0");
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const base = `${day}.${month}.${d.getFullYear()}`;
+  if (!withTime) return base;
+  const hh = String(d.getHours()).padStart(2, "0");
+  const mm = String(d.getMinutes()).padStart(2, "0");
+  return `${base} · ${hh}:${mm}`;
+}
+
+function renderHistory() {
+  const list = loadHistory();
+  const wrap = document.getElementById("history-list");
+  const empty = document.getElementById("history-empty");
+  const clearBtn = document.getElementById("history-clear");
+  if (!wrap || !empty) return;
+  if (!list.length) {
+    wrap.innerHTML = "";
+    empty.hidden = false;
+    if (clearBtn) clearBtn.hidden = true;
+    return;
+  }
+  empty.hidden = true;
+  if (clearBtn) clearBtn.hidden = false;
+
+  wrap.innerHTML = list
+    .map(
+      (h) => `
+      <div class="history__item glass" data-id="${h.id}" role="button" tabindex="0" aria-expanded="false">
+        <span class="history__ico">${h.icon || "🃏"}</span>
+        <div class="history__info">
+          <h4>${h.title}</h4>
+          <p>${h.subtitle || ""}</p>
+        </div>
+        <span class="history__date">${fmtDate(h.savedAt)}</span>
+      </div>`
+    )
+    .join("");
+}
+
+function renderHistoryDetail(el, entry) {
+  const open = el.classList.contains("history__item--open");
+  el.classList.toggle("history__item--open", !open);
+  el.setAttribute("aria-expanded", String(!open));
+  let detail = el.querySelector(".history__detail");
+  if (!open) {
+    if (entry.type === "reads") {
+      const chips = (entry.arcana || [])
+        .map((a) => `<span class="history__card-chip">${a.pos}: ${a.card}</span>`)
+        .join("");
+      detail = document.createElement("div");
+      detail.className = "history__detail";
+      detail.innerHTML = `<div class="history__cards">${chips}</div>${entry.zodiac ? "Принадлежишь к знаку <b>" + entry.zodiac + "</b>." : ""}`;
+    } else {
+      detail = document.createElement("div");
+      detail.className = "history__detail";
+      detail.textContent = entry.text || "Прогноз был рассчитан на твою дату.";
+    }
+    el.appendChild(detail);
+  } else if (detail) {
+    detail.remove();
+  }
+}
+
+document.addEventListener("click", (e) => {
+  const item = e.target.closest(".history__item");
+  if (!item) return;
+  const id = item.dataset.id;
+  const entry = loadHistory().find((h) => h.id === id);
+  if (entry) renderHistoryDetail(item, entry);
+});
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Enter") return;
+  const item = e.target.closest && e.target.closest(".history__item");
+  if (item) {
+    const id = item.dataset.id;
+    const entry = loadHistory().find((h) => h.id === id);
+    if (entry) renderHistoryDetail(item, entry);
+  }
+});
+document.getElementById("history-clear")?.addEventListener("click", clearHistory);
+
+// === Прогноз: локальная генерация (без ИИ) ===
+const FORECAST_HEADERS = {
+  day: "Прогноз на сегодня",
+  week: "Прогноз на неделю",
+  month: "Прогноз на месяц",
+};
+
+function natalForForecast() {
+  const n = savedNatal && savedNatal.day ? savedNatal : null;
+  const c = window.__taroCalc || {};
+  const day = (n && n.day) || c.day || 12;
+  const month = (n && n.month) || c.month || 5;
+  const year = (n && n.year) || c.year || 1998;
+  return { day, month, year };
+}
+
+function buildForecast(horizon) {
+  const { day, month, year } = natalForForecast();
+  const signName = zodiac(day, month);
+  const sign = SIGNS[signName];
+  const arc = arcana(day, month, year);
+  const now = new Date();
+  const todayNum = reduce(now.getDate() + now.getMonth() + 1);
+  const weekStart = reduce(String(year).split("").reduce((a, b) => a + Number(b), 0) + month + now.getDay());
+  const sTitle = signName;
+  const sEl = sign.element.toLowerCase();
+  const sPl = sign.planet;
+  const w = arc[reduce(now.getDay() * 2 + 1)] || arc[1];
+  const d = arc[todayNum % 10] || arc[0];
+  const m = arc[(month * 2 + now.getDate()) % 10] || arc[2];
+
+  const texts = {
+    day: `Сегодня у ${sTitle} резонирует аркан **«${d.card}»** (${d.kw}).\n\nСтихия ${sEl} и планета ${sPl} советуют не форсировать события: короткие, но честные ходы дадут больше, чем громкий рывок. Обрати внимание на первую мысль после пробуждения — это голос ${d.pos === "Личность" ? "твоего я" : "интуиции"}.`,
+    week: `Неделя у ${sTitle} идёт под арканом **«${w.card}»** (${w.kw}).\n\nВлияние ${sPl} смещает акцент на ${w.pos.toLowerCase()}. Готовь пространство под середину недели — то, что откладывалось, можно безопасно запускать. Энергия ${sEl} поддерживает учёбу, переговоры и порядок дома.`,
+    month: `Месяц ${sTitle} несёт энергию **«${m.card}»** (${m.kw}).\n\nЭто волна ${sEl}-знака, и планета-управитель ${sPl} требует целостности: сначала заверши старые циклы, потом открывай новые. ${m.pos} станет главной темой — держи фокус, не распыляйся, и месяц принесёт рост.`,
+  };
+
+  const text = texts[horizon] || texts.day;
+  const entry = {
+    type: "forecast",
+    icon: horizon === "day" ? "☀" : horizon === "week" ? "🌙" : "🪐",
+    title: FORECAST_HEADERS[horizon],
+    subtitle: `${signName} · ${sPl}`,
+    arcana: [d, w, m],
+    text,
+    zodiac: signName,
+  };
+  addHistory(entry);
+  return entry;
+}
+
+function showForecast(horizon) {
+  const entry = buildForecast(horizon);
+  const box = document.getElementById("forecast-result");
+  const chips = entry.arcana
+    .map((a) => `<span class="forecast__tag">${a.card}</span>`)
+    .join("");
+  box.innerHTML = `
+    <div class="forecast__head">
+      <span class="forecast__hed">${entry.title}</span>
+      <span class="forecast__date">${fmtDate(Date.now(), true)}</span>
+    </div>
+    ${chips}
+    <p>${entry.text}</p>`;
+  box.hidden = false;
+  box.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
+document.querySelectorAll(".forecast__block").forEach((btn) => {
+  btn.addEventListener("click", () => showForecast(btn.dataset.horizon));
+});
+
+renderHistory();
