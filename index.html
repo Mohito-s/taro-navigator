@@ -19,138 +19,253 @@
         <span class="logo__mark">☾</span>
         <span class="logo__text">TARO<span>&nbsp;NAVIGATOR</span></span>
       </a>
-      <nav class="nav__links">
-        <a href="#calculator">Калькулятор</a>
-        <a href="#about">Тайны системы</a>
-        <a class="nav__cta tg-cta" href="tg://resolve?domain=MyGoodTaro_bot">Открыть в Telegram</a>
-      </nav>
       <button id="webapp-close" class="nav__close" hidden aria-label="Закрыть">✕</button>
     </div>
   </header>
 
   <main>
-    <section class="hero" id="top">
-      <div class="hero__content">
-        <p class="hero__eyebrow reveal">
-          <span class="eyebrow__bar"></span>АСТРОЛОГИЯ · ТАРО · НУМЕРОЛОГИЯ
-        </p>
-        <h1 class="hero__title reveal d2">
-          Ты — <span class="grad grad--animate">Вселенная</span>
-        </h1>
-        <p class="hero__subtitle reveal d3">
-          Зодиак, 22 аркана Таро и числа даты рождения складываются в твой личный
-          космический код. Узнай, о чём говорит небо именно о тебе.
-        </p>
-        <div class="hero__actions reveal d4">
-          <a href="#calculator" class="btn btn--primary">Рассчитать код личности</a>
-          <a href="#about" class="btn btn--ghost">Как это работает</a>
+    <!-- ЭКРАН 1: Расклады (главная) -->
+    <section class="screen screen--active" id="screen-reads">
+      <section class="hero" id="top">
+        <div class="hero__content">
+          <p class="hero__eyebrow reveal">
+            <span class="eyebrow__bar"></span>АСТРОЛОГИЯ · ТАРО · НУМЕРОЛОГИЯ
+          </p>
+          <h1 class="hero__title reveal d2">
+            Ты — <span class="grad grad--animate">Вселенная</span>
+          </h1>
+          <p class="hero__subtitle reveal d3">
+            Зодиак, 22 аркана Таро и числа даты рождения складываются в твой личный
+            космический код. Узнай, о чём говорит небо именно о тебе.
+          </p>
+          <div class="hero__actions reveal d4">
+            <a href="#calculator" class="btn btn--primary">Рассчитать код личности</a>
+            <a href="#about" class="btn btn--ghost">Как это работает</a>
+          </div>
         </div>
+      </section>
+
+      <section class="calc" id="calculator">
+        <div class="section__head reveal">
+          <p class="section__eyebrow">СТАНЦИЯ ВВОДА</p>
+          <h2 class="section__title">Космический паспорт</h2>
+          <p class="section__subtitle">Введи дату рождения — остальное посчитают звёзды.</p>
+        </div>
+
+        <div class="calc__card glass reveal d2">
+          <div class="calc__head">
+            <span class="calc__head-ico">✧</span>
+            <span>АСТРОЛОГИЧЕСКИЙ ВВОД</span>
+          </div>
+          <div class="calc__inputs">
+            <label class="field">
+              <span class="field__ico">☀</span>
+              <span class="field__name">День</span>
+              <input id="day" type="number" min="1" max="31" placeholder="12" />
+            </label>
+            <span class="field__sep"></span>
+            <label class="field">
+              <span class="field__ico">☽</span>
+              <span class="field__name">Месяц</span>
+              <input id="month" type="number" min="1" max="12" placeholder="5" />
+            </label>
+            <span class="field__sep"></span>
+            <label class="field">
+              <span class="field__ico">✦</span>
+              <span class="field__name">Год</span>
+              <input id="year" type="number" min="1900" max="2100" placeholder="1998" />
+            </label>
+          </div>
+          <div class="calc__foot">
+            <button id="run" class="btn btn--primary btn--wide">🔮 Синхронизировать со звёздами</button>
+            <p id="calc-error" class="calc__error" hidden></p>
+          </div>
+        </div>
+
+        <div id="result" hidden>
+          <div id="zodiac-card" class="zodiac glass reveal"></div>
+          <div class="result__head reveal">
+            <h3 class="result__heading">Твои арканы судьбы</h3>
+            <p class="result__note">Десять позиций, рассчитанных из цифр даты рождения</p>
+          </div>
+          <div id="arcana-grid" class="arcana"></div>
+          <div id="webapp-actions" class="webapp-actions" hidden>
+            <button class="btn btn--primary" id="wa-save">💾 Сохранить в боте</button>
+            <button class="btn btn--ghost" id="wa-buy">✨ Полный ИИ-разбор · 10⭐</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="about" id="about">
+        <div class="section__head reveal">
+          <p class="section__eyebrow">ЧЁРНАЯ ДЫРА ЗНАНИЙ</p>
+          <h2 class="section__title">Тайны системы</h2>
+          <p class="section__subtitle">Четыре принципа, за которыми код, а не магия (ну, почти).</p>
+        </div>
+        <div class="about__grid">
+          <div class="about__item glass reveal">
+            <span class="about__num">01</span>
+            <span class="about__icon">☉</span>
+            <h3>Детерминированная база</h3>
+            <p>12 знаков зодиака и 22 старших аркана Таро — человеческая мудрость, проверенная веками.</p>
+          </div>
+          <div class="about__item glass reveal d2">
+            <span class="about__num">02</span>
+            <span class="about__icon">✦</span>
+            <h3>Числа рождения</h3>
+            <p>10 позиций арканов судьбы считаются строго из цифр твоей даты. Без случайности и подкрутки.</p>
+          </div>
+          <div class="about__item glass reveal d3">
+            <span class="about__num">03</span>
+            <span class="about__icon">⚡</span>
+            <h3>ИИ-разбор</h3>
+            <p>Нейросеть превращает сухие данные в живой персональный портрет твоей личности.</p>
+          </div>
+          <div class="about__item glass reveal d4">
+            <span class="about__num">04</span>
+            <span class="about__icon">₿</span>
+            <h3>Заботливая монетизация</h3>
+            <p>Бесплатный разбор — всем. Глубокий портрет со всеми деталями — за 10 Telegram Stars.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="cta reveal tg-cta">
+        <div class="cta__inner glass">
+          <div class="cta__glow"></div>
+          <p class="cta__eyebrow">ГОТОВ К ВЗЛЁТУ?</p>
+          <h2 class="cta__title">Твой созвездие ждёт в Telegram</h2>
+          <p class="cta__text">
+            Полная версия — с регистрацией профиля, историей разборов и оплатой
+            в один клик через Telegram Stars.
+          </p>
+          <a class="btn btn--primary tg-cta" href="tg://resolve?domain=MyGoodTaro_bot">🚀 Открыть бота</a>
+        </div>
+      </section>
+
+      <footer class="footer">
+        <div class="footer__stars"></div>
+        <p>TARO NAVIGATOR · космический тандем астрономии и кода</p>
+      </footer>
+    </section>
+
+    <!-- ЭКРАН 2: Натал -->
+    <section class="screen" id="screen-natal">
+      <div class="screen__head">
+        <p class="section__eyebrow">НАТАЛЬНАЯ КАРТА</p>
+        <h2 class="section__title">Твоя карта рождения</h2>
+        <p class="section__subtitle">Введи точное время и город — построим космический снимок момента твоего появления.</p>
+      </div>
+      <div class="natal">
+        <form class="natal__form glass" id="natal-form">
+          <h3>✧ Координаты рождения</h3>
+          <div class="natal__row">
+            <span>Дата</span>
+            <input id="n-date" type="date" max="2100-01-01" value="1998-05-12" />
+          </div>
+          <div class="natal__row">
+            <span>Время (по местному)</span>
+            <input id="n-time" type="time" value="14:30" />
+          </div>
+          <div class="natal__row">
+            <span>Город</span>
+            <input id="n-city" type="text" placeholder="Москва" value="Москва" />
+          </div>
+          <button class="btn btn--primary btn--wide" type="submit">🌌 Построить карту</button>
+        </form>
+        <div class="natal__chart" id="natal-chart">
+          <div class="natal__stars" id="natal-stars" aria-hidden="true"></div>
+          <div class="natal__disc" id="natal-disc"></div>
+        </div>
+        <p class="natal__note">Полный расчёт домов и аспектов — в ИИ-разборе бота (в разработке).</p>
       </div>
     </section>
 
-    <section class="calc" id="calculator">
-      <div class="section__head reveal">
-        <p class="section__eyebrow">СТАНЦИЯ ВВОДА</p>
-        <h2 class="section__title">Космический паспорт</h2>
-        <p class="section__subtitle">Введи дату рождения — остальное посчитают звёзды.</p>
+    <!-- ЭКРАН 3: Прогноз -->
+    <section class="screen" id="screen-forecast">
+      <div class="screen__head">
+        <p class="section__eyebrow">ПРОГНОЗ</p>
+        <h2 class="section__title">День · Неделя · Месяц</h2>
+        <p class="section__subtitle">Персональный прогноз, транзиты и лунный календарь — в разработке.</p>
       </div>
-
-      <div class="calc__card glass reveal d2">
-        <div class="calc__head">
-          <span class="calc__head-ico">✧</span>
-          <span>АСТРОЛОГИЧЕСКИЙ ВВОД</span>
-        </div>
-        <div class="calc__inputs">
-          <label class="field">
-            <span class="field__ico">☀</span>
-            <span class="field__name">День</span>
-            <input id="day" type="number" min="1" max="31" placeholder="12" />
-          </label>
-          <span class="field__sep"></span>
-          <label class="field">
-            <span class="field__ico">☽</span>
-            <span class="field__name">Месяц</span>
-            <input id="month" type="number" min="1" max="12" placeholder="5" />
-          </label>
-          <span class="field__sep"></span>
-          <label class="field">
-            <span class="field__ico">✦</span>
-            <span class="field__name">Год</span>
-            <input id="year" type="number" min="1900" max="2100" placeholder="1998" />
-          </label>
-        </div>
-        <div class="calc__foot">
-          <button id="run" class="btn btn--primary btn--wide">🔮 Синхронизировать со звёздами</button>
-          <p id="calc-error" class="calc__error" hidden></p>
-        </div>
-      </div>
-
-      <div id="result" hidden>
-        <div id="zodiac-card" class="zodiac glass reveal"></div>
-        <div class="result__head reveal">
-          <h3 class="result__heading">Твои арканы судьбы</h3>
-          <p class="result__note">Десять позиций, рассчитанных из цифр даты рождения</p>
-        </div>
-        <div id="arcana-grid" class="arcana"></div>
-        <div id="webapp-actions" class="webapp-actions" hidden>
-          <button class="btn btn--primary" id="wa-save">💾 Сохранить в боте</button>
-          <button class="btn btn--ghost" id="wa-buy">✨ Полный ИИ-разбор · 10⭐</button>
-        </div>
-      </div>
-    </section>
-
-    <section class="about" id="about">
-      <div class="section__head reveal">
-        <p class="section__eyebrow">ЧЁРНАЯ ДЫРА ЗНАНИЙ</p>
-        <h2 class="section__title">Тайны системы</h2>
-        <p class="section__subtitle">Четыре принципа, за которыми код, а не магия (ну, почти).</p>
-      </div>
-      <div class="about__grid">
+      <div class="natal" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));">
         <div class="about__item glass reveal">
-          <span class="about__num">01</span>
-          <span class="about__icon">☉</span>
-          <h3>Детерминированная база</h3>
-          <p>12 знаков зодиака и 22 старших аркана Таро — человеческая мудрость, проверенная веками.</p>
+          <span class="about__icon">☀</span>
+          <h3>На сегодня</h3>
+          <p>Короткий импульс от звёзд: на что направить энергию прямо сейчас.</p>
         </div>
         <div class="about__item glass reveal d2">
-          <span class="about__num">02</span>
-          <span class="about__icon">✦</span>
-          <h3>Числа рождения</h3>
-          <p>10 позиций арканов судьбы считаются строго из цифр твоей даты. Без случайности и подкрутки.</p>
+          <span class="about__icon">🌙</span>
+          <h3>На неделю</h3>
+          <p>Волны транзитов и благоприятные окна для важных шагов.</p>
         </div>
         <div class="about__item glass reveal d3">
-          <span class="about__num">03</span>
-          <span class="about__icon">⚡</span>
-          <h3>ИИ-разбор</h3>
-          <p>Нейросеть превращает сухие данные в живой персональный портрет твоей личности.</p>
-        </div>
-        <div class="about__item glass reveal d4">
-          <span class="about__num">04</span>
-          <span class="about__icon">₿</span>
-          <h3>Заботливая монетизация</h3>
-          <p>Бесплатный разбор — всем. Глубокий портрет со всеми деталями — за 10 Telegram Stars.</p>
+          <span class="about__icon">🪐</span>
+          <h3>На месяц</h3>
+          <p>Широкий цикл развития и темы, которые принесут рост.</p>
         </div>
       </div>
     </section>
 
-    <section class="cta reveal tg-cta">
-      <div class="cta__inner glass">
-        <div class="cta__glow"></div>
-        <p class="cta__eyebrow">ГОТОВ К ВЗЛЁТУ?</p>
-        <h2 class="cta__title">Твой созвездие ждёт в Telegram</h2>
-        <p class="cta__text">
-          Полная версия — с регистрацией профиля, историей разборов и оплатой
-          в один клик через Telegram Stars.
-        </p>
-        <a class="btn btn--primary tg-cta" href="tg://resolve?domain=MyGoodTaro_bot">🚀 Открыть бота</a>
+    <!-- ЭКРАН 4: История -->
+    <section class="screen" id="screen-history">
+      <div class="screen__head">
+        <p class="section__eyebrow">ИСТОРИЯ</p>
+        <h2 class="section__title">Прошлые расклады</h2>
+        <p class="section__subtitle">Сохранённые расклады и избранное — в разработке.</p>
+      </div>
+      <div class="natal" style="grid-template-columns: 1fr;">
+        <div class="zodiac glass reveal" style="max-width: 720px; margin: 0 auto;">
+          <div class="zodiac__ring"><span class="zodiac__icon">📜</span></div>
+          <div class="zodiac__body">
+            <h3>Пока пусто</h3>
+            <p>Расклады, сохранённые в Telegram-боте, появятся здесь. Открой бота, чтобы создать первый.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ЭКРАН 5: Профиль -->
+    <section class="screen" id="screen-profile">
+      <div class="screen__head">
+        <p class="section__eyebrow">ПРОФИЛЬ</p>
+        <h2 class="section__title">Настройки и баланс</h2>
+        <p class="section__subtitle">Баланс Stars, стиль интерпретации, язык, рефералка — в разработке.</p>
+      </div>
+      <div class="natal" style="grid-template-columns: 1fr;">
+        <div class="calc__card glass reveal" style="max-width: 520px; margin: 0 auto;">
+          <div class="calc__head"><span class="calc__head-ico">👤</span><span>ТВОЙ АККАУНТ</span></div>
+          <div style="padding: 26px 24px;">
+            <div class="zodiac__tags" style="justify-content: center; margin: 0 0 14px;">
+              <span class="zodiac__tag zodiac__tag--elem">⭐ Stars: 0</span>
+              <span class="zodiac__tag zodiac__tag--plnt">Стиль: Космо</span>
+            </div>
+            <p style="text-align: center; color: var(--muted); font-size: 14px;">Полный профиль доступен в Telegram-боте.</p>
+            <a class="btn btn--primary btn--wide tg-cta" style="margin-top: 18px;" href="tg://resolve?domain=MyGoodTaro_bot">Открыть в Telegram</a>
+          </div>
+        </div>
       </div>
     </section>
   </main>
 
-  <footer class="footer">
-    <div class="footer__stars"></div>
-    <p>TARO NAVIGATOR · космический тандем астрономии и кода</p>
-  </footer>
+  <!-- НИЖНЯЯ НАВИГАЦИЯ (всегда видна) -->
+  <nav class="tabbar">
+    <button class="tabbar__btn tabbar__btn--active" data-tab="reads">
+      <span class="tabbar__ico">🔮</span><span class="tabbar__label">Расклады</span>
+    </button>
+    <button class="tabbar__btn" data-tab="natal">
+      <span class="tabbar__ico">🌌</span><span class="tabbar__label">Натал</span>
+    </button>
+    <button class="tabbar__btn" data-tab="forecast">
+      <span class="tabbar__ico">🌠</span><span class="tabbar__label">Прогноз</span>
+    </button>
+    <button class="tabbar__btn" data-tab="history">
+      <span class="tabbar__ico">📜</span><span class="tabbar__label">История</span>
+    </button>
+    <button class="tabbar__btn" data-tab="profile">
+      <span class="tabbar__ico">👤</span><span class="tabbar__label">Профиль</span>
+    </button>
+  </nav>
 
   <div id="arcana-modal" class="modal" hidden>
     <div class="modal__backdrop" data-close></div>

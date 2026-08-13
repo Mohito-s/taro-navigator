@@ -22,10 +22,11 @@ description: Use when working on the TARO web app visual design, layout, CSS, HT
 - No images from the internet for the visual language — textures are procedural (canvas-generated) so the site works offline. Fonts load from Google Fonts (allowed).
 - Keep spacing consistent (8px grid, section padding ~90px desktop / ~60px mobile).
 - Russian copy, "ты"-form, no lorem.
+- Mini App is a tabbed SPA: 5 screens (`<section class="screen" id="screen-reads|natal|forecast|history|profile">`) switched by a fixed bottom `<nav class="tabbar">`. The Three.js canvas stays a global background. For Mini App SDK/routing/haptics/CloudStorage/sendData conventions see the `mini-app` skill.
 
 ## Before/after any visual change
 
 1. Edit files under repo root (`index.html`, `css/style.css`, `js/app.js`, `js/space.js`).
-2. Serve: `python -m http.server 8000 --directory web`.
+2. Serve: `python -m http.server 8000` (repo root; the site was moved from `web/` to root).
 3. Run the automated check: `node tools/browser-check/check.cjs` (expect 11/11).
 4. If a new breakpoint/behavior was touched, the puppeteer script may need a new assertion — add it rather than removing coverage.

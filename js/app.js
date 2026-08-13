@@ -137,7 +137,7 @@ function renderResult(day, month, year) {
   window.__taroCalc = { day, month, year };
 
   const wa = document.getElementById("webapp-actions");
-  if (wa && window.__taroWebApp) wa.hidden = false;
+  if (wa && window.__taroCanSend) wa.hidden = false;
 
   $("zodiac-card").innerHTML = `
     <div class="zodiac__ring">
@@ -157,14 +157,19 @@ function renderResult(day, month, year) {
     .map(
       (a, i) => `
       <div class="arcana__item glass" data-idx="${i}" tabindex="0" role="button" aria-label="Подробнее: ${a.pos} — ${a.card}" style="animation-delay:${i * 60}ms">
-        <div class="arcana__num">АРКАН ${ROMAN[a.n]}</div>
-        <div class="arcana__title">${a.pos}</div>
-        <div class="arcana__card">${a.card}</div>
-        <span class="arcana__kw">${a.kw}</span>
-        <span class="arcana__more">Подробнее ›</span>
+        <div class="arcana__inner">
+          <div class="arcana__sheen"></div>
+          <div class="arcana__num">АРКАН ${ROMAN[a.n]}</div>
+          <div class="arcana__title">${a.pos}</div>
+          <div class="arcana__card">${a.card}</div>
+          <span class="arcana__kw">${a.kw}</span>
+          <span class="arcana__more">Подробнее ›</span>
+        </div>
       </div>`
     )
     .join("");
+
+  bindTilt();
 
   $("result").hidden = false;
   $("result").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -247,19 +252,158 @@ document.addEventListener("keydown", (e) => {
   }
 });
 
+// Объёмный наклон карт за курсором (3D Tilt)
+function bindTilt() {
+  document.querySelectorAll(".arcana__item").forEach((el) => {
+    if (el.__tilt) return;
+    el.__tilt = true;
+    el.addEventListener("pointermove", (e) => {
+      const r = el.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width;
+      const py = (e.clientY - r.top) / r.height;
+      const rx = (0.5 - py) * 15;
+      const ry = (px - 0.5) * 15;
+      el.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
+      el.style.setProperty("--mx", px * 100 + "%");
+      el.style.setProperty("--my", py * 100 + "%");
+    });
+    el.addEventListener("pointerleave", () => {
+      el.style.transform = "";
+    });
+  });
+}
+
+// === Натальная карта: 3D-круг Зодиака ===
+function renderNatalChart() {
+  const disc = document.getElementById("natal-disc");
+  if (!disc) return;
+  const names = Object.keys(SIGNS);
+  const glyphs = names.map((n) => SIGNS[n].icon);
+  const cx = 200, cy = 200, R = 180;
+  let segs = "";
+  for (let i = 0; i < 12; i++) {
+    const a = (i / 12) * Math.PI * 2 - Math.PI / 2 + Math.PI / 12;
+    const x = cx + Math.cos(a) * (R - 26);
+    const y = cy + Math.sin(a) * (R - 26);
+    segs += `<text class="natal__glyph" x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central">${glyphs[i]}</text>`;
+    const a1 = (i / 12) * Math.PI * 2;
+    const a2 = ((i + 1) / 12) * Math.PI * 2;
+    const x1 = cx + Math.cos(a1 - Math.PI / 2) * R;
+    const y1 = cy + Math.sin(a1 - Math.PI / 2) * R;
+    segs += `<line class="natal__tick" x1="${cx}" y1="${cy}" x2="${x1}" y2="${y1}" />`;
+  }
+  // условные планеты (демо-раскладка)
+  const planets = [
+    { name: "☉", label: "Солнце", deg: 35 },
+    { name: "☽", label: "Луна", deg: 120 },
+    { name: "ASC", label: "Асцендент", deg: 210 },
+  ];
+  let dots = "";
+  planets.forEach((p) => {
+    const a = (p.deg / 360) * Math.PI * 2 - Math.PI / 2;
+    const x = cx + Math.cos(a) * (R * 0.62);
+    const y = cy + Math.sin(a) * (R * 0.62);
+    dots += `<circle class="natal__planet" cx="${x}" cy="${y}" r="6" />
+      <text class="natal__planet-label" x="${x + 9}" y="${y + 4}">${p.label}</text>`;
+  });
+
+  disc.innerHTML = `
+    <svg viewBox="0 0 400 400" aria-label="Натальная карта">
+      <defs>
+        <radialGradient id="discBg" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="rgba(62,42,116,0.95)" />
+          <stop offset="58%" stop-color="rgba(22,18,52,0.92)" />
+          <stop offset="100%" stop-color="rgba(6,8,22,0.97)" />
+        </radialGradient>
+        <radialGradient id="core" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="rgba(84,241,255,0.95)" />
+          <stop offset="100%" stop-color="rgba(84,241,255,0)" />
+        </radialGradient>
+        <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#54f1ff" />
+          <stop offset="50%" stop-color="#8b5cf6" />
+          <stop offset="100%" stop-color="#ff5fb2" />
+        </linearGradient>
+        <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
+          <feGaussianBlur stdDeviation="2.4" result="b" />
+          <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
+        </filter>
+      </defs>
+
+      <circle cx="200" cy="200" r="192" fill="url(#discBg)" stroke="url(#ringGrad)" stroke-width="2.5" />
+      <circle cx="200" cy="200" r="150" fill="none" stroke="rgba(84,241,255,0.35)" stroke-width="1" />
+      <circle cx="200" cy="200" r="96" fill="none" stroke="rgba(139,92,246,0.5)" stroke-width="1" />
+      <circle cx="200" cy="200" r="60" fill="none" stroke="rgba(255,95,178,0.32)" stroke-width="1" stroke-dasharray="3 6" />
+
+      <g class="natal__spin" filter="url(#glow)">
+        ${segs}
+      </g>
+
+      ${dots}
+
+      <circle cx="200" cy="200" r="36" fill="url(#core)" />
+      <text x="200" y="200" text-anchor="middle" dominant-baseline="central" font-size="28" fill="#ffffff">☉</text>
+    </svg>`;
+
+  // лёгкий наклон всего диска за курсором
+  const chart = document.getElementById("natal-chart");
+  if (chart) {
+    chart.addEventListener("pointermove", (e) => {
+      const r = chart.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width - 0.5;
+      const py = (e.clientY - r.top) / r.height - 0.5;
+      disc.style.transform = `rotateX(${8 - py * 14}deg) rotateY(${px * 18}deg)`;
+    });
+    chart.addEventListener("pointerleave", () => {
+      disc.style.transform = "";
+    });
+  }
+}
+renderNatalChart();
+
+// 3D-звёзды вокруг натального диска (наш космический стиль)
+(function fillNatalStars() {
+  const wrap = document.getElementById("natal-stars");
+  if (!wrap) return;
+  const cls = ["", "natal__star--pink", "natal__star--violet"];
+  const count = 34;
+  let html = "";
+  for (let i = 0; i < count; i++) {
+    const x = Math.random() * 100;
+    const y = Math.random() * 100;
+    const s = (Math.random() * 3 + 1.5).toFixed(1);
+    const z = (Math.random() * 120 - 40).toFixed(0);
+    const d = (Math.random() * 3.6).toFixed(2);
+    html += `<span class="natal__star ${cls[i % 3]}" style="left:${x}%;top:${y}%;--s:${s}px;transform:translateZ(${z}px);animation-delay:${d}s"></span>`;
+  }
+  wrap.innerHTML = html;
+})();
+
+const natalForm = document.getElementById("natal-form");
+if (natalForm) {
+  natalForm.addEventListener("submit", (e) => {
+    e.preventDefault();
+    const note = document.querySelector(".natal__note");
+    if (note) note.textContent = "Карта обновлена (демо). Точный расчёт домов и аспектов появится в ИИ-разборе бота.";
+  });
+}
+
 // Telegram WebApp: прячем лишние «открыть бота» CTA, применяем тему и мост к боту
 function initTelegram() {
   if (window.__taroInited) return;
   const tg = window.Telegram && window.Telegram.WebApp;
-  // Скрываем CTA только в РЕАЛЬНОМ WebApp (initData заполнен), на публичном сайте — нет.
+  // Скрываем CTA, как только мы ВНУТРИ Telegram WebApp (объект WebApp существует).
   // Скрипт Telegram иногда инъектируется позже загрузки страницы — опрашиваем.
-  if (!tg || !tg.initData) {
+  // initData может быть пустым в некоторых клиентах — на его наличие НЕ завязываем
+  // само скрытие, иначе CTA остаются видимыми.
+  if (!tg) {
     window.__taroTgTries = (window.__taroTgTries || 0) + 1;
-    if (window.__taroTgTries <= 50) setTimeout(initTelegram, 200);
+    if (window.__taroTgTries <= 80) setTimeout(initTelegram, 150);
     return;
   }
   window.__taroInited = true;
   window.__taroWebApp = true;
+  window.__taroCanSend = !!tg.initData;
   tg.ready();
   tg.expand();
   document.body.classList.add("in-webapp");
@@ -283,6 +427,10 @@ function initTelegram() {
 
   // Действия: сохранить профиль / купить разбор
   const sendToBot = (type) => {
+    if (!window.__taroCanSend) {
+      alert("Нет данных сессии Telegram — откройте мини-апп из бота.");
+      return;
+    }
     const c = window.__taroCalc || {};
     tg.sendData(JSON.stringify(Object.assign({ type }, c)));
   };
@@ -291,9 +439,9 @@ function initTelegram() {
   if (saveBtn) saveBtn.addEventListener("click", () => sendToBot("save"));
   if (buyBtn) buyBtn.addEventListener("click", () => sendToBot("buy"));
 
-  // Показываем действия, если результат уже посчитан
+  // Показываем действия, если результат уже посчитан и можно отправить данные
   const wa = document.getElementById("webapp-actions");
-  if (wa && window.__taroCalc) wa.hidden = false;
+  if (wa && window.__taroCalc && window.__taroCanSend) wa.hidden = false;
 }
 
 if (document.readyState === "loading") {
@@ -310,6 +458,10 @@ document.addEventListener("click", (e) => {
   const cta = e.target.closest("#modal-cta");
   if (cta && window.__taroWebApp) {
     e.preventDefault();
+    if (!window.__taroCanSend) {
+      alert("Нет данных сессии Telegram — откройте мини-апп из бота.");
+      return;
+    }
     const c = window.__taroCalc || {};
     window.Telegram.WebApp.sendData(
       JSON.stringify(Object.assign({ type: "buy", arcana_n: lastModalArcana }, c))

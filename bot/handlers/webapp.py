@@ -3,8 +3,10 @@ import json
 from aiogram import F, Router
 from aiogram.types import Message
 
-from bot.db.db import save_profile
+from bot.config import TEST_MODE
+from bot.db.db import save_profile, get_user
 from bot.handlers.payment import send_star_invoice
+from bot.handlers.report import send_report
 from bot.handlers.start import MAIN_MENU
 from bot.services.numerology import get_arcana, get_zodiac
 
@@ -52,6 +54,17 @@ async def on_web_app_data(message: Message):
     )
 
     if data.get("type") == "buy":
+        if TEST_MODE:
+            await message.answer(
+                f"🧪 <b>ТЕСТОВЫЙ РЕЖИМ</b>: оплата Stars отключена.\n"
+                f"✅ Профиль сохранён ({zodiac}). Генерирую полный ИИ-разбор…",
+                parse_mode="HTML",
+            )
+            user = await get_user(message.from_user.id)
+            if user:
+                await send_report(message, user, full=True)
+            return
+
         await message.answer(
             f"✅ Профиль сохранён ({zodiac}). Запускаю оплату полного ИИ-разбора…"
         )

@@ -8,6 +8,9 @@ BOT_TOKEN: str = os.getenv("BOT_TOKEN", "")
 DB_PATH: str = os.getenv("DB_PATH", "data/taro.db")
 MINI_APP_URL: str = os.getenv("MINI_APP_URL", "").strip()
 
+# Тестовый режим: отключает оплату Stars, чтобы прогнать весь флоу локально без платежа.
+TEST_MODE: bool = os.getenv("TEST_MODE", "false").strip().lower() in ("1", "true", "yes", "on")
+
 AI_PROVIDER: str = os.getenv("AI_PROVIDER", "deepseek").strip().lower()
 AI_BASE_URL: str = os.getenv("AI_BASE_URL", "").rstrip("/")
 AI_API_KEY: str = os.getenv("AI_API_KEY", "") or os.getenv("DEEPSEEK_API_KEY", "")

@@ -627,6 +627,200 @@ main {
   opacity: 1;
 }
 
+/* === 3D ОБЪЁМНЫЕ КАРТЫ ТАРО === */
+
+.arcana {
+  /* общая точка схода для всех карт */
+  perspective: 1100px;
+}
+
+.arcana__item {
+  transform-style: preserve-3d;
+  transition: transform 0.16s ease-out, border-color 0.3s, box-shadow 0.3s;
+  will-change: transform;
+  cursor: pointer;
+}
+
+.arcana__inner {
+  position: relative;
+  transform-style: preserve-3d;
+  height: 100%;
+  min-height: 168px;
+  display: flex;
+  flex-direction: column;
+}
+
+/* слои «всплывают» над плоскостью карты */
+.arcana__item .arcana__num,
+.arcana__item .arcana__title {
+  transform: translateZ(22px);
+}
+.arcana__item .arcana__card {
+  transform: translateZ(46px);
+}
+.arcana__item .arcana__kw,
+.arcana__item .arcana__more {
+  transform: translateZ(30px);
+}
+
+/* голографическая плёнка, бегающая за курсором */
+.arcana__sheen {
+  position: absolute;
+  inset: -2px;
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at var(--mx, 50%) var(--my, 50%), rgba(84, 241, 255, 0.4), transparent 42%),
+    conic-gradient(from 0deg at var(--mx, 50%) var(--my, 50%),
+      rgba(139, 92, 246, 0.28), rgba(255, 95, 178, 0.22),
+      rgba(84, 241, 255, 0.28), rgba(139, 92, 246, 0.28));
+  mix-blend-mode: screen;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+  transform: translateZ(52px);
+}
+.arcana__item:hover .arcana__sheen {
+  opacity: 1;
+}
+
+/* объёмная тень под картой */
+.arcana__item::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 18px;
+  transform: translateZ(-26px);
+  box-shadow: 0 32px 54px -22px rgba(139, 92, 246, 0.55);
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+.arcana__item:hover::after {
+  opacity: 1;
+}
+.arcana__item:hover {
+  border-color: rgba(139, 92, 246, 0.7);
+  box-shadow: 0 18px 50px rgba(139, 92, 246, 0.3);
+}
+
+/* === ЭКРАН «НАТАЛ» === */
+
+.natal {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 8px 24px 60px;
+  display: grid;
+  grid-template-columns: 1fr 1.15fr;
+  gap: 28px;
+  align-items: center;
+}
+
+.natal__form {
+  padding: 28px;
+}
+.natal__form h3 {
+  font-family: "Orbitron", sans-serif;
+  font-size: 18px;
+  margin-bottom: 18px;
+  letter-spacing: 1px;
+}
+.natal__row {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-bottom: 16px;
+}
+.natal__row span {
+  font-size: 11px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.natal__row input {
+  width: 100%;
+  background: rgba(8, 10, 26, 0.65);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 13px 15px;
+  color: var(--text);
+  font-family: "Orbitron", sans-serif;
+  font-size: 16px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.natal__row input:focus {
+  border-color: var(--cyan);
+  box-shadow: 0 0 18px rgba(84, 241, 255, 0.3);
+}
+
+.natal__chart {
+  perspective: 1200px;
+  display: grid;
+  place-items: center;
+  position: relative;
+  min-height: 380px;
+}
+
+/* 3D-звёзды вокруг натального диска (в нашем космическом стиле) */
+.natal__stars {
+  position: absolute;
+  inset: -10% -6%;
+  transform-style: preserve-3d;
+  pointer-events: none;
+  z-index: -1;
+}
+.natal__star {
+  position: absolute;
+  width: var(--s, 3px);
+  height: var(--s, 3px);
+  border-radius: 50%;
+  background: var(--cyan);
+  box-shadow: 0 0 8px 2px rgba(84, 241, 255, 0.7);
+  opacity: 0.85;
+  animation: starTwinkle 3.6s ease-in-out infinite;
+}
+.natal__star--pink {
+  background: var(--pink);
+  box-shadow: 0 0 8px 2px rgba(255, 95, 178, 0.7);
+}
+.natal__star--violet {
+  background: var(--violet);
+  box-shadow: 0 0 8px 2px rgba(139, 92, 246, 0.7);
+}
+@keyframes starTwinkle {
+  0%, 100% { opacity: 0.25; transform: scale(0.7); }
+  50% { opacity: 1; transform: scale(1.25); }
+}
+.natal__disc {
+  transform-style: preserve-3d;
+  transition: transform 0.2s ease-out;
+  width: min(360px, 80vw);
+  filter: drop-shadow(0 24px 50px rgba(84, 160, 255, 0.35));
+  animation: natalFloat 9s ease-in-out infinite;
+}
+@keyframes natalFloat {
+  0%, 100% { transform: rotateX(12deg) rotateY(-8deg) translateY(0); }
+  50% { transform: rotateX(8deg) rotateY(8deg) translateY(-10px); }
+}
+.natal__disc svg { width: 100%; height: auto; display: block; }
+.natal__glyph { font: 700 22px/1 "Manrope", sans-serif; fill: var(--cyan); }
+.natal__tick { stroke: rgba(84, 241, 255, 0.4); }
+.natal__ring { fill: none; stroke: rgba(139, 92, 246, 0.5); }
+.natal__ring-outer { fill: rgba(10, 14, 34, 0.55); stroke: rgba(84, 241, 255, 0.45); }
+.natal__planet { fill: var(--pink); }
+.natal__planet-label { font: 600 11px/1 "Manrope", sans-serif; fill: #ffd6ec; }
+.natal__note {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+@media (max-width: 760px) {
+  .natal { grid-template-columns: 1fr; }
+}
+
 /* ---------- modal ---------- */
 
 .modal {
@@ -940,4 +1134,84 @@ body.in-webapp .tg-cta {
 .webapp-actions .btn--primary {
   background: var(--tg-btn, #7c5cff);
   color: var(--tg-btn-text, #fff);
+}
+
+/* === Экраны (табbed SPA) === */
+.screen {
+  display: none;
+}
+.screen--active {
+  display: block;
+}
+.screen__head {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 48px 24px 24px;
+  text-align: center;
+}
+.screen__head .section__eyebrow {
+  color: var(--tg-hint, #8b93c0);
+  letter-spacing: 0.2em;
+  font: 600 12px/1 Manrope, sans-serif;
+}
+.screen__head .section__title {
+  margin: 10px 0 8px;
+  font: 900 30px/1.1 Orbitron, sans-serif;
+  background: linear-gradient(90deg, #54f1ff, #8b5cf6, #ff5fb2);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+.screen__head .section__subtitle {
+  color: var(--tg-hint, #8b93c0);
+  font: 400 15px/1.5 Manrope, sans-serif;
+}
+.screen .tg-cta {
+  display: inline-block;
+  margin: 18px auto 40px;
+}
+
+/* Запас места под нижнюю панель */
+main {
+  padding-bottom: 92px;
+}
+
+/* === Нижняя навигация === */
+.tabbar {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 60;
+  display: flex;
+  justify-content: space-around;
+  align-items: stretch;
+  background: rgba(8, 10, 24, 0.82);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.tabbar__btn {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  padding: 10px 4px 8px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--tg-hint, #8b93c0);
+  font: 600 11px/1 Manrope, sans-serif;
+}
+.tabbar__ico {
+  font-size: 20px;
+  line-height: 1;
+}
+.tabbar__btn--active {
+  color: var(--tg-btn, #7c5cff);
+}
+.tabbar__btn--active .tabbar__ico {
+  filter: drop-shadow(0 0 8px var(--tg-btn, #7c5cff));
 }
