@@ -26,7 +26,31 @@
 «ЛОГ ИСПРАВЛЕНИЙ» (формат: `ДАТА — что сделано (где)`). Проверь фикс перед
 записью (lint/run/test). Изменения в `PROJECT_STATE.md` коммить вместе с кодом.
 
-## 4. Проект в двух словах
+## 4. НИКОГДА не ломай кодировку UTF-8 (частая авария проекта)
+
+Все файлы с русским текстом (`index.html`, `css/style.css`, `js/*.js`,
+`*.md`, `bot/*.py`) — **UTF-8 без BOM**. Их ломает любой перезапуск через
+Windows-оболочку. Жёсткие правила:
+
+- **ЗАПРЕЩЕНО** читать/писать такие файлы через PowerShell:
+  `Get-Content`, `Set-Content`, `Out-File`, `-replace` в конвейере,
+  `(Get-Content -Raw) ... | Set-Content`. Даже `Set-Content -Encoding utf8`
+  в Windows PowerShell 5.1 перекодирует кириллицу в моджабу (`ÐÑÐ»ÐµÐ½...`)
+  и/или ставит BOM.
+- **Можно и нужно** использовать:
+  - инструмент `Edit`/`Write` (безопасен, сохраняет UTF-8);
+  - `node --check` / `python` с явным `encoding="utf-8"` для чтения/проверки;
+  - `python -m py_compile`.
+- Если файл всё-таки нужно переписать потоком — делай это скриптом с явным
+  UTF-8 (например Python `open(f, "w", encoding="utf-8", newline="\n")`), но
+  лучше всего править точечно через `Edit`.
+- Перед коммитом веб-файлов **обязательно** проверь кодировку:
+  `python -c "raw=open('index.html','rb').read(); print(raw[:3]==b'\xef\xbb\xbf', raw.decode('utf-8','replace').count(chr(0xFFFD)))"`
+  должно быть `False 0`. Если 0xFFFD или «Ð/â€”» появились — файл побит, чини
+  (восстанови из git и нанеси правки заново через `Edit`).
+- Команды `git checkout <commit> -- <file>` для восстановления — безопасны.
+
+## 5. Проект в двух словах
 
 - `bot/` — aiogram 3 Telegram-бот, SQLite `data/taro.db`, Stars-оплата, ИИ-провайдеры.
 - `index.html` + `css/style.css` + `js/app.js` + `js/space.js` — сайт/мини-апп
