@@ -248,9 +248,12 @@ document.addEventListener("keydown", (e) => {
 });
 
 // Telegram WebApp: прячем лишние «открыть бота» CTA, применяем тему и мост к боту
-(function initTelegram() {
+function initTelegram() {
+  if (window.__taroInited) return;
   const tg = window.Telegram && window.Telegram.WebApp;
-  if (!tg) return;
+  // Скрываем CTA только в РЕАЛЬНОМ WebApp (initData заполнен), на публичном сайте — нет
+  if (!tg || !tg.initData) return;
+  window.__taroInited = true;
   window.__taroWebApp = true;
   tg.ready();
   tg.expand();
@@ -282,7 +285,20 @@ document.addEventListener("keydown", (e) => {
   const buyBtn = document.getElementById("wa-buy");
   if (saveBtn) saveBtn.addEventListener("click", () => sendToBot("save"));
   if (buyBtn) buyBtn.addEventListener("click", () => sendToBot("buy"));
-})();
+
+  // Показываем действия, если результат уже посчитан
+  const wa = document.getElementById("webapp-actions");
+  if (wa && window.__taroCalc) wa.hidden = false;
+}
+
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initTelegram);
+} else {
+  initTelegram();
+}
+// На случай поздней инъекции скрипта Telegram
+setTimeout(initTelegram, 300);
+window.addEventListener("telegramWebviewReady", initTelegram);
 
 // Внутри WebApp кнопка аркана отправляет данные боту вместо ссылки
 document.addEventListener("click", (e) => {
