@@ -1180,7 +1180,8 @@ body.in-webapp .tg-cta {
   color: var(--tg-hint, #8b93c0);
   font: 400 15px/1.5 Manrope, sans-serif;
 }
-.screen .tg-cta {
+.screen a.tg-cta,
+.screen button.tg-cta {
   display: inline-block;
   margin: 18px auto 40px;
 }

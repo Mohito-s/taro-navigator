@@ -25,6 +25,13 @@ async def main():
             BotCommand(command="cancel", description="Отменить"),
         ]
     )
+    await bot.set_my_description(
+        "Космический навигатор: опишу твою личность по знаку зодиака, "
+        "22 арканам Таро и числам даты рождения. Полный разбор — за Telegram Stars."
+    )
+    await bot.set_my_short_description(
+        "Таро · Астрология · Нумерология — разбор личности по дате рождения"
+    )
     if MINI_APP_URL:
         await bot.set_chat_menu_button(
             menu_button=MenuButtonWebApp(text="🪐 Мини-апп", web_app=WebAppInfo(url=MINI_APP_URL))

@@ -379,13 +379,52 @@ renderNatalChart();
   wrap.innerHTML = html;
 })();
 
+// === Натальная карта = ФУНДАМЕНТ: сразу сохраняется и используется везде ===
 const natalForm = document.getElementById("natal-form");
 if (natalForm) {
   natalForm.addEventListener("submit", (e) => {
     e.preventDefault();
     const note = document.querySelector(".natal__note");
-    if (note) note.textContent = "Карта обновлена (демо). Точный расчёт домов и аспектов появится в ИИ-разборе бота.";
+    const dateVal = document.getElementById("n-date").value; // YYYY-MM-DD
+    const timeVal = document.getElementById("n-time").value || "";
+    const cityVal = document.getElementById("n-city").value.trim() || "не указано";
+    const [y, m, d] = dateVal.split("-").map(Number);
+    if (!d || !m || !y || y < 1900 || y > 2100) {
+      if (note) note.textContent = "⚠️ Выбери корректную дату рождения.";
+      return;
+    }
+    const signName = zodiac(d, m);
+    const arc = arcana(d, m, y);
+    const natal = { day: d, month: m, year: y, time: timeVal, city: cityVal, zodiac: signName, arcana: arc, savedAt: Date.now() };
+    try { localStorage.setItem("taro_natal", JSON.stringify(natal)); } catch (err) { /* ignore */ }
+
+    // Отправляем боту, чтобы натальная карта стала фундаментом и для сервера
+    if (window.__taroCanSend && window.Telegram && window.Telegram.WebApp) {
+      window.Telegram.WebApp.sendData(
+        JSON.stringify({ type: "natal", day: d, month: m, year: y, time: timeVal, city: cityVal })
+      );
+    }
+
+    renderNatalChart();
+    if (note) {
+      note.innerHTML = window.__taroCanSend
+        ? `✅ Натальная карта <b>${signName}</b> сохранена — основа раскладов и прогнозов.`
+        : `✅ Сохранено на этом устройстве (<b>${signName}</b>). Для синхронизации с ботом открой мини-апп из Telegram.`;
+    }
   });
+}
+
+// Фундамент: подставляем сохранённую натальную карту во всё приложение
+const savedNatal = (function () {
+  try { return JSON.parse(localStorage.getItem("taro_natal") || "null"); } catch (err) { return null; }
+})();
+if (savedNatal && savedNatal.day) {
+  const nd = document.getElementById("n-date");
+  if (nd) nd.value = `${savedNatal.year}-${String(savedNatal.month).padStart(2, "0")}-${String(savedNatal.day).padStart(2, "0")}`;
+  const nt = document.getElementById("n-time");
+  if (nt && savedNatal.time) nt.value = savedNatal.time;
+  const nc = document.getElementById("n-city");
+  if (nc && savedNatal.city) nc.value = savedNatal.city;
 }
 
 // === Нижняя навигация: переключение экранов ===
@@ -442,12 +481,7 @@ function initTelegram() {
   setVar("--tg-btn", tp.button_color);
   setVar("--tg-btn-text", tp.button_text_color);
 
-  // Кнопка «Закрыть»
-  const closeBtn = document.getElementById("webapp-close");
-  if (closeBtn) {
-    closeBtn.hidden = false;
-    closeBtn.addEventListener("click", () => tg.close());
-  }
+  // Кнопка закрытия у Telegram родная (в заголовке мини-аппа), свою не добавляем.
 
   // Действия: сохранить профиль / купить разбор
   const sendToBot = (type) => {
@@ -493,4 +527,12 @@ document.addEventListener("click", (e) => {
   }
 });
 
-renderResult(12, 5, 1998);
+// Открываем с сохранённой натальной картой (фундамент), иначе — демо-дата
+if (savedNatal && savedNatal.day) {
+  $("#day").value = savedNatal.day;
+  $("#month").value = savedNatal.month;
+  $("#year").value = savedNatal.year;
+  renderResult(savedNatal.day, savedNatal.month, savedNatal.year);
+} else {
+  renderResult(12, 5, 1998);
+}

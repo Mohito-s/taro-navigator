@@ -41,17 +41,33 @@ async def on_web_app_data(message: Message):
     zodiac = get_zodiac(day, month)
     arcana = get_arcana(day, month, year)
     birth_date = f"{day:02d}.{month:02d}.{year}"
+    birth_time = str(data.get("time", "") or "").strip()[:20]
+    birth_place = str(data.get("city", "") or "").strip()[:80]
     user = message.from_user
 
     await save_profile(
         telegram_id=user.id,
         username=user.username or user.first_name or "",
         birth_date=birth_date,
-        birth_time="",
-        birth_place="",
+        birth_time=birth_time,
+        birth_place=birth_place,
         zodiac=zodiac,
         arcana=arcana,
     )
+
+    if data.get("type") == "natal":
+        await message.answer(
+            f"🪐 <b>Натальная карта сохранена</b> — теперь это твой фундамент.\n\n"
+            f"📅 Дата: {birth_date}\n"
+            f"🕐 Время: {birth_time or 'не указано'}\n"
+            f"📍 Город: {birth_place or 'не указано'}\n"
+            f"♈ Знак: <b>{zodiac}</b>\n"
+            f"🃏 Арканов рассчитано: {len(arcana)}\n\n"
+            "Она уже используется в раскладах и прогнозах.",
+            parse_mode="HTML",
+            reply_markup=MAIN_MENU,
+        )
+        return
 
     if data.get("type") == "buy":
         if TEST_MODE:
