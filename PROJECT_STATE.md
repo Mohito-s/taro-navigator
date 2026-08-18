@@ -119,6 +119,12 @@
       (`renderAIText`: escape HTML + `**`→`<b>` + `\n`→`<br>`), loading-состояние,
       сохранение в историю; фоллбэк — бот (в WebApp) / локальный текст (сайт).
       Ассеты подняты до `?v=11`. Браузерные проверки 21/21 (без API фоллбэк жив).
+- [x] Сайт хостится на своём домене: статика `shadowlinkapp.online/` отдаётся
+      nginx с VPS (`/var/www/taro`, rsync из репо с исключениями чувствительных
+      файлов), API — same-origin `/api/`, `MINI_APP_URL` = `https://shadowlinkapp.online/`
+      (кнопка меню и инлайн-клавиатура бота), CORS расширен на домен; GitHub Pages
+      остался запасным хостом. Проверено в браузере на домене — 0 ошибок.
+      (`api/main.py`, nginx, `/var/www/taro`, `.env` VPS+локально)
 - [x] Деплой API на VPS и проверка в проде: `pip install fastapi uvicorn` в venv,
       `pm2 start taro-api` (`venv/bin/python -m uvicorn api.main:app --host
       127.0.0.1 --port 8001`), nginx `location /api/` в vhost shadowlinkapp.online
@@ -133,6 +139,22 @@
 
 ## ЛОГ ИСПРАВЛЕНИЙ (последние изменения сверху)
 
+- 2026-08-19 — **Сайт переехал на свой домен: всё на shadowlinkapp.online.**
+  Раньше фронт мини-аппа жил на GitHub Pages (`mohito-s.github.io/taro-navigator`),
+  на VPS был только API. По решению пользователя статика теперь отдаётся с VPS:
+  (1) nginx vhost `shadowlinkapp.online` — `location /` → `root /var/www/taro`
+  (`try_files $uri $uri/ =404`), рядом остались `/sl-rw` (RemnaWave-нода) и
+  `/api/` (FastAPI). (2) Веб-рут `/var/www/taro` синхронизируется rsync из репо
+  `~/apps/taro-navigator` с исключениями (`.env`, `bot/`, `api/`, `data/`,
+  `venv/`, `tools/`, `scripts/`, `.git`, логи, `*.db` — чувствительное не
+  отдаётся); в руте только `index.html`, `css/`, `js/`. (3) `MINI_APP_URL`
+  на VPS и локально → `https://shadowlinkapp.online/` (кнопка меню и
+  инлайн-клавиатура бота ведут на домен; бот перезапущен). (4) CORS API расширен:
+  добавлен `https://shadowlinkapp.online` — запросы со своего домена same-origin,
+  GitHub Pages оставлен запасным хостом. Проверено в браузере на
+  `https://shadowlinkapp.online/`: сайт грузится, клик «На сегодня» → same-origin
+  `/api/v1/forecast` → полный ИИ-прогноз inline (~19с, 2486 симв), 0 ошибок
+  консоли. Коммит `a5ec473`. (`api/main.py`, nginx, `/var/www/taro`, `.env` VPS+локально)
 - 2026-08-19 — **FastAPI-API мини-аппа в проде: полные разборы прямо во вкладках
   работают.** Мини-апп делает полный ИИ-разбор сам, без ухода в чат: натал-кнопка
   → `/api/v1/natal`, CTA аркана → `/api/v1/arcana`, день/неделя/месяц →
