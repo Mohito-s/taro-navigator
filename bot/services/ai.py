@@ -42,7 +42,10 @@ STYLE_PERSONAS = {
 
 def system_prompt(style: str = "") -> str:
     """Базовый системный промт + персона выбранного стиля интерпретации."""
-    persona = STYLE_PERSONAS.get(style or "", "")
+    style = (style or "").strip()
+    if style == "cosmo":  # внутренний id дефолтного стиля из БД = нейтральный «Космо»
+        style = "Космо"
+    persona = STYLE_PERSONAS.get(style, "")
     if not persona:
         return SYSTEM_PROMPT
     return f"{SYSTEM_PROMPT}\n\nСтиль голоса: {persona}"
