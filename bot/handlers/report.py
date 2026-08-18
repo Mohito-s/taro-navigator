@@ -48,13 +48,13 @@ def _format_profile(user: dict, full: bool = False) -> str:
     return "\n".join(lines)
 
 
-async def send_report(message: Message, user: dict, full: bool = False):
+async def send_report(message: Message, user: dict, full: bool = False, variation: int = 0):
     await message.answer(_format_profile(user, full), parse_mode="HTML")
 
     await message.answer(
         "⌛️ Генерация разбора… Это займёт несколько секунд."
     )
-    text = await ai.generate_personality(user, full=full)
+    text = await ai.generate_personality(user, full=full, variation=variation)
     header = "🔮 Разбор личности (полный)" if full else "🔮 Разбор личности"
     await message.answer(f"{header}\n\n{text}", reply_markup=NEXT_MENU)
 

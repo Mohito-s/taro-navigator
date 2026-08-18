@@ -1,3 +1,5 @@
+import time
+
 from aiogram import F, Router
 from aiogram.filters import Command, CommandStart
 from aiogram.fsm.context import FSMContext
@@ -71,7 +73,8 @@ async def cb_regenerate(callback: CallbackQuery):
     await callback.answer("Пересоздаю разбор…")
     user = await get_user(callback.from_user.id)
     if user and user["birth_date"]:
-        await report.send_report(callback.message, user, full=True)
+        variation = int(time.time()) % 1000000
+        await report.send_report(callback.message, user, full=True, variation=variation)
     else:
         await callback.message.answer(
             "Сначала заполни данные: нажми «🌙 Мой разбор»."

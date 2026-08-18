@@ -25,14 +25,42 @@ def _arcana_payload(arcana: list[dict]) -> str:
     return "\n".join(lines)
 
 
-def _fallback_report(user: dict) -> str:
+# Ракурсы для «пересоздать разбор»: каждый регенерат идёт под новым углом
+PERSONALITY_ANGLES = [
+    "Раскрой тему через любовь и отношения: как этот код звучит в партнёрстве.",
+    "Раскрой тему через карьеру и финансы: где этому коду жить и зарабатывать.",
+    "Раскрой тему через тени и уроки: что важно осознать, чтобы расти.",
+    "Раскрой тему через сильные стороны: как усиливать то, что уже дано.",
+    "Раскрой тему через ближайший месяц: практические ориентиры и окна возможностей.",
+    "Раскрой тему через внутренний мир: эмоции, страхи и то, что питает душу.",
+    "Раскрой тему через предназначение: куда ведёт большой путь и что делать сейчас.",
+]
+
+FALLBACK_TIPS = [
+    "🪐 Совет из космоса: начни с аркана «Личность» — это твоя главная опора. Проживай энергию каждого аркана осознанно.",
+    "🪐 Совет из космоса: выбери один аркан на неделю и проживи его энергию — изменения придут через практику.",
+    "🪐 Совет из космоса: не бойся сильных качеств — они даны не для показухи, а для роста. Действуй по-своему.",
+    "🪐 Совет из космоса: кармические уроки легче всего прорабатываются в отношениях — присмотрись к повторяющимся сценариям.",
+    "🪐 Совет из космоса: месячный ритм — твой союзник. Планируй важное на растущую энергию, отдыхай — на спад.",
+    "🪐 Совет из космоса: твой ложный аркан — это маска, за которой прячется сила. Снимай её постепенно.",
+    "🪐 Совет из космоса: предназначение раскрывается не в поиске, а в действии. Делай следующий малый шаг.",
+]
+
+
+def _fallback_report(user: dict, variation: int = 0) -> str:
     zodiac = user["zodiac"]
     sign = ZODIAC[zodiac]
     arcana = itemify(user)
+    n = len(arcana)
+    # сдвигаем порядок арканов, чтобы «пересоздать» не повторялся текст
+    shift = variation % max(n, 1)
+    arcana = arcana[shift:] + arcana[:shift]
     parts = [sign["text"]]
     for item in arcana:
         card = ARCANA[item["number"]]
         parts.append(f"{item['title']} · {card['name']} ({card['keyword']}): {card['text']}")
+    tip = FALLBACK_TIPS[variation % len(FALLBACK_TIPS)]
+    parts.append(tip)
     return "\n\n".join(parts)
 
 
@@ -42,7 +70,7 @@ def itemify(user: dict) -> list[dict]:
     return json.loads(user.get("arcana") or "[]")
 
 
-def build_prompt(user: dict, full: bool = False) -> str:
+def build_prompt(user: dict, full: bool = False, variation: int = 0) -> str:
     zodiac = user.get("zodiac", "")
     sign = ZODIAC.get(zodiac)
     arcana = itemify(user)
@@ -75,6 +103,10 @@ def build_prompt(user: dict, full: bool = False) -> str:
             "Напиши КРАТКИЙ разбор личности (~120–180 слов): суть персонажа, "
             "ключевые качества и одну подсказку на будущее."
         )
+
+    angle = PERSONALITY_ANGLES[variation % len(PERSONALITY_ANGLES)] if variation else ""
+    if angle:
+        content += f"\n\nСейчас сделай разворот под новым углом: {angle}"
     return content
 
 
@@ -210,13 +242,13 @@ async def _chat(payload: dict) -> str | None:
         return None
 
 
-async def generate_personality(user: dict, full: bool = False) -> str:
+async def generate_personality(user: dict, full: bool = False, variation: int = 0) -> str:
     text = await _chat(
         {
             "model": AI_MODEL,
             "messages": [
                 {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": build_prompt(user, full=full)},
+                {"role": "user", "content": build_prompt(user, full=full, variation=variation)},
             ],
             "temperature": 0.9,
             "max_tokens": 800 if full else 400,
@@ -224,10 +256,10 @@ async def generate_personality(user: dict, full: bool = False) -> str:
     )
     if text:
         return text
-    return _fallback_report(user)
+    return _fallback_report(user, variation=variation)
 
 
-async def generate_natal_forecast(user: dict) -> str:
+async def generate_natal_forecast(user: dict, variation: int = 0) -> str:
     text = await _chat(
         {
             "model": AI_MODEL,
@@ -244,7 +276,7 @@ async def generate_natal_forecast(user: dict) -> str:
     return _natal_forecast_fallback(user)
 
 
-async def generate_arcana_forecast(user: dict, arcana_number: int) -> str:
+async def generate_arcana_forecast(user: dict, arcana_number: int, variation: int = 0) -> str:
     if arcana_number not in ARCANA:
         return "⚠️ Не нашёл этот аркан в базе."
     text = await _chat(
