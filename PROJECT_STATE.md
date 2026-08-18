@@ -25,10 +25,12 @@
 - [ ] Синхронизация из сайта (не только из Telegram): чтобы натальная карта,
       введённая на сайте в браузере, тоже попадала в БД (сейчас — только через
       мини-апп в Telegram, `__taroCanSend`).
-- [ ] Полный ИИ-разбор прямо в мини-аппе (без ухода в чат с ботом): нужно
-      HTTP-API мини-аппа (FastAPI на VPS) — мини-апп шлёт данные на
-      `/api/v1/natal` и рендерит ответ, ключ ИИ не светится во фронте.
-      Решение пользователя: ждёт обсуждения архитектуры.
+- [ ] Полный ИИ-разбор прямо в мини-аппе (без ухода в чат с ботом): **код готов** —
+      `api/` (FastAPI: `/api/v1/{natal,arcana,forecast}` + `/api/health`, CORS,
+      rate-limit, семафор, валидация initData) + inline-рендер в мини-аппе
+      (`TaroAPI` в `js/app.js`, фоллбэк на бота/локальный текст). Осталось:
+      деплой на VPS (`pip install fastapi/uvicorn`, `pm2 taro-api`, nginx
+      `location /api/` в vhost shadowlinkapp.online) и проверка живого API.
 
 ## СДЕЛАНО (реализовано, проверено)
 
@@ -98,8 +100,52 @@
       реальный код бота (`generate_personality` через venv на VPS) — ИИ-текст
       генерируется. Дефолт `config.py` для openrouter обновлён на рабочую модель.
       (`bot/config.py`, `.env` локально + VPS)
+- [x] Прогнозы день/неделя/месяц — полные ИИ-версии с разной глубиной: период-
+      промты `build_period_forecast_prompt` (день ~300–380 слов, неделя ~400–500,
+      месяц ~500–650 слов, разделы: общий фон / энергия / любовь / работа / здоровье
+      / совет; у недели — ключевые дни и окна, у месяца — этапы и поворотные точки),
+      используют натал (реальные планеты/ASC/аспекты из `planets`) и арканы;
+      `max_tokens` под горизонт (700/1000/1400); детерминированный фоллбэк
+      `_period_forecast_fallback`. Единые для бота и API. (`bot/services/ai.py`)
+- [x] FastAPI-API мини-аппа (`api/main.py`): `POST /api/v1/natal`,
+      `/api/v1/arcana`, `/api/v1/forecast`, `GET /api/health`; переиспользует
+      промты/стили/фоллбэки из `bot/services/ai.py` (единый источник); арканы
+      считаются серверно (`numerology.get_arcana`), CORS только
+      `https://mohito-s.github.io`, rate-limit по IP из `X-Forwarded-For` (~30/мин),
+      семафор на 3 конкурентных запроса, опциональная валидация Telegram
+      `initData` (HMAC WebAppData + BOT_TOKEN). `requirements.txt` + fastapi/uvicorn.
+- [x] Мини-апп рендерит полные разборы прямо на вкладках: `TaroAPI`-клиент
+      (`js/app.js`, fetch на `shadowlinkapp.online/api/v1`, style + initData,
+      таймаут 80с); натал-кнопка → `/v1/natal`, CTA в модалке аркана → `/v1/arcana`,
+      блоки день/неделя/месяц → `/v1/forecast`; безопасный рендер
+      (`renderAIText`: escape HTML + `**`→`<b>` + `\n`→`<br>`), loading-состояние,
+      сохранение в историю; фоллбэк — бот (в WebApp) / локальный текст (сайт).
+      Ассеты подняты до `?v=11`. Браузерные проверки 21/21 (без API фоллбэк жив).
 
 ## ЛОГ ИСПРАВЛЕНИЙ (последние изменения сверху)
+
+- 2026-08-19 — **FastAPI-API мини-аппа + полные разборы прямо во вкладках.**
+  Мини-апп теперь делает полный ИИ-разбор сам, без ухода в чат: натал-кнопка →
+  `/api/v1/natal`, CTA аркана → `/api/v1/arcana`, день/неделя/месяц →
+  `/api/v1/forecast`. (1) `api/main.py` (FastAPI): переиспользует промты/стили/
+  фоллбэки из `bot/services/ai.py` (единый источник), арканы считаются серверно
+  (`numerology.get_arcana` — не доверяем клиенту), CORS только
+  `https://mohito-s.github.io`, rate-limit по IP (30/мин, `X-Forwarded-For`),
+  семафор (3 конкурентных), валидация `initData` (HMAC WebAppData + BOT_TOKEN),
+  `/api/health`. `requirements.txt` + `fastapi`/`uvicorn`. (2) Прогнозы
+  день/неделя/месяц стали полными ИИ-прогнозами: `build_period_forecast_prompt`/
+  `_period_forecast_fallback`/`generate_period_forecast` в `bot/services/ai.py` с
+  разной глубиной под горизонт (день 300–380 слов, неделя 400–500 с ключевыми
+  днями, месяц 500–650 с этапами; разделы фон/энергия/любовь/работа/здоровье/
+  совет; натал-планеты и арканы в промте; max_tokens 700/1000/1400). (3) Мини-апп:
+  `TaroAPI`-клиент (fetch на `shadowlinkapp.online/api/v1`, style + initData,
+  таймаут 80с), `renderAIText` (escape + `**`→`<b>`), loading-состояние,
+  `showInlineResult`, история; фоллбэк — бот (в WebApp) / локальный текст (сайт);
+  ассеты `?v=11`, стиль `.forecast__loading`/disabled. Проверки: `py_compile`,
+  импорт `api.main` (маршруты на месте), node --check, UTF-8 без BOM, браузерный
+  чек 21/21 (фоллбэк жив без API). Осталось: деплой VPS + проверка живого API.
+  (`api/`, `bot/services/ai.py`, `js/app.js`, `css/style.css`, `index.html`,
+  `requirements.txt`, `PROJECT_STATE.md`)
 
 - 2026-08-18 — **Зачистка VPS и освобождение домена shadowlinkapp.online.** Аудит
   сервера показал: на домене крутился Next.js `shadowlink-web` (порт 3000, pm2) +

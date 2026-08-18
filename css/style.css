@@ -1435,6 +1435,20 @@ main {
   color: var(--tg-text, #eaf0ff);
   font: 600 12px/1.4 Manrope, sans-serif;
 }
+.forecast__loading {
+  color: var(--cyan, #54f1ff);
+  font: 600 15px/1.6 Manrope, sans-serif;
+  animation: pulse 1.6s ease-in-out infinite;
+}
+button.btn:disabled,
+button:disabled {
+  opacity: 0.65;
+  cursor: wait;
+}
+@keyframes pulse {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
 
 /* === История === */
 .history {

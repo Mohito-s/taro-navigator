@@ -304,6 +304,129 @@ def _arcana_forecast_fallback(user: dict, arcana_number: int) -> str:
     )
 
 
+# Горизонты прогноза: день / неделя / месяц (единые для бота и API)
+PERIOD_LABELS = {
+    "day": "на сегодня",
+    "week": "на неделю",
+    "month": "на месяц",
+}
+
+# Задача и объём каждого горизонта: прогнозы становятся полнее от дня к месяцу
+PERIOD_INSTRUCTIONS = {
+    "day": (
+        "Напиши ПОДРОБНЫЙ прогноз на сегодня (~300–380 слов) с конкретикой по дню. "
+        "Разделы:\n"
+        "☀ Общий фон дня\n"
+        "⚡ Энергия и фокус: куда направить силы именно сегодня\n"
+        "💞 Любовь и отношения: как вести себя с близкими сегодня\n"
+        "💼 Работа и финансы: задачи и решения дня\n"
+        "🌱 Здоровье и баланс\n"
+        "🪐 Совет на сегодня\n"
+    ),
+    "week": (
+        "Напиши РАСШИРЕННЫЙ прогноз на неделю (~400–500 слов). Отметь ключевые дни "
+        "недели и благоприятные окна. Разделы:\n"
+        "☀ Общий фон недели\n"
+        "⚡ Главные темы и фокус\n"
+        "💞 Любовь и отношения: ритм недели\n"
+        "💼 Карьера, деньги, дела: что запускать, что отложить\n"
+        "🌱 Энергия и самозабота\n"
+        "🪐 Совет и один смелый шаг на неделю\n"
+    ),
+    "month": (
+        "Напиши ПОЛНЫЙ прогноз на месяц (~500–650 слов) как большую карту периода: "
+        "этапы, поворотные точки и долгие темы. Разделы:\n"
+        "☀ Общий фон месяца\n"
+        "⚡ Этапы и поворотные точки: начало, середина, финал\n"
+        "💞 Любовь и отношения: большой цикл\n"
+        "💼 Карьера и финансы: стратегия и окна возможностей\n"
+        "🌱 Здоровье, энергия, восстановление\n"
+        "🪐 Главный урок месяца и совет\n"
+    ),
+}
+
+
+def build_period_forecast_prompt(user: dict, horizon: str) -> str:
+    """Прогноз на день/неделю/месяц по знаку, арканам и натальной карте."""
+    label = PERIOD_LABELS.get(horizon, "на сегодня")
+    zodiac = user.get("zodiac", "")
+    sign = ZODIAC.get(zodiac)
+    arcana = itemify(user)
+
+    zodiac_line = (
+        f"Знак зодиака: {zodiac} — стихия {sign['element']}, планета {sign['planet']}.\n"
+        f"Суть знака: {sign['text']}"
+        if sign
+        else "Знак зодиака не определён."
+    )
+    content = (
+        f"Дата рождения: {user.get('birth_date', 'не указана')}.\n"
+        f"{zodiac_line}\n\n"
+        f"Арканы судьбы по дате рождения:\n{_arcana_payload(arcana)}"
+    )
+    planets = _planets_payload(user)
+    if planets:
+        content += f"\n\n{planets}\nОпирайся на реальные положения планет, Асцендент и аспекты, где это уместно."
+    content += (
+        f"\n\n{PERIOD_INSTRUCTIONS.get(horizon, PERIOD_INSTRUCTIONS['day'])}"
+        "Пиши конкретно, живо, обращаясь к человеку на «ты», без общих фраз и штампов. "
+        "Числа и даты можно упоминать как ориентиры, но не утверждай их как гарантию."
+    )
+    return content
+
+
+def _period_forecast_fallback(user: dict, horizon: str) -> str:
+    label = PERIOD_LABELS.get(horizon, "на сегодня")
+    zodiac = user.get("zodiac", "")
+    sign = ZODIAC.get(zodiac)
+    arcana = itemify(user)
+    now = __import__("datetime").datetime.now()
+    n = len(arcana)
+    pick = arcana[(now.day + now.month) % max(n, 1)] if n else None
+    card = ARCANA[pick["number"]] if pick else None
+
+    parts = [f"☀ <b>Общий фон {label}</b>\n{sign['text'] if sign else 'Звёзды готовят поворот.'}"]
+    if card:
+        parts.append(
+            f"⚡ <b>Энергия и фокус</b>\nДень проходит под арканом «{card['name']}» "
+            f"({card['keyword']}). Это твой внутренний ориентир: "
+            f"{card['text']}"
+        )
+    parts.append(
+        "💞 <b>Любовь и отношения</b>\n"
+        f"Планета {sign['planet'] if sign else 'Венера'} советует держать лёгкость: "
+        "честный разговор и пауза вместо давления решают больше."
+    )
+    parts.append(
+        "💼 <b>Работа и финансы</b>\nНе форсируй события: последовательные шаги "
+        f"{('в ритме стихии ' + sign['element'].lower()) if sign else ''} принесут больше, чем рывок."
+    )
+    parts.append(
+        "🪐 <b>Совет</b>\nВыбери одно ключевое действие на этот период и доведи его "
+        "до конца — звёзды поддержат движение, а не ожидание."
+    )
+    return "\n\n".join(parts)
+
+
+async def generate_period_forecast(user: dict, horizon: str) -> str:
+    """ИИ-прогноз на день/неделю/месяц с детерминированным фолбэком."""
+    max_tokens = {"day": 700, "week": 1000, "month": 1400}.get(horizon, 700)
+    text = await _chat(
+        {
+            "model": AI_MODEL,
+            "messages": [
+                {"role": "system", "content": system_prompt(user.get("style", ""))},
+                {"role": "user", "content": build_period_forecast_prompt(user, horizon)},
+            ],
+            "temperature": 0.9,
+            "max_tokens": max_tokens,
+        }
+    )
+    if text:
+        return text
+    return _period_forecast_fallback(user, horizon)
+
+
 async def _chat(payload: dict) -> str | None:
     if not AI_API_KEY:
         return None

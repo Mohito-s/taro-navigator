@@ -143,6 +143,57 @@ function arcana(day, month, year) {
 
 const $ = (id) => document.getElementById(id);
 
+// === API полных ИИ-разборов (FastAPI на shadowlinkapp.online/api) ===
+// Каждая вкладка рендерит свой полный разбор прямо здесь, без ухода в бота.
+const TARO_API_BASE = "https://shadowlinkapp.online/api/v1";
+
+async function taroApi(path, body) {
+  const payload = Object.assign({ style: getSavedStyle().name }, body);
+  const tg = window.Telegram && window.Telegram.WebApp;
+  if (tg && tg.initData) payload.initData = tg.initData;
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 80000);
+  try {
+    const res = await fetch(TARO_API_BASE + "/" + path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      signal: ctrl.signal,
+    });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const data = await res.json();
+    return data.text || "";
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+// Безопасный рендер ИИ-текста: экранируем HTML, затем **жирный** и переносы строк
+function renderAIText(text) {
+  return String(text)
+    .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+    .replace(/\*\*(.+?)\*\*/g, "<b>$1</b>")
+    .replace(/\n/g, "<br>");
+}
+
+function setLoading(box, msg) {
+  if (!box) return;
+  box.innerHTML = `<div class="forecast__head"><span class="forecast__hed">${msg}</span></div><p class="forecast__loading">🪐 Считаем по звёздам…</p>`;
+  box.hidden = false;
+}
+
+function showInlineResult(box, title, text) {
+  if (!box) return;
+  box.innerHTML = `
+    <div class="forecast__head">
+      <span class="forecast__hed">${title}</span>
+      <span class="forecast__date">${fmtDate(Date.now(), true)}</span>
+    </div>
+    <p>${renderAIText(text)}</p>`;
+  box.hidden = false;
+  box.scrollIntoView({ behavior: "smooth", block: "nearest" });
+}
+
 function renderResult(day, month, year, opts = {}) {
   const signName = zodiac(day, month);
   const sign = SIGNS[signName];
@@ -586,33 +637,47 @@ function buildExtendedNatalText() {
   );
 }
 
-// Расширенный прогноз по натальной карте: в WebApp шлём боту, на сайте — локальный текст
+// Расширенный прогноз по натальной карте: полный ИИ-разбор прямо на вкладке.
+// Сначала пробуем API; если недоступно — бот (в WebApp) или локальный текст (сайт).
 const natalForecastBtn = document.getElementById("natal-forecast");
 if (natalForecastBtn) {
-  natalForecastBtn.addEventListener("click", () => {
+  natalForecastBtn.addEventListener("click", async () => {
     const { day, month, year } = natalForForecast();
-    const payload = { type: "natal_forecast", day, month, year };
+    const n = getSavedNatal() || {};
+    const payload = {
+      day,
+      month,
+      year,
+      time: n.time || document.getElementById("n-time").value || "",
+      city: n.city || document.getElementById("n-city").value || "",
+      name: n.name || "",
+      chart: n.chart ? chartBrief(n.chart) : undefined,
+    };
+    const box = document.getElementById("natal-extended");
+    const prev = natalForecastBtn.textContent;
+    natalForecastBtn.disabled = true;
+    natalForecastBtn.textContent = "🪐 Считаем натальный разбор…";
+    setLoading(box, "Полный разбор натальной карты");
+    try {
+      const text = await taroApi("natal", payload);
+      if (text) {
+        showInlineResult(box, "Полный разбор натальной карты", text);
+        addHistory({ type: "natal", icon: "🌌", title: "Разбор натальной карты", subtitle: `${zodiac(day, month)} · ${fmtDate(Date.now(), true)}`, text });
+        return;
+      }
+    } catch (err) {
+      /* API недоступно — фоллбэк ниже */
+    } finally {
+      natalForecastBtn.disabled = false;
+      natalForecastBtn.textContent = prev;
+    }
     if (window.__taroWebApp) {
-      const n = getSavedNatal() || {};
-      Object.assign(payload, {
-        time: n.time || document.getElementById("n-time").value || "",
-        city: n.city || document.getElementById("n-city").value || "",
-      });
-      if (n.chart) payload.chart = chartBrief(n.chart);
-      taroSend(JSON.stringify(payload));
+      taroSend(JSON.stringify({ type: "natal_forecast", day, month, year, time: payload.time, city: payload.city, chart: payload.chart }));
+      if (box) box.hidden = true;
       return;
     }
-    const box = document.getElementById("natal-extended");
     if (box) {
-      box.innerHTML = `
-        <div class="forecast__head">
-          <span class="forecast__hed">Расширенный прогноз по натальной карте</span>
-          <span class="forecast__date">${fmtDate(Date.now(), true)}</span>
-        </div>
-        <p>${buildExtendedNatalText()}</p>
-        <a class="btn btn--primary btn--wide tg-cta" href="tg://resolve?domain=MyGoodTaro_bot">🚀 Полный ИИ-разбор — в боте</a>`;
-      box.hidden = false;
-      box.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      showInlineResult(box, "Расширенный прогноз по натальной карте", buildExtendedNatalText());
     }
   });
 }
@@ -751,30 +816,54 @@ if (document.readyState === "loading") {
 setTimeout(initTelegram, 300);
 window.addEventListener("telegramWebviewReady", initTelegram);
 
-// Внутри WebApp кнопка аркана отправляет данные боту на расширенный разбор.
-// На сайте (без Telegram) показываем расширенный локальный текст + CTA в бота.
+// Полный разбор аркана: сначала API (прямо в модалке), фоллбэк — бот/локальный текст.
 document.addEventListener("click", (e) => {
   const cta = e.target.closest("#modal-cta");
   if (!cta || cta.tagName === "A") return;
   e.preventDefault();
   const arcItem = lastArc.find((a) => a.n === lastModalArcana) || null;
-  if (window.__taroWebApp) {
-    const c = window.__taroCalc || {};
-    taroSend(JSON.stringify(Object.assign({ type: "arcana", arcana_n: lastModalArcana }, c)));
-    closeModal();
-    return;
-  }
-  const text = arcItem
-    ? buildExtendedArcanaText(arcItem)
-    : "Эта карта хранит свою тайну — открой бота и попроси расширенный разбор.";
-  $("modal-text").textContent = text;
-  const link = document.createElement("a");
-  link.href = "tg://resolve?domain=MyGoodTaro_bot";
-  link.target = "_blank";
-  link.className = cta.className;
-  link.id = "modal-cta";
-  link.textContent = "🚀 Открыть в боте для ИИ-версии";
-  cta.replaceWith(link);
+  const c = window.__taroCalc || {};
+
+  const fallback = () => {
+    if (window.__taroWebApp) {
+      taroSend(JSON.stringify(Object.assign({ type: "arcana", arcana_n: lastModalArcana }, c)));
+      closeModal();
+      return;
+    }
+    const text = arcItem
+      ? buildExtendedArcanaText(arcItem)
+      : "Эта карта хранит свою тайну — открой бота и попроси расширенный разбор.";
+    $("modal-text").textContent = text;
+    const link = document.createElement("a");
+    link.href = "tg://resolve?domain=MyGoodTaro_bot";
+    link.target = "_blank";
+    link.className = cta.className;
+    link.id = "modal-cta";
+    link.textContent = "🚀 Открыть в боте для ИИ-версии";
+    cta.replaceWith(link);
+  };
+
+  const doApi = async () => {
+    cta.disabled = true;
+    cta.textContent = "🪐 Готовим разбор…";
+    try {
+      const text = await taroApi("arcana", { day: c.day, month: c.month, year: c.year, arcana_n: lastModalArcana });
+      if (text) {
+        $("modal-text").textContent = text;
+        if (arcItem) addHistory({ type: "arcana", icon: "🃏", title: `Разбор аркана «${arcItem.card}»`, subtitle: arcItem.pos, text });
+        cta.textContent = "🔮 Разбор готов";
+        cta.disabled = false;
+        return;
+      }
+    } catch (err) {
+      /* API недоступно — фоллбэк */
+    }
+    cta.textContent = "🔮 Расширенный разбор этого аркана";
+    cta.disabled = false;
+    fallback();
+  };
+
+  doApi();
 });
 
 // Открываем с сохранённой натальной картой (фундамент), иначе — демо-дата
@@ -1061,8 +1150,35 @@ function showForecast(horizon) {
   box.scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
 
+// Прогнозы: полный ИИ-прогноз прямо на вкладке (API), фоллбэк — локальная генерация.
 document.querySelectorAll(".forecast__block").forEach((btn) => {
-  btn.addEventListener("click", () => showForecast(btn.dataset.horizon));
+  btn.addEventListener("click", async () => {
+    const horizon = btn.dataset.horizon;
+    const box = document.getElementById("forecast-result");
+    const { day, month, year } = natalForForecast();
+    const n = getSavedNatal() || {};
+    btn.disabled = true;
+    setLoading(box, FORECAST_HEADERS[horizon]);
+    try {
+      const text = await taroApi("forecast", {
+        day,
+        month,
+        year,
+        horizon,
+        chart: n.chart ? chartBrief(n.chart) : undefined,
+      });
+      if (text) {
+        showInlineResult(box, FORECAST_HEADERS[horizon], text);
+        addHistory({ type: "forecast", icon: horizon === "day" ? "☀" : horizon === "week" ? "🌙" : "🪐", title: FORECAST_HEADERS[horizon], subtitle: `${zodiac(day, month)} · ${fmtDate(Date.now(), true)}`, text });
+        return;
+      }
+    } catch (err) {
+      /* API недоступно — локальный фоллбэк ниже */
+    } finally {
+      btn.disabled = false;
+    }
+    showForecast(horizon);
+  });
 });
 
 renderHistory();
