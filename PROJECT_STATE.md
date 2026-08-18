@@ -101,6 +101,26 @@
 
 ## ЛОГ ИСПРАВЛЕНИЙ (последние изменения сверху)
 
+- 2026-08-18 — **Зачистка VPS и освобождение домена shadowlinkapp.online.** Аудит
+  сервера показал: на домене крутился Next.js `shadowlink-web` (порт 3000, pm2) +
+  куча мёртвых WebSocket-локаций (10001, 10101–10109) + живой `/sl-rw` → 10110
+  (`rw-core` = нода RemnaWave). По решению пользователя удалено (после локального
+  бэкапа в `backup_vps_20260818/`): pm2 `shadowlink-web`, папки
+  `~/apps/{shadowlink-web,shadowlink-web-git,shared}`, сайт `stroikakras.ru`
+  (vhost + `/var/www/stroikakras.ru` — не тот сайт, будет новый с GitHub),
+  `/var/www/html`, хвосты в `~` (`migrate.py`, `test_models.py`,
+  `package-lock.json`, `audit*.sh`). Из nginx-конфига `shadowlinkapp.online`
+  убраны мёртвые локации и прокси на 3000, **оставлен только `/sl-rw`**
+  (RemnaWave-нода). Отключено SSH-уведомление на почту (`/etc/ssh/sshrc` — msmtp,
+  пароль приложения Gmail протух, при каждом входе сыпалась ошибка; исходник в
+  бэкапе, вернуть просто). НЕ тронуто: RemnaWave (контейнеры remnanode/remnawave/
+  db/redis, `rw-core`, порты 2222/10110/61000/UDP), WireGuard 51821/udp +
+  интерфейс 10.8.1.1, AmneziaWG (`amnezia-awg2`, 46817/udp), duckdns-панель,
+  SSH 1993, бот TARO, `stroikakras.ru` больше не обслуживается (DNS остался).
+  Проверено: контейнеры Up, нода отвечает на `/sl-rw` (400 = WS-handshake жив),
+  домен на `/` отдаёт 404, диск 7.9→8.7G. Домен освобождён под будущий API TARO
+  (FastAPI, моноплана: статика мини-аппа на GitHub Pages + `bot/` + будущая
+  `api/` в одном репо `taro-navigator`; на VPS pm2 `taro-bot` + `taro-api`).
 - 2026-08-18 — **Деплой аудита стилей + фикс ИИ-провайдера на VPS.** (1) VPS
   обновлён с `0fa276d` до `2be56bb` (`git pull --ff-only`, 13 файлов, создан
   `js/natal.js`), `pm2 restart taro-bot` — стили и натал теперь в проде.
