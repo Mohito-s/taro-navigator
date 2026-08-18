@@ -727,6 +727,9 @@ main {
 .natal__form {
   padding: 28px;
 }
+.natal__inputs {
+  padding: 0 0 20px;
+}
 .natal__form h3 {
   font-family: "Orbitron", sans-serif;
   font-size: 18px;

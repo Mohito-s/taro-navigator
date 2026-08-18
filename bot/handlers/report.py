@@ -23,10 +23,12 @@ def _format_profile(user: dict, full: bool = False) -> str:
 
     place = html.escape(user.get("birth_place") or "не указано")
     day_time = html.escape(user.get("birth_time") or "")
+    birth_name = html.escape(user.get("name") or "")
 
     lines = [
         "🌌 <b>КОСМИЧЕСКИЙ ПАСПОРТ</b>",
         "",
+        f"👤 Имя: <b>{birth_name or 'не указано'}</b>",
         f"📅 Дата рождения: <b>{html.escape(user['birth_date'])}</b>"
         + (f", {day_time}" if day_time else ""),
         f"📍 Место рождения: <b>{place}</b>",

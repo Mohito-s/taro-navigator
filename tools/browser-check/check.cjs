@@ -147,6 +147,42 @@ function check(name, ok, detail) {
   const historyOpen = await page.$$eval(".history__item--open", (els) => els.length);
   check("история: рендер записей + раскрытие деталей", historyItems >= 2 && emptyHidden && historyOpen >= 1, `items=${historyItems}, emptyHidden=${emptyHidden}, open=${historyOpen}`);
 
+  // Смена персоны: ввод другого человека в натал-форме (ручной ввод, как на «Раскладах»)
+  // должен обновить хранилище, профиль и прогноз (был баг: const savedNatal)
+  await page.click('[data-tab="natal"]');
+  await new Promise((r) => setTimeout(r, 400));
+  await page.evaluate(() => {
+    document.getElementById("n-day").value = "7";
+    document.getElementById("n-month").value = "3";
+    document.getElementById("n-year").value = "1990";
+    document.getElementById("n-name").value = "Аня";
+    document.getElementById("n-time").value = "12:00";
+    document.getElementById("n-city").value = "Москва";
+    document.getElementById("natal-form").dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+  });
+  await new Promise((r) => setTimeout(r, 600));
+  const personaChange = await page.evaluate(() => {
+    const stored = JSON.parse(localStorage.getItem("taro_natal") || "null");
+    const profileSign = document.getElementById("profile-sign").textContent.trim();
+    return {
+      storedDay: stored && stored.day,
+      storedName: stored && stored.name,
+      profileSign,
+    };
+  });
+  check(
+    "смена персоны в натале обновляет хранилище и профиль",
+    personaChange.storedDay === 7 && personaChange.storedName === "Аня" && personaChange.profileSign.includes("Аня"),
+    `stored=${personaChange.storedDay} (${personaChange.storedName}), profile=${personaChange.profileSign}`,
+  );
+
+  await page.click('[data-tab="forecast"]');
+  await new Promise((r) => setTimeout(r, 300));
+  await page.click('[data-horizon="day"]');
+  await new Promise((r) => setTimeout(r, 400));
+  const personaForecast = await page.$eval("#forecast-result p", (el) => el.textContent.trim());
+  check("смена персоны: прогноз пересчитывается под новую карту", personaForecast.includes("Рыбы"), personaForecast.slice(0, 60));
+
   await browser.close();
   console.log("\nИтого: " + results.filter((r) => r.ok).length + "/" + results.length + " пройдено");
   process.exit(results.every((r) => r.ok) ? 0 : 1);

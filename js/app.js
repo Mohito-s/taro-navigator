@@ -143,7 +143,7 @@ function arcana(day, month, year) {
 
 const $ = (id) => document.getElementById(id);
 
-function renderResult(day, month, year) {
+function renderResult(day, month, year, opts = {}) {
   const signName = zodiac(day, month);
   const sign = SIGNS[signName];
   const arc = arcana(day, month, year);
@@ -186,7 +186,9 @@ function renderResult(day, month, year) {
   bindTilt();
 
   $("result").hidden = false;
-  $("result").scrollIntoView({ behavior: "smooth", block: "start" });
+  if (!opts.skipScroll) {
+    $("result").scrollIntoView({ behavior: "smooth", block: "start" });
+  }
 }
 
 function validate(day, month, year, daysInMonth) {
@@ -283,9 +285,9 @@ function buildExtendedArcanaText(item) {
   const prompt = ARCADES[reduce(nowNum + item.n)] || item;
   return (
     `${base}\n\n` +
-    `Позиция в твоей карте: <b>${item.pos}</b>. Здесь этот аркан звучит как ` +
+    `Позиция в твоей карте: ${item.pos}. Здесь этот аркан звучит как ` +
     `${item.kw.toLowerCase()} — ресурс, который проще всего включить в повседневности.\n\n` +
-    `Энергия дня: <b>${prompt.card}</b> (${prompt.kw}). Созвучная карта усиливает ` +
+    `Энергия дня: ${prompt.card} (${prompt.kw}). Созвучная карта усиливает ` +
     `проявление этого аркана прямо сейчас — присмотрись к своему настроению и делам.\n\n` +
     `Практический ключ: проживи сегодня качество аркана «${item.card}» осознанно — ` +
     `одно небольшое действие в этом ключе откроет больше, чем долгие размышления.`
@@ -435,29 +437,45 @@ renderNatalChart();
 })();
 
 // === Натальная карта = ФУНДАМЕНТ: сразу сохраняется и используется везде ===
+// Синхронизируем «текущую персону» со всеми экранами приложения
+function syncNatalToApp(natal) {
+  if (!natal || !natal.day) return;
+  // калькулятор «Расклады»
+  const dayEl = $("day"), monthEl = $("month"), yearEl = $("year");
+  if (dayEl) dayEl.value = natal.day;
+  if (monthEl) monthEl.value = natal.month;
+  if (yearEl) yearEl.value = natal.year;
+  renderResult(natal.day, natal.month, natal.year);
+  // профиль
+  renderProfile();
+}
+
 const natalForm = document.getElementById("natal-form");
 if (natalForm) {
   natalForm.addEventListener("submit", (e) => {
     e.preventDefault();
     const note = document.querySelector(".natal__note");
-    const dateVal = document.getElementById("n-date").value; // YYYY-MM-DD
+    const d = Number(document.getElementById("n-day").value);
+    const m = Number(document.getElementById("n-month").value);
+    const y = Number(document.getElementById("n-year").value);
     const timeVal = document.getElementById("n-time").value || "";
     const cityVal = document.getElementById("n-city").value.trim() || "не указано";
-    const [y, m, d] = dateVal.split("-").map(Number);
-    if (!d || !m || !y || y < 1900 || y > 2100) {
-      if (note) note.textContent = "⚠️ Выбери корректную дату рождения.";
+    const nameVal = document.getElementById("n-name").value.trim();
+    if (!d || !m || !y || y < 1900 || y > 2100 || d < 1 || d > 31 || m < 1 || m > 12) {
+      if (note) note.textContent = "⚠️ Введи корректную дату рождения (день, месяц, год).";
       return;
     }
     const signName = zodiac(d, m);
     const arc = arcana(d, m, y);
-    const natal = { day: d, month: m, year: y, time: timeVal, city: cityVal, zodiac: signName, arcana: arc, savedAt: Date.now() };
-    try { localStorage.setItem("taro_natal", JSON.stringify(natal)); } catch (err) { /* ignore */ }
+    const natal = { day: d, month: m, year: y, time: timeVal, city: cityVal, name: nameVal, zodiac: signName, arcana: arc, savedAt: Date.now() };
+    saveNatal(natal);
 
     // Отправляем боту, чтобы натальная карта стала фундаментом и для сервера.
     // Если Telegram WebView ещё не инициализирован — ставим в очередь,
     // initTelegram() отправит данные, как только будет готов (см. taroSend).
-    taroSend(JSON.stringify({ type: "natal", day: d, month: m, year: y, time: timeVal, city: cityVal }));
+    taroSend(JSON.stringify({ type: "natal", day: d, month: m, year: y, time: timeVal, city: cityVal, name: nameVal }));
 
+    syncNatalToApp(natal);
     renderNatalChart();
     if (note) {
       note.innerHTML = window.__taroCanSend
@@ -467,26 +485,31 @@ if (natalForm) {
   });
 }
 
-// Локальный расширенный прогноз по натальной карте (для сайта без Telegram)
+// Локальный расширенный прогноз по натальной карте (для сайта без Telegram).
+// Чистая астрология: знак, стихия, планета — без карт Таро.
 function buildExtendedNatalText() {
   const { day, month, year } = natalForForecast();
   const signName = zodiac(day, month);
   const sign = SIGNS[signName];
-  const arc = arcana(day, month, year);
-  const lines = [
-    `Знак: <b>${signName}</b> · стихия ${sign.element} · планета ${sign.planet}\n\n`,
-    `Арканы по позициям:\n`,
-  ];
-  arc.forEach((a) => {
-    lines.push(`• <b>${a.pos}</b> — ${a.card} (${a.kw})`);
-  });
-  lines.push(`\n${signName} даёт темперамент, а арканы — сценарий.` +
-    ` Личность и Таланты — главные опоры: их энергия доступна тебе каждый день.` +
-    ` Кармические уроки и Предназначение — направление роста на месяц вперёд.\n\n` +
-    `Общий фон периода: сосредоточься на аркане «${arc[0].card}» — это твой якорь.` +
-    ` Любовь и отношения подсветит «${arc[7].card}», карьеру — «${arc[6].card}».` +
-    ` Двигайся к целям небольшими шагами, не форсируя.`);
-  return lines.join("");
+  const n = getSavedNatal() || {};
+  const time = n.time || "";
+  const city = n.city && n.city !== "не указано" ? n.city : "";
+  const name = n.name || "";
+  return (
+    `${name ? `Для: <b>${name}</b>\n` : ""}` +
+    `Знак: <b>${signName}</b> · стихия ${sign.element} · планета ${sign.planet}\n\n` +
+    (time ? `Время рождения: <b>${time}</b>\n` : "") +
+    (city ? `Место рождения: <b>${city}</b>\n` : "") +
+    `\n${sign.element}-знак даёт темперамент: ${sign.text} ` +
+    `Солнечный знак определяет характер и жизненную энергию. ` +
+    `Луна отвечает за эмоции и интуицию — прислушивайся к внутреннему голосу. ` +
+    `Асцендент, рассчитанный по времени рождения${time ? ` (${time})` : ""}, ` +
+    `показывает, как ты проявляешься в новых знакомствах и начинаниях.\n\n` +
+    `Общий фон периода: энергия ${signName} усиливается к середине периода. ` +
+    `Любовь и отношения резонируют с планетой ${sign.planet} — держи лёгкость и честность. ` +
+    `Карьере помогает ритм стихии ${sign.element.toLowerCase()}: не форсируй события, ` +
+    `а действуй последовательно, и месяц принесёт рост.`
+  );
 }
 
 // Расширенный прогноз по натальной карте: в WebApp шлём боту, на сайте — локальный текст
@@ -496,7 +519,7 @@ if (natalForecastBtn) {
     const { day, month, year } = natalForForecast();
     const payload = { type: "natal_forecast", day, month, year };
     if (window.__taroWebApp) {
-      const n = savedNatal && savedNatal.day ? savedNatal : {};
+      const n = getSavedNatal() || {};
       Object.assign(payload, {
         time: n.time || document.getElementById("n-time").value || "",
         city: n.city || document.getElementById("n-city").value || "",
@@ -519,17 +542,30 @@ if (natalForecastBtn) {
   });
 }
 
-// Фундамент: подставляем сохранённую натальную карту во всё приложение
-const savedNatal = (function () {
+// Фундамент: живой источник «текущей персоны» (taro_natal в localStorage).
+// Читаем на лету, чтобы ввод нового человека сразу подхватывался всеми экранами.
+function getSavedNatal() {
   try { return JSON.parse(localStorage.getItem("taro_natal") || "null"); } catch (err) { return null; }
-})();
-if (savedNatal && savedNatal.day) {
-  const nd = document.getElementById("n-date");
-  if (nd) nd.value = `${savedNatal.year}-${String(savedNatal.month).padStart(2, "0")}-${String(savedNatal.day).padStart(2, "0")}`;
+}
+function saveNatal(natal) {
+  try { localStorage.setItem("taro_natal", JSON.stringify(natal)); } catch (err) { /* ignore */ }
+}
+
+// Подставляем сохранённую карту в поля формы натала
+const natalFormInit = getSavedNatal();
+if (natalFormInit && natalFormInit.day) {
+  const nd = document.getElementById("n-day");
+  if (nd) nd.value = natalFormInit.day;
+  const nm = document.getElementById("n-month");
+  if (nm) nm.value = natalFormInit.month;
+  const ny = document.getElementById("n-year");
+  if (ny) ny.value = natalFormInit.year;
+  const nn = document.getElementById("n-name");
+  if (nn && natalFormInit.name) nn.value = natalFormInit.name;
   const nt = document.getElementById("n-time");
-  if (nt && savedNatal.time) nt.value = savedNatal.time;
+  if (nt && natalFormInit.time) nt.value = natalFormInit.time;
   const nc = document.getElementById("n-city");
-  if (nc && savedNatal.city) nc.value = savedNatal.city;
+  if (nc && natalFormInit.city) nc.value = natalFormInit.city;
 }
 
 // === Нижняя навигация: переключение экранов ===
@@ -667,11 +703,12 @@ document.addEventListener("click", (e) => {
 });
 
 // Открываем с сохранённой натальной картой (фундамент), иначе — демо-дата
-if (savedNatal && savedNatal.day) {
-  $("day").value = savedNatal.day;
-  $("month").value = savedNatal.month;
-  $("year").value = savedNatal.year;
-  renderResult(savedNatal.day, savedNatal.month, savedNatal.year);
+const initialNatal = getSavedNatal();
+if (initialNatal && initialNatal.day) {
+  $("day").value = initialNatal.day;
+  $("month").value = initialNatal.month;
+  $("year").value = initialNatal.year;
+  renderResult(initialNatal.day, initialNatal.month, initialNatal.year);
 } else {
   renderResult(12, 5, 1998);
 }
@@ -726,8 +763,9 @@ function renderProfile() {
   const metaEl = document.getElementById("profile-meta");
   const starsEl = document.getElementById("profile-stars");
 
-  if (savedNatal && savedNatal.zodiac) {
-    if (signEl) signEl.textContent = savedNatal.zodiac;
+  const savedNatal = getSavedNatal() || {};
+  if (savedNatal.zodiac) {
+    if (signEl) signEl.textContent = savedNatal.name ? `${savedNatal.name} · ${savedNatal.zodiac}` : savedNatal.zodiac;
     if (metaEl) {
       const arc = savedNatal.arcana && savedNatal.arcana[0];
       metaEl.textContent = `${savedNatal.day}.${String(savedNatal.month).padStart(2, "0")}.${savedNatal.year}` +
@@ -888,7 +926,7 @@ const FORECAST_HEADERS = {
 };
 
 function natalForForecast() {
-  const n = savedNatal && savedNatal.day ? savedNatal : null;
+  const n = getSavedNatal() || null;
   const c = window.__taroCalc || {};
   const day = (n && n.day) || c.day || 12;
   const month = (n && n.month) || c.month || 5;

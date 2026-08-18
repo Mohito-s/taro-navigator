@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS users (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     telegram_id INTEGER UNIQUE NOT NULL,
     username TEXT DEFAULT '',
+    name TEXT DEFAULT '',
     birth_date TEXT DEFAULT '',
     birth_time TEXT DEFAULT '',
     birth_place TEXT DEFAULT '',
@@ -30,11 +31,13 @@ async def init_db() -> None:
     _ensure_dir()
     async with aiosqlite.connect(DB_PATH) as db:
         await db.execute(SCHEMA)
-        # миграция: добавляем колонку style в уже существующие таблицы
+        # миграции: добавляем недостающие колонки в уже существующие таблицы
         cur = await db.execute("PRAGMA table_info(users)")
         cols = [row[1] for row in await cur.fetchall()]
         if "style" not in cols:
             await db.execute("ALTER TABLE users ADD COLUMN style TEXT DEFAULT 'cosmo'")
+        if "name" not in cols:
+            await db.execute("ALTER TABLE users ADD COLUMN name TEXT DEFAULT ''")
         await db.commit()
 
 
@@ -54,14 +57,16 @@ async def save_profile(
     birth_place: str,
     zodiac: str,
     arcana: list[dict],
+    name: str = "",
 ) -> None:
     async with aiosqlite.connect(DB_PATH) as db:
         await db.execute(
             """
-            INSERT INTO users (telegram_id, username, birth_date, birth_time, birth_place, zodiac, arcana)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO users (telegram_id, username, name, birth_date, birth_time, birth_place, zodiac, arcana)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(telegram_id) DO UPDATE SET
                 username=excluded.username,
+                name=CASE WHEN excluded.name != '' THEN excluded.name ELSE users.name END,
                 birth_date=excluded.birth_date,
                 birth_time=excluded.birth_time,
                 birth_place=excluded.birth_place,
@@ -71,6 +76,7 @@ async def save_profile(
             (
                 telegram_id,
                 username,
+                name,
                 birth_date,
                 birth_time,
                 birth_place,

@@ -63,11 +63,13 @@ async def on_web_app_data(message: Message):
     birth_date = f"{day:02d}.{month:02d}.{year}"
     birth_time = str(data.get("time", "") or "").strip()[:20]
     birth_place = str(data.get("city", "") or "").strip()[:80]
+    birth_name = str(data.get("name", "") or "").strip()[:40]
     user = message.from_user
 
     await save_profile(
         telegram_id=user.id,
         username=user.username or user.first_name or "",
+        name=birth_name,
         birth_date=birth_date,
         birth_time=birth_time,
         birth_place=birth_place,
@@ -76,8 +78,9 @@ async def on_web_app_data(message: Message):
     )
 
     if data.get("type") == "natal":
+        who = html.escape(birth_name) or "Профиль"
         await message.answer(
-            f"🪐 <b>Натальная карта сохранена</b> — теперь это твой фундамент.\n\n"
+            f"🪐 <b>Натальная карта {f'для {who} ' if birth_name else ''}сохранена</b> — теперь это твой фундамент.\n\n"
             f"📅 Дата: {birth_date}\n"
             f"🕐 Время: {html.escape(birth_time) or 'не указано'}\n"
             f"📍 Город: {html.escape(birth_place) or 'не указано'}\n"

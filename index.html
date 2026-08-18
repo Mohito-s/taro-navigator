@@ -158,17 +158,36 @@
       <div class="natal">
         <form class="natal__form glass" id="natal-form">
           <h3>✧ Координаты рождения</h3>
-          <div class="natal__row">
-            <span>Дата</span>
-            <input id="n-date" type="date" max="2100-01-01" value="1998-05-12" />
+          <div class="calc__inputs natal__inputs">
+            <label class="field">
+              <span class="field__ico">☀</span>
+              <span class="field__name">День</span>
+              <input id="n-day" type="number" min="1" max="31" placeholder="12" inputmode="numeric" />
+            </label>
+            <span class="field__sep"></span>
+            <label class="field">
+              <span class="field__ico">☽</span>
+              <span class="field__name">Месяц</span>
+              <input id="n-month" type="number" min="1" max="12" placeholder="5" inputmode="numeric" />
+            </label>
+            <span class="field__sep"></span>
+            <label class="field">
+              <span class="field__ico">✦</span>
+              <span class="field__name">Год</span>
+              <input id="n-year" type="number" min="1900" max="2100" placeholder="1998" inputmode="numeric" />
+            </label>
           </div>
           <div class="natal__row">
-            <span>Время (по местному)</span>
-            <input id="n-time" type="time" value="14:30" />
+            <span>Имя</span>
+            <input id="n-name" type="text" placeholder="Твоё имя" maxlength="40" />
           </div>
           <div class="natal__row">
-            <span>Город</span>
-            <input id="n-city" type="text" placeholder="Москва" value="Москва" />
+            <span>Время рождения (по местному)</span>
+            <input id="n-time" type="time" />
+          </div>
+          <div class="natal__row">
+            <span>Город рождения</span>
+            <input id="n-city" type="text" placeholder="Москва" />
           </div>
           <button class="btn btn--primary btn--wide" type="submit">🌌 Построить карту</button>
         </form>

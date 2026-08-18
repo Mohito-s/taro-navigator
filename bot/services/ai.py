@@ -145,10 +145,10 @@ def build_prompt(user: dict, full: bool = False, variation: int = 0) -> str:
 def build_natal_forecast_prompt(user: dict) -> str:
     zodiac = user.get("zodiac", "")
     sign = ZODIAC.get(zodiac)
-    arcana = itemify(user)
 
     zodiac_line = (
         f"Знак зодиака: {zodiac} — стихия {sign['element']}, планета {sign['planet']}.\n"
+        f"Период знака: {sign['dates']}\n"
         f"Суть знака: {sign['text']}"
         if sign
         else "Знак зодиака не определён."
@@ -159,12 +159,11 @@ def build_natal_forecast_prompt(user: dict) -> str:
         f"Время рождения: {user.get('birth_time') or 'не указано'}.\n"
         f"Место рождения: {user.get('birth_place', 'не указано')}.\n\n"
         f"{zodiac_line}\n\n"
-        f"Арканы судьбы по позициям:\n{_arcana_payload(arcana)}\n\n"
-        "Напиши РАСШИРЕННЫЙ прогноз по натальной карте (~450–550 слов), с разделом "
-        "по каждому аркану (что он значит именно в этой позиции и как прожить его энергию "
-        "в ближайший месяц) и разделами:\n"
-        "🔮 Общий фон периода\n"
-        "🌟 По арканам судьбы — по позициям\n"
+        "Напиши РАСШИРЕННЫЙ астрологический прогноз по натальной карте (~450–550 слов), "
+        "ТОЛЬКО по астрологии — НЕ упоминай карты Таро и арканы. Разделы:\n"
+        "🔭 Общий фон периода\n"
+        "♈ Солнечный знак: характер, энергия, темперамент\n"
+        "☽ Луна и эмоции\n"
         "💞 Любовь и отношения\n"
         "💼 Карьера и финансы\n"
         "🪐 Совет из космоса\n"
@@ -212,17 +211,29 @@ def build_arcana_forecast_prompt(user: dict, arcana_number: int) -> str:
 def _natal_forecast_fallback(user: dict) -> str:
     zodiac = user.get("zodiac", "")
     sign = ZODIAC.get(zodiac)
-    arcana = itemify(user)
 
-    parts = [f"🔮 <b>Общий фон</b>\n{sign['text']}"]
-    for item in arcana:
-        card = ARCANA[item["number"]]
-        parts.append(
-            f"🌟 <b>{item['title']}</b> · {card['name']} ({card['keyword']})\n{card['text']}"
-        )
+    parts = [f"🔭 <b>Общий фон</b>\n{sign['text']}"]
     parts.append(
-        "🪐 <b>Совет из космоса</b>\nНачни с аркана «Личность»: это твоя главная опора. "
-        "Проживай энергию каждого аркана осознанно — и месяц принесёт рост."
+        f"☉ <b>Солнце и характер</b>\nТвой солнечный знак — {zodiac} (стихия {sign['element']}, "
+        f"планета {sign['planet']}). Ты проявляешься как энергия знака: "
+        f"{sign['text']}"
+    )
+    parts.append(
+        "☽ <b>Луна и эмоции</b>\nЭмоциональный фон управляется Луной: прислушивайся к "
+        "интуиции и не подавляй чувства — они твой внутренний компас."
+    )
+    parts.append(
+        "💞 <b>Любовь и отношения</b>\nПартнёрство резонирует с планетой "
+        f"{sign['planet']}: цени лёгкость, честность и личное пространство."
+    )
+    parts.append(
+        "💼 <b>Карьера и финансы</b>\nЭнергия "
+        f"{sign['element'].lower()}-знака поддерживает деятельность, где важен "
+        f"{'творческий импульс' if sign['element'] == 'Огонь' else 'порядок и результат' if sign['element'] == 'Земля' else 'контакт и идеи' if sign['element'] == 'Воздух' else 'глубина и чувства'}."
+    )
+    parts.append(
+        "🪐 <b>Совет из космоса</b>\nСледуй ритму планет: важное — в первой половине периода, "
+        "закрепление — в финале. Доверяй своему знаку — он уже знает ответ."
     )
     return "\n\n".join(parts)
 
