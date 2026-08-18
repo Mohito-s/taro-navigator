@@ -331,7 +331,7 @@ function bindTilt() {
 }
 
 // === Натальная карта: 3D-круг Зодиака ===
-function renderNatalChart() {
+function renderNatalChart(natal) {
   const disc = document.getElementById("natal-disc");
   if (!disc) return;
   const names = Object.keys(SIGNS);
@@ -349,20 +349,27 @@ function renderNatalChart() {
     const y1 = cy + Math.sin(a1 - Math.PI / 2) * R;
     segs += `<line class="natal__tick" x1="${cx}" y1="${cy}" x2="${x1}" y2="${y1}" />`;
   }
-  // условные планеты (демо-раскладка)
-  const planets = [
-    { name: "☉", label: "Солнце", deg: 35 },
-    { name: "☽", label: "Луна", deg: 120 },
-    { name: "ASC", label: "Асцендент", deg: 210 },
-  ];
+  // реальные планеты из расчёта (эфемериды) либо демо-раскладка
+  const chart = (natal && natal.chart) || null;
   let dots = "";
-  planets.forEach((p) => {
-    const a = (p.deg / 360) * Math.PI * 2 - Math.PI / 2;
+  function placeDot(lon, cls, glyph, label) {
+    const a = (lon / 360) * Math.PI * 2 - Math.PI / 2;
     const x = cx + Math.cos(a) * (R * 0.62);
     const y = cy + Math.sin(a) * (R * 0.62);
-    dots += `<circle class="natal__planet" cx="${x}" cy="${y}" r="6" />
-      <text class="natal__planet-label" x="${x + 9}" y="${y + 4}">${p.label}</text>`;
-  });
+    dots += `<circle class="${cls}" cx="${x}" cy="${y}" r="5.5"><title>${label}</title></circle>
+      <text class="natal__planet-label" x="${x + 9}" y="${y + 4}">${glyph}</text>`;
+  }
+  if (chart && chart.planets) {
+    chart.planets.forEach((p) => placeDot(p.pos.lon, "natal__planet", p.icon, p.name + " — " + p.pos.label));
+    if (chart.asc) placeDot(chart.asc.lon, "natal__planet--asc", "ASC", "Асцендент — " + chart.asc.label);
+    if (chart.mc) placeDot(chart.mc.lon, "natal__planet--mc", "MC", "МС — " + chart.mc.label);
+  } else {
+    [
+      { icon: "☉", label: "Солнце", deg: 35 },
+      { icon: "☽", label: "Луна", deg: 120 },
+      { icon: "ASC", label: "Асцендент", deg: 210 },
+    ].forEach((p) => placeDot(p.deg, p.icon === "ASC" ? "natal__planet--asc" : "natal__planet", p.icon, p.label));
+  }
 
   disc.innerHTML = `
     <svg viewBox="0 0 400 400" aria-label="Натальная карта">
@@ -403,20 +410,34 @@ function renderNatalChart() {
     </svg>`;
 
   // лёгкий наклон всего диска за курсором
-  const chart = document.getElementById("natal-chart");
-  if (chart) {
-    chart.addEventListener("pointermove", (e) => {
-      const r = chart.getBoundingClientRect();
+  const chartWrap = document.getElementById("natal-chart");
+  if (chartWrap) {
+    chartWrap.addEventListener("pointermove", (e) => {
+      const r = chartWrap.getBoundingClientRect();
       const px = (e.clientX - r.left) / r.width - 0.5;
       const py = (e.clientY - r.top) / r.height - 0.5;
       disc.style.transform = `rotateX(${8 - py * 14}deg) rotateY(${px * 18}deg)`;
     });
-    chart.addEventListener("pointerleave", () => {
+    chartWrap.addEventListener("pointerleave", () => {
       disc.style.transform = "";
     });
   }
 }
-renderNatalChart();
+const chartNatalInit = getSavedNatal();
+renderNatalChart(chartNatalInit);
+// Если сохранённая карта ещё без реального расчёта — считаем эфемериды на лету
+if (chartNatalInit && chartNatalInit.day && !chartNatalInit.chart && window.TaroNatal) {
+  TaroNatal.compute(chartNatalInit).then((chart) => {
+    if (!chart) return;
+    chartNatalInit.chart = chart;
+    const brief = chartBrief(chart);
+    chartNatalInit.planets = brief.planets;
+    chartNatalInit.asc = brief.asc;
+    chartNatalInit.mc = brief.mc;
+    saveNatal(chartNatalInit);
+    renderNatalChart(chartNatalInit);
+  });
+}
 
 // 3D-звёзды вокруг натального диска (наш космический стиль)
 (function fillNatalStars() {
@@ -450,6 +471,29 @@ function syncNatalToApp(natal) {
   renderProfile();
 }
 
+// Краткое представление расчёта для бота и localStorage (без тяжёлых полей)
+function chartBrief(chart) {
+  if (!chart) return null;
+  return {
+    planets: chart.planets.map((p) => ({ name: p.name, icon: p.icon, sign: p.pos.sign, deg: p.pos.degMin })),
+    asc: chart.asc ? chart.asc.label : null,
+    mc: chart.mc ? chart.mc.label : null,
+    houses: chart.houses ? chart.houses.positions : null,
+    aspects: chart.aspects.slice(0, 15).map((a) => `${a.a} ${a.icon} ${a.b} (${a.label}, орб ${a.orb}°)`),
+    havePlace: chart.havePlace,
+  };
+}
+
+// Короткая строка «: ☉ 12° Льва · …» для заметки под формой
+function chartSummary(chart) {
+  if (!chart || !chart.planets) return "";
+  const parts = chart.planets.slice(0, 5).map((p) => `${p.icon} ${p.pos.degMin} ${p.pos.sign}`);
+  let s = ": " + parts.join(" · ");
+  if (chart.asc) s += ` · ASC ${chart.asc.degMin} ${chart.asc.sign}`;
+  if (chart.mc) s += ` · MC ${chart.mc.degMin} ${chart.mc.sign}`;
+  return s;
+}
+
 const natalForm = document.getElementById("natal-form");
 if (natalForm) {
   natalForm.addEventListener("submit", (e) => {
@@ -468,19 +512,37 @@ if (natalForm) {
     const signName = zodiac(d, m);
     const arc = arcana(d, m, y);
     const natal = { day: d, month: m, year: y, time: timeVal, city: cityVal, name: nameVal, zodiac: signName, arcana: arc, savedAt: Date.now() };
-    saveNatal(natal);
 
-    // Отправляем боту, чтобы натальная карта стала фундаментом и для сервера.
-    // Если Telegram WebView ещё не инициализирован — ставим в очередь,
-    // initTelegram() отправит данные, как только будет готов (см. taroSend).
-    taroSend(JSON.stringify({ type: "natal", day: d, month: m, year: y, time: timeVal, city: cityVal, name: nameVal }));
+    const finish = (chart) => {
+      if (chart) {
+        natal.chart = chart;
+        const brief = chartBrief(chart);
+        natal.planets = brief.planets;
+        natal.asc = brief.asc;
+        natal.mc = brief.mc;
+      }
+      saveNatal(natal);
+      // Отправляем боту, чтобы натальная карта стала фундаментом и для сервера.
+      // Вместе с данными уходит реальный расчёт планет (эфемериды).
+      // Если Telegram WebView ещё не инициализирован — ставим в очередь,
+      // initTelegram() отправит данные, как только будет готов (см. taroSend).
+      taroSend(JSON.stringify({ type: "natal", day: d, month: m, year: y, time: timeVal, city: cityVal, name: nameVal, chart: chartBrief(chart) }));
+      syncNatalToApp(natal);
+      renderNatalChart(natal);
+      if (note) {
+        if (window.__taroCanSend) {
+          note.innerHTML = `✅ Натальная карта <b>${signName}</b> построена${chartSummary(chart)} — основа раскладов и прогнозов.`;
+        } else {
+          note.innerHTML = `✅ Сохранено на этом устройстве (<b>${signName}</b>${chartSummary(chart)}). Для синхронизации с ботом открой мини-апп из Telegram.`;
+        }
+      }
+    };
 
-    syncNatalToApp(natal);
-    renderNatalChart();
-    if (note) {
-      note.innerHTML = window.__taroCanSend
-        ? `✅ Натальная карта <b>${signName}</b> сохранена — основа раскладов и прогнозов.`
-        : `✅ Сохранено на этом устройстве (<b>${signName}</b>). Для синхронизации с ботом открой мини-апп из Telegram.`;
+    if (window.TaroNatal) {
+      if (note) note.textContent = "🪐 Считаем эфемериды…";
+      TaroNatal.compute(natal).then(finish);
+    } else {
+      finish(null);
     }
   });
 }
@@ -495,8 +557,20 @@ function buildExtendedNatalText() {
   const time = n.time || "";
   const city = n.city && n.city !== "не указано" ? n.city : "";
   const name = n.name || "";
+  let chartText = "";
+  const chart = n.chart || null;
+  if (chart && chart.planets) {
+    chartText =
+      "Планеты в момент рождения (эфемериды):\n" +
+      chart.planets.map((p) => `• ${p.icon} ${p.name} — ${p.pos.degMin} ${p.pos.sign}`).join("\n") +
+      (chart.asc ? `\n• Асцендент — ${chart.asc.degMin} ${chart.asc.sign}` : "") +
+      (chart.mc ? ` • МС — ${chart.mc.degMin} ${chart.mc.sign}` : "") +
+      (chart.houses ? `\n• Дома планет: ${Object.keys(chart.houses.positions).slice(0, 4).map((k) => `${k} — ${chart.houses.positions[k]}-й`).join(", ")}` : "") +
+      "\n\n";
+  }
   return (
     `${name ? `Для: <b>${name}</b>\n` : ""}` +
+    chartText +
     `Знак: <b>${signName}</b> · стихия ${sign.element} · планета ${sign.planet}\n\n` +
     (time ? `Время рождения: <b>${time}</b>\n` : "") +
     (city ? `Место рождения: <b>${city}</b>\n` : "") +
@@ -524,6 +598,7 @@ if (natalForecastBtn) {
         time: n.time || document.getElementById("n-time").value || "",
         city: n.city || document.getElementById("n-city").value || "",
       });
+      if (n.chart) payload.chart = chartBrief(n.chart);
       taroSend(JSON.stringify(payload));
       return;
     }

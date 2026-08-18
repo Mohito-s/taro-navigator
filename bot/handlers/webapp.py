@@ -64,6 +64,8 @@ async def on_web_app_data(message: Message):
     birth_time = str(data.get("time", "") or "").strip()[:20]
     birth_place = str(data.get("city", "") or "").strip()[:80]
     birth_name = str(data.get("name", "") or "").strip()[:40]
+    chart = data.get("chart")
+    planets_json = json.dumps(chart, ensure_ascii=False) if isinstance(chart, dict) else "{}"
     user = message.from_user
 
     await save_profile(
@@ -75,17 +77,21 @@ async def on_web_app_data(message: Message):
         birth_place=birth_place,
         zodiac=zodiac,
         arcana=arcana,
+        planets=planets_json,
     )
 
     if data.get("type") == "natal":
         who = html.escape(birth_name) or "Профиль"
+        planets_count = len(chart.get("planets", [])) if isinstance(chart, dict) and chart.get("planets") else 0
+        planets_line = f"\n🪐 Планет рассчитано: <b>{planets_count}</b>" if planets_count else ""
         await message.answer(
             f"🪐 <b>Натальная карта {f'для {who} ' if birth_name else ''}сохранена</b> — теперь это твой фундамент.\n\n"
             f"📅 Дата: {birth_date}\n"
             f"🕐 Время: {html.escape(birth_time) or 'не указано'}\n"
             f"📍 Город: {html.escape(birth_place) or 'не указано'}\n"
             f"♈ Знак: <b>{zodiac}</b>\n"
-            f"🃏 Арканов рассчитано: {len(arcana)}\n\n"
+            f"🃏 Арканов рассчитано: {len(arcana)}"
+            f"{planets_line}\n\n"
             "Она уже используется в раскладах и прогнозах.",
             parse_mode="HTML",
             reply_markup=MAIN_MENU,

@@ -1,3 +1,4 @@
+import json
 import logging
 
 import httpx
@@ -142,6 +143,34 @@ def build_prompt(user: dict, full: bool = False, variation: int = 0) -> str:
     return content
 
 
+def _planets_payload(user: dict) -> str:
+    """Реальный расчёт натальной карты (эфемериды VSOP87) из профиля."""
+    try:
+        chart = json.loads(user.get("planets") or "{}")
+    except (json.JSONDecodeError, TypeError):
+        return ""
+    if not isinstance(chart, dict) or not chart.get("planets"):
+        return ""
+
+    lines = ["Реальное положение планет (эфемериды VSOP87, точность ~1 угл. минуты):"]
+    for p in chart["planets"][:10]:
+        icon = p.get("icon", "")
+        lines.append(f"• {icon} {p.get('name', '')}: {p.get('deg', '')} {p.get('sign', '')}")
+    if chart.get("asc"):
+        lines.append(f"• Асцендент: {chart['asc']}")
+    if chart.get("mc"):
+        lines.append(f"• МС (середина неба): {chart['mc']}")
+    houses = chart.get("houses")
+    if isinstance(houses, dict) and houses:
+        top = list(houses.items())[:5]
+        lines.append("• Дома планет: " + ", ".join(f"{k} — {v}" for k, v in top))
+    aspects = chart.get("aspects")
+    if isinstance(aspects, list) and aspects:
+        lines.append("• Ключевые аспекты:")
+        lines.extend(f"   - {a}" for a in aspects[:8])
+    return "\n".join(lines)
+
+
 def build_natal_forecast_prompt(user: dict) -> str:
     zodiac = user.get("zodiac", "")
     sign = ZODIAC.get(zodiac)
@@ -154,13 +183,20 @@ def build_natal_forecast_prompt(user: dict) -> str:
         else "Знак зодиака не определён."
     )
 
-    return (
+    planets_block = _planets_payload(user)
+
+    content = (
         f"Дата рождения: {user.get('birth_date', 'не указана')}.\n"
         f"Время рождения: {user.get('birth_time') or 'не указано'}.\n"
         f"Место рождения: {user.get('birth_place', 'не указано')}.\n\n"
-        f"{zodiac_line}\n\n"
-        "Напиши РАСШИРЕННЫЙ астрологический прогноз по натальной карте (~450–550 слов), "
-        "ТОЛЬКО по астрологии — НЕ упоминай карты Таро и арканы. Разделы:\n"
+        f"{zodiac_line}"
+    )
+    if planets_block:
+        content += f"\n\n{planets_block}"
+    content += (
+        "\n\nНапиши РАСШИРЕННЫЙ астрологический прогноз по натальной карте (~450–550 слов), "
+        "ТОЛЬКО по астрологии — НЕ упоминай карты Таро и арканы. Используй реальные положения "
+        "планет, Асцендент и аспекты из данных выше. Разделы:\n"
         "🔭 Общий фон периода\n"
         "♈ Солнечный знак: характер, энергия, темперамент\n"
         "☽ Луна и эмоции\n"
@@ -169,6 +205,7 @@ def build_natal_forecast_prompt(user: dict) -> str:
         "🪐 Совет из космоса\n"
         "Пиши конкретно по данным человека, без общих фраз."
     )
+    return content
 
 
 def build_arcana_forecast_prompt(user: dict, arcana_number: int) -> str:
@@ -213,6 +250,9 @@ def _natal_forecast_fallback(user: dict) -> str:
     sign = ZODIAC.get(zodiac)
 
     parts = [f"🔭 <b>Общий фон</b>\n{sign['text']}"]
+    planets_block = _planets_payload(user)
+    if planets_block:
+        parts.append(f"🪐 <b>Планеты в момент рождения</b>\n{planets_block}")
     parts.append(
         f"☉ <b>Солнце и характер</b>\nТвой солнечный знак — {zodiac} (стихия {sign['element']}, "
         f"планета {sign['planet']}). Ты проявляешься как энергия знака: "

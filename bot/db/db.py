@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS users (
     birth_place TEXT DEFAULT '',
     zodiac TEXT DEFAULT '',
     arcana TEXT DEFAULT '[]',
+    planets TEXT DEFAULT '{}',
     style TEXT DEFAULT 'cosmo',
     full_report_paid INTEGER DEFAULT 0,
     created_at TEXT DEFAULT (datetime('now'))
@@ -38,6 +39,8 @@ async def init_db() -> None:
             await db.execute("ALTER TABLE users ADD COLUMN style TEXT DEFAULT 'cosmo'")
         if "name" not in cols:
             await db.execute("ALTER TABLE users ADD COLUMN name TEXT DEFAULT ''")
+        if "planets" not in cols:
+            await db.execute("ALTER TABLE users ADD COLUMN planets TEXT DEFAULT '{}'")
         await db.commit()
 
 
@@ -58,12 +61,13 @@ async def save_profile(
     zodiac: str,
     arcana: list[dict],
     name: str = "",
+    planets: str = "",
 ) -> None:
     async with aiosqlite.connect(DB_PATH) as db:
         await db.execute(
             """
-            INSERT INTO users (telegram_id, username, name, birth_date, birth_time, birth_place, zodiac, arcana)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+            INSERT INTO users (telegram_id, username, name, birth_date, birth_time, birth_place, zodiac, arcana, planets)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(telegram_id) DO UPDATE SET
                 username=excluded.username,
                 name=CASE WHEN excluded.name != '' THEN excluded.name ELSE users.name END,
@@ -71,7 +75,8 @@ async def save_profile(
                 birth_time=excluded.birth_time,
                 birth_place=excluded.birth_place,
                 zodiac=excluded.zodiac,
-                arcana=excluded.arcana
+                arcana=excluded.arcana,
+                planets=CASE WHEN excluded.planets != '{}' THEN excluded.planets ELSE users.planets END
             """,
             (
                 telegram_id,
@@ -82,6 +87,7 @@ async def save_profile(
                 birth_place,
                 zodiac,
                 json.dumps(arcana, ensure_ascii=False),
+                planets or "{}",
             ),
         )
         await db.commit()

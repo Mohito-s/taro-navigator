@@ -820,6 +820,8 @@ main {
 .natal__ring { fill: none; stroke: rgba(139, 92, 246, 0.5); }
 .natal__ring-outer { fill: rgba(10, 14, 34, 0.55); stroke: rgba(84, 241, 255, 0.45); }
 .natal__planet { fill: var(--pink); }
+.natal__planet--asc { fill: var(--cyan); }
+.natal__planet--mc { fill: var(--violet); }
 .natal__planet-label { font: 600 11px/1 "Manrope", sans-serif; fill: #ffd6ec; }
 .natal__note {
   grid-column: 1 / -1;
