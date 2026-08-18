@@ -14,6 +14,38 @@ SYSTEM_PROMPT = (
     "Избегай общих фраз, штампов и пустых комплиментов."
 )
 
+# Стили интерпретации из профиля мини-аппа → персона для ИИ
+STYLE_PERSONAS = {
+    "Космо": (
+        "Обращайся к человеку на «ты», спокойно и по делу. "
+        "Без ролевой игры и пафоса: понятно, по-человечески, с лёгким тёплым подтекстом."
+    ),
+    "Гендальф Серый": (
+        "Говори голосом мудреца Севера: торжественно, притчами и метафорами света. "
+        "Обращайся на «ты». Позволяй себе образные сравнения и неторопливые выводы."
+    ),
+    "Доктор Стрэндж": (
+        "Говори голосом хранителя Санктума: точно, собранно, о времени и тайных течениях. "
+        "Обращайся на «ты». Упоминай «сокрытые течения», «баланс», «видимое и скрытое»."
+    ),
+    "Мастер Йода": (
+        "Говори как Мастер Йода: кротко, загадочно и мудро. Обращайся на «ты». "
+        "Строй фразы инверсией («Многое предстоит тебе узнать»), короткими афоризмами о Силе."
+    ),
+    "Дамблдор": (
+        "Говори голосом Дамблдора: тепло, иронично, всегда с намёком. Обращайся на «ты». "
+        "Допускай мягкий юмор, «может быть» вместо категоричности и лёгкую загадочность."
+    ),
+}
+
+
+def system_prompt(style: str = "") -> str:
+    """Базовый системный промт + персона выбранного стиля интерпретации."""
+    persona = STYLE_PERSONAS.get(style or "", "")
+    if not persona:
+        return SYSTEM_PROMPT
+    return f"{SYSTEM_PROMPT}\n\nСтиль голоса: {persona}"
+
 
 def _arcana_payload(arcana: list[dict]) -> str:
     lines = []
@@ -247,7 +279,7 @@ async def generate_personality(user: dict, full: bool = False, variation: int = 
         {
             "model": AI_MODEL,
             "messages": [
-                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "system", "content": system_prompt(user.get("style", ""))},
                 {"role": "user", "content": build_prompt(user, full=full, variation=variation)},
             ],
             "temperature": 0.9,
@@ -264,7 +296,7 @@ async def generate_natal_forecast(user: dict, variation: int = 0) -> str:
         {
             "model": AI_MODEL,
             "messages": [
-                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "system", "content": system_prompt(user.get("style", ""))},
                 {"role": "user", "content": build_natal_forecast_prompt(user)},
             ],
             "temperature": 0.9,
@@ -283,7 +315,7 @@ async def generate_arcana_forecast(user: dict, arcana_number: int, variation: in
         {
             "model": AI_MODEL,
             "messages": [
-                {"role": "system", "content": SYSTEM_PROMPT},
+                {"role": "system", "content": system_prompt(user.get("style", ""))},
                 {"role": "user", "content": build_arcana_forecast_prompt(user, arcana_number)},
             ],
             "temperature": 0.9,
