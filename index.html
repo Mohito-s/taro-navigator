@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Manrope:wght@400;600;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=8" />
+  <link rel="stylesheet" href="css/style.css?v=9" />
 </head>
 <body>
   <canvas id="space"></canvas>
@@ -91,7 +91,6 @@
           <div id="arcana-grid" class="arcana"></div>
           <div id="webapp-actions" class="webapp-actions" hidden>
             <button class="btn btn--primary" id="wa-save">💾 Сохранить в боте</button>
-            <button class="btn btn--ghost" id="wa-buy">✨ Полный ИИ-разбор · 10⭐</button>
           </div>
         </div>
       </section>
@@ -124,8 +123,8 @@
           <div class="about__item glass reveal d4">
             <span class="about__num">04</span>
             <span class="about__icon">₿</span>
-            <h3>Заботливая монетизация</h3>
-            <p>Бесплатный разбор — всем. Глубокий портрет со всеми деталями — за 10 Telegram Stars.</p>
+            <h3>Расширенные разборы</h3>
+            <p>Бесплатный разбор — всем. Полный портрет и прогнозы по натальной карте — в тестовой версии бесплатно.</p>
           </div>
         </div>
       </section>
@@ -136,8 +135,8 @@
           <p class="cta__eyebrow">ГОТОВ К ВЗЛЁТУ?</p>
           <h2 class="cta__title">Твой созвездие ждёт в Telegram</h2>
           <p class="cta__text">
-            Полная версия — с регистрацией профиля, историей разборов и оплатой
-            в один клик через Telegram Stars.
+            Полная версия — с регистрацией профиля, историей разборов и расширенными
+            ИИ-прогнозами по натальной карте.
           </p>
           <a class="btn btn--primary tg-cta" href="tg://resolve?domain=MyGoodTaro_bot">🚀 Открыть бота</a>
         </div>
@@ -177,7 +176,11 @@
           <div class="natal__stars" id="natal-stars" aria-hidden="true"></div>
           <div class="natal__disc" id="natal-disc"></div>
         </div>
-        <p class="natal__note">Полный расчёт домов и аспектов — в ИИ-разборе бота (в разработке).</p>
+        <p class="natal__note">Полный расчёт домов и аспектов — в расширенном ИИ-прогнозе.</p>
+        <button class="btn btn--ghost btn--wide natal__forecast-btn" id="natal-forecast" type="button">
+          ✨ Расширенный прогноз по натальной карте
+        </button>
+        <div class="forecast__result glass reveal" id="natal-extended" hidden></div>
       </div>
     </section>
 
@@ -320,17 +323,16 @@
       <h3 class="modal__card-name" id="modal-card">Звезда</h3>
       <span class="modal__kw" id="modal-kw">Надежда и вдохновение</span>
       <p class="modal__text" id="modal-text"></p>
-      <a
+      <button
         class="btn btn--primary btn--wide modal__cta"
         id="modal-cta"
-        href="tg://resolve?domain=MyGoodTaro_bot"
-        target="_blank"
-        >🔮 ИИ-разбор именно этого аркана · 10 ⭐</a>
+        type="button"
+        >🔮 Расширенный разбор этого аркана</button>
     </div>
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-  <script src="js/space.js?v=8"></script>
-  <script src="js/app.js?v=8"></script>
+  <script src="js/space.js?v=9"></script>
+  <script src="js/app.js?v=9"></script>
 </body>
 </html>

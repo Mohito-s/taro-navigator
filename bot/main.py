@@ -7,7 +7,7 @@ from aiogram.types import BotCommand, MenuButtonWebApp, WebAppInfo
 
 from bot.config import BOT_TOKEN, MINI_APP_URL
 from bot.db import db as db_module
-from bot.handlers import daily, payment, report, start, webapp, wizard
+from bot.handlers import daily, report, start, webapp, wizard
 
 
 async def main():
@@ -27,7 +27,7 @@ async def main():
     )
     await bot.set_my_description(
         "Космический навигатор: опишу твою личность по знаку зодиака, "
-        "22 арканам Таро и числам даты рождения. Полный разбор — за Telegram Stars."
+        "22 арканам Таро и числам даты рождения. Полный разбор — бесплатно."
     )
     await bot.set_my_short_description(
         "Таро · Астрология · Нумерология — разбор личности по дате рождения"
@@ -40,8 +40,7 @@ async def main():
             menu_button=MenuButtonWebApp(text="open", web_app=WebAppInfo(url=MINI_APP_URL))
         )
 
-    dp.include_routers(start.router, wizard.router, daily.router, payment.router, webapp.router)
-    payment.setup(dp)
+    dp.include_routers(start.router, wizard.router, daily.router, webapp.router)
 
     logging.info("Bot started")
     await dp.start_polling(bot)

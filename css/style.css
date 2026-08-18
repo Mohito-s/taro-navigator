@@ -826,6 +826,17 @@ main {
   margin-top: 6px;
 }
 
+.natal__forecast-btn {
+  grid-column: 1 / -1;
+  margin-top: 12px;
+}
+
+#natal-extended {
+  grid-column: 1 / -1;
+  width: 100%;
+  margin-top: 16px;
+}
+
 @media (max-width: 760px) {
   .natal { grid-template-columns: 1fr; }
 }

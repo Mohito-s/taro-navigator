@@ -131,4 +131,4 @@ async def _finalize(message: Message, state: FSMContext, place: str):
     from bot.handlers.report import send_report
 
     user = await get_user(message.from_user.id)
-    await send_report(message, user)
+    await send_report(message, user, full=True)

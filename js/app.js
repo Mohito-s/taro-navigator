@@ -241,8 +241,39 @@ function openModal(item) {
   $("modal-card").textContent = item.card;
   $("modal-kw").textContent = item.kw;
   $("modal-text").textContent = ARCANA_TEXT[item.n] || "Эта карта хранит свою тайну.";
+  resetModalCta();
   modal.hidden = false;
   document.body.style.overflow = "hidden";
+}
+
+// Восстанавливаем CTA модалки как кнопку (после сайта он мог стать ссылкой в бота)
+function resetModalCta() {
+  const existing = document.getElementById("modal-cta");
+  if (existing && existing.tagName !== "BUTTON") {
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = existing.className;
+    btn.id = "modal-cta";
+    btn.textContent = "🔮 Расширенный разбор этого аркана";
+    existing.replaceWith(btn);
+  }
+}
+
+// Локальный расширенный разбор аркана для сайта (без Telegram) — детальнее, чем короткий текст
+function buildExtendedArcanaText(item) {
+  const base = ARCANA_TEXT[item.n] || "Эта карта хранит свою тайну.";
+  const d = new Date();
+  const nowNum = reduce(d.getDate() + d.getMonth() + 1);
+  const prompt = ARCADES[reduce(nowNum + item.n)] || item;
+  return (
+    `${base}\n\n` +
+    `Позиция в твоей карте: <b>${item.pos}</b>. Здесь этот аркан звучит как ` +
+    `${item.kw.toLowerCase()} — ресурс, который проще всего включить в повседневности.\n\n` +
+    `Энергия дня: <b>${prompt.card}</b> (${prompt.kw}). Созвучная карта усиливает ` +
+    `проявление этого аркана прямо сейчас — присмотрись к своему настроению и делам.\n\n` +
+    `Практический ключ: проживи сегодня качество аркана «${item.card}» осознанно — ` +
+    `одно небольшое действие в этом ключе откроет больше, чем долгие размышления.`
+  );
 }
 
 document.addEventListener("click", (e) => {
@@ -420,6 +451,58 @@ if (natalForm) {
   });
 }
 
+// Локальный расширенный прогноз по натальной карте (для сайта без Telegram)
+function buildExtendedNatalText() {
+  const { day, month, year } = natalForForecast();
+  const signName = zodiac(day, month);
+  const sign = SIGNS[signName];
+  const arc = arcana(day, month, year);
+  const lines = [
+    `Знак: <b>${signName}</b> · стихия ${sign.element} · планета ${sign.planet}\n\n`,
+    `Арканы по позициям:\n`,
+  ];
+  arc.forEach((a) => {
+    lines.push(`• <b>${a.pos}</b> — ${a.card} (${a.kw})`);
+  });
+  lines.push(`\n${signName} даёт темперамент, а арканы — сценарий.` +
+    ` Личность и Таланты — главные опоры: их энергия доступна тебе каждый день.` +
+    ` Кармические уроки и Предназначение — направление роста на месяц вперёд.\n\n` +
+    `Общий фон периода: сосредоточься на аркане «${arc[0].card}» — это твой якорь.` +
+    ` Любовь и отношения подсветит «${arc[7].card}», карьеру — «${arc[6].card}».` +
+    ` Двигайся к целям небольшими шагами, не форсируя.`);
+  return lines.join("");
+}
+
+// Расширенный прогноз по натальной карте: в WebApp шлём боту, на сайте — локальный текст
+const natalForecastBtn = document.getElementById("natal-forecast");
+if (natalForecastBtn) {
+  natalForecastBtn.addEventListener("click", () => {
+    const { day, month, year } = natalForForecast();
+    const payload = { type: "natal_forecast", day, month, year };
+    if (window.__taroWebApp) {
+      const n = savedNatal && savedNatal.day ? savedNatal : {};
+      Object.assign(payload, {
+        time: n.time || document.getElementById("n-time").value || "",
+        city: n.city || document.getElementById("n-city").value || "",
+      });
+      taroSend(JSON.stringify(payload));
+      return;
+    }
+    const box = document.getElementById("natal-extended");
+    if (box) {
+      box.innerHTML = `
+        <div class="forecast__head">
+          <span class="forecast__hed">Расширенный прогноз по натальной карте</span>
+          <span class="forecast__date">${fmtDate(Date.now(), true)}</span>
+        </div>
+        <p>${buildExtendedNatalText()}</p>
+        <a class="btn btn--primary btn--wide tg-cta" href="tg://resolve?domain=MyGoodTaro_bot">🚀 Полный ИИ-разбор — в боте</a>`;
+      box.hidden = false;
+      box.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  });
+}
+
 // Фундамент: подставляем сохранённую натальную карту во всё приложение
 const savedNatal = (function () {
   try { return JSON.parse(localStorage.getItem("taro_natal") || "null"); } catch (err) { return null; }
@@ -519,15 +602,13 @@ function initTelegram() {
 
   // Кнопка закрытия у Telegram родная (в заголовке мини-аппа), свою не добавляем.
 
-  // Действия: сохранить профиль / купить разбор
+  // Действия: сохранить профиль в боте
   const sendToBot = (type) => {
     const c = window.__taroCalc || {};
     taroSend(JSON.stringify(Object.assign({ type }, c)));
   };
   const saveBtn = document.getElementById("wa-save");
-  const buyBtn = document.getElementById("wa-buy");
   if (saveBtn) saveBtn.addEventListener("click", () => sendToBot("save"));
-  if (buyBtn) buyBtn.addEventListener("click", () => sendToBot("buy"));
 
   // Показываем действия, если результат уже посчитан и можно отправить данные
   const wa = document.getElementById("webapp-actions");
@@ -543,14 +624,30 @@ if (document.readyState === "loading") {
 setTimeout(initTelegram, 300);
 window.addEventListener("telegramWebviewReady", initTelegram);
 
-// Внутри WebApp кнопка аркана отправляет данные боту вместо ссылки
+// Внутри WebApp кнопка аркана отправляет данные боту на расширенный разбор.
+// На сайте (без Telegram) показываем расширенный локальный текст + CTA в бота.
 document.addEventListener("click", (e) => {
   const cta = e.target.closest("#modal-cta");
-  if (cta && window.__taroWebApp) {
-    e.preventDefault();
+  if (!cta || cta.tagName === "A") return;
+  e.preventDefault();
+  const arcItem = lastArc.find((a) => a.n === lastModalArcana) || null;
+  if (window.__taroWebApp) {
     const c = window.__taroCalc || {};
-    taroSend(JSON.stringify(Object.assign({ type: "buy", arcana_n: lastModalArcana }, c)));
+    taroSend(JSON.stringify(Object.assign({ type: "arcana", arcana_n: lastModalArcana }, c)));
+    closeModal();
+    return;
   }
+  const text = arcItem
+    ? buildExtendedArcanaText(arcItem)
+    : "Эта карта хранит свою тайну — открой бота и попроси расширенный разбор.";
+  $("modal-text").textContent = text;
+  const link = document.createElement("a");
+  link.href = "tg://resolve?domain=MyGoodTaro_bot";
+  link.target = "_blank";
+  link.className = cta.className;
+  link.id = "modal-cta";
+  link.textContent = "🚀 Открыть в боте для ИИ-версии";
+  cta.replaceWith(link);
 });
 
 // Открываем с сохранённой натальной картой (фундамент), иначе — демо-дата

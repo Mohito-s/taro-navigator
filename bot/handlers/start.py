@@ -11,7 +11,7 @@ from aiogram.types import (
 
 from bot.config import MINI_APP_URL
 from bot.db.db import get_user
-from bot.handlers import daily, payment, report, wizard
+from bot.handlers import daily, report, wizard
 
 router = Router()
 
@@ -61,7 +61,7 @@ async def cb_my_report(callback: CallbackQuery, state: FSMContext):
     await callback.answer()
     user = await get_user(callback.from_user.id)
     if user and user["birth_date"]:
-        await report.send_report(callback.message, user)
+        await report.send_report(callback.message, user, full=True)
     else:
         await wizard.start_wizard(callback.message, state)
 
@@ -71,7 +71,7 @@ async def cb_regenerate(callback: CallbackQuery):
     await callback.answer("Пересоздаю разбор…")
     user = await get_user(callback.from_user.id)
     if user and user["birth_date"]:
-        await report.send_report(callback.message, user)
+        await report.send_report(callback.message, user, full=True)
     else:
         await callback.message.answer(
             "Сначала заполни данные: нажми «🌙 Мой разбор»."
@@ -93,27 +93,7 @@ async def cb_full_report(callback: CallbackQuery):
             "Сначала сделай бесплатный разбор — там я спрошу дату рождения."
         )
         return
-    if user["full_report_paid"]:
-        await callback.message.answer("Твой полный разбор уже оплачен. Генерирую заново…")
-        await report.send_report(callback.message, user, full=True)
-        return
-    await callback.message.answer(
-        f"Полный разбор стоит {payment.PRICE_STARS} ⭐ Telegram Stars.\n\n"
-        "Ты получишь подробный портрет по всем 10 арканам судьбы, сгенерированный ИИ: "
-        "сильные стороны, любовь, кармические уроки и совет из космоса.",
-        reply_markup=InlineKeyboardMarkup(
-            inline_keyboard=[
-                [InlineKeyboardButton(text="⭐ Оплатить разбор", callback_data="pay_full")],
-                [InlineKeyboardButton(text="🔙 В меню", callback_data="back_menu")],
-            ]
-        ),
-    )
-
-
-@router.callback_query(F.data == "pay_full")
-async def cb_pay_full(callback: CallbackQuery):
-    await callback.answer()
-    await payment.send_star_invoice(callback.message)
+    await report.send_report(callback.message, user, full=True)
 
 
 @router.callback_query(F.data == "about")
@@ -124,7 +104,7 @@ async def cb_about(callback: CallbackQuery):
         "• Вычисляю твой знак зодиака и 10 арканов судьбы по дате рождения\n"
         "• Собираю детерминированную базу 22 старших арканов Таро и 12 знаков\n"
         "• ИИ-движок превращает её в персональный разбор личности\n"
-        "• Полный портрет — за Telegram Stars\n\n"
+        "• Полный портрет — бесплатно, в тестовой версии\n\n"
         "Напиши /start и нажми «🌙 Мой разбор».",
         reply_markup=MAIN_MENU,
     )

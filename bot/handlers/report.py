@@ -57,3 +57,27 @@ async def send_report(message: Message, user: dict, full: bool = False):
     text = await ai.generate_personality(user, full=full)
     header = "🔮 Разбор личности (полный)" if full else "🔮 Разбор личности"
     await message.answer(f"{header}\n\n{text}", reply_markup=NEXT_MENU)
+
+
+async def send_natal_forecast(message: Message, user: dict):
+    await message.answer(
+        "⌛️ Считаю звёзды по твоей натальной карте… Это займёт несколько секунд."
+    )
+    text = await ai.generate_natal_forecast(user)
+    await message.answer(
+        f"🪐 <b>Расширенный прогноз по натальной карте</b>\n\n{text}",
+        parse_mode="HTML",
+        reply_markup=NEXT_MENU,
+    )
+
+
+async def send_arcana_forecast(message: Message, user: dict, arcana_number: int):
+    await message.answer(
+        "⌛️ Готовлю расширенный разбор аркана… Это займёт несколько секунд."
+    )
+    text = await ai.generate_arcana_forecast(user, arcana_number)
+    await message.answer(
+        f"🔮 <b>Расширенный разбор аркана</b>\n\n{text}",
+        parse_mode="HTML",
+        reply_markup=NEXT_MENU,
+    )

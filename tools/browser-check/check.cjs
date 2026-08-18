@@ -31,11 +31,21 @@ function check(name, ok, detail) {
   const demoSign = await page.$eval("#zodiac-card h3", (el) => el.textContent.trim());
   check("демо-дата (12.05) → Телец", demoSign === "Телец", demoSign);
 
+  const clearInput = async (id) => {
+    await page.click("#" + id);
+    await page.keyboard.down("Control");
+    await page.keyboard.press("KeyA");
+    await page.keyboard.up("Control");
+    await page.keyboard.press("Backspace");
+  };
+  await clearInput("day");
   await page.type("#day", "25");
+  await clearInput("month");
   await page.type("#month", "09");
+  await clearInput("year");
   await page.type("#year", "1985");
   await page.click("#run");
-  await new Promise((r) => setTimeout(r, 400));
+  await new Promise((r) => setTimeout(r, 500));
 
   const libSign = await page.$eval("#zodiac-card h3", (el) => el.textContent.trim());
   check("25.09.1985 → Весы (bugfix)", libSign === "Весы", libSign);
@@ -50,6 +60,20 @@ function check(name, ok, detail) {
   const modalVisible = await page.$eval("#arcana-modal", (el) => !el.hidden);
   const modalText = await page.$eval("#modal-text", (el) => el.textContent.length);
   check("модалка открывается по клику на карточку", modalVisible && modalText > 40, `text=${modalText} симв.`);
+
+  const buyRemoved = await page.evaluate(() => {
+    const buy = document.getElementById("wa-buy");
+    const cta = document.getElementById("modal-cta");
+    return !buy && cta && cta.tagName === "BUTTON";
+  });
+  check("кнопки оплаты 10⭐ убраны (wa-buy нет, modal-cta — кнопка)", buyRemoved);
+
+  const natalBtn = await page.evaluate(() => {
+    const b = document.getElementById("natal-forecast");
+    return b && b.textContent.includes("Расширенный");
+  });
+  check("натальная карта: есть кнопка расширенного прогноза", !!natalBtn);
+
   await page.keyboard.press("Escape");
   const modalClosed = await page.$eval("#arcana-modal", (el) => el.hidden);
   check("Escape закрывает модалку", modalClosed);
