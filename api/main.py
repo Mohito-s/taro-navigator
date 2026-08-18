@@ -26,8 +26,14 @@ logger = logging.getLogger("taro-api")
 
 app = FastAPI(title="TARO API", version="1.0.0")
 
-# Мини-апп живёт на GitHub Pages; dev-окружение может слать запросы без Origin.
-ALLOWED_ORIGINS = ["https://mohito-s.github.io", "null", "http://localhost:8000"]
+# Сайт живёт на shadowlinkapp.online (свой сервер); GitHub Pages оставлен как запасной
+# хост. Запросы со своего домена — same-origin (CORS не нужен), GitHub Pages — разрешён.
+ALLOWED_ORIGINS = [
+    "https://shadowlinkapp.online",
+    "https://mohito-s.github.io",
+    "null",
+    "http://localhost:8000",
+]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
