@@ -25,12 +25,10 @@
 - [ ] Синхронизация из сайта (не только из Telegram): чтобы натальная карта,
       введённая на сайте в браузере, тоже попадала в БД (сейчас — только через
       мини-апп в Telegram, `__taroCanSend`).
-- [ ] Полный ИИ-разбор прямо в мини-аппе (без ухода в чат с ботом): **код готов** —
-      `api/` (FastAPI: `/api/v1/{natal,arcana,forecast}` + `/api/health`, CORS,
-      rate-limit, семафор, валидация initData) + inline-рендер в мини-аппе
-      (`TaroAPI` в `js/app.js`, фоллбэк на бота/локальный текст). Осталось:
-      деплой на VPS (`pip install fastapi/uvicorn`, `pm2 taro-api`, nginx
-      `location /api/` в vhost shadowlinkapp.online) и проверка живого API.
+- [ ] Полный ИИ-разбор прямо в мини-аппе (без ухода в чат с ботом) — **сделано**:
+      `api/` FastAPI развёрнут на VPS (`pm2 taro-api`, `127.0.0.1:8001`, nginx
+      `/api/` на shadowlinkapp.online), мини-апп рендерит разборы inline на своих
+      вкладках, деплой и живая проверка пройдены. См. «СДЕЛАНО»/«ЛОГ».
 
 ## СДЕЛАНО (реализовано, проверено)
 
@@ -121,12 +119,23 @@
       (`renderAIText`: escape HTML + `**`→`<b>` + `\n`→`<br>`), loading-состояние,
       сохранение в историю; фоллбэк — бот (в WebApp) / локальный текст (сайт).
       Ассеты подняты до `?v=11`. Браузерные проверки 21/21 (без API фоллбэк жив).
+- [x] Деплой API на VPS и проверка в проде: `pip install fastapi uvicorn` в venv,
+      `pm2 start taro-api` (`venv/bin/python -m uvicorn api.main:app --host
+      127.0.0.1 --port 8001`), nginx `location /api/` в vhost shadowlinkapp.online
+      (proxy на 8001, `proxy_read_timeout 120s`), `sudo nginx -t` + reload.
+      Проверено извне (`https://shadowlinkapp.online`): `/api/health` → 200,
+      `/api/v1/forecast` → полный ИИ-прогноз, `/api/v1/natal` → разбор наталки,
+      `/api/v1/arcana` (стиль «Мастер Йода» → голос персоны). Прод-флоу в браузере
+      на GitHub Pages: прогноз ~19с → inline-текст (2590 симв), натал-кнопка →
+      inline (3718 симв), CTA аркана в модалке → inline (2723 симв). CORS для
+      `https://mohito-s.github.io` работает, фоллбэк на бота/локальный текст жив.
+      (`api/`, nginx, pm2, `PROJECT_STATE.md`)
 
 ## ЛОГ ИСПРАВЛЕНИЙ (последние изменения сверху)
 
-- 2026-08-19 — **FastAPI-API мини-аппа + полные разборы прямо во вкладках.**
-  Мини-апп теперь делает полный ИИ-разбор сам, без ухода в чат: натал-кнопка →
-  `/api/v1/natal`, CTA аркана → `/api/v1/arcana`, день/неделя/месяц →
+- 2026-08-19 — **FastAPI-API мини-аппа в проде: полные разборы прямо во вкладках
+  работают.** Мини-апп делает полный ИИ-разбор сам, без ухода в чат: натал-кнопка
+  → `/api/v1/natal`, CTA аркана → `/api/v1/arcana`, день/неделя/месяц →
   `/api/v1/forecast`. (1) `api/main.py` (FastAPI): переиспользует промты/стили/
   фоллбэки из `bot/services/ai.py` (единый источник), арканы считаются серверно
   (`numerology.get_arcana` — не доверяем клиенту), CORS только
@@ -141,11 +150,18 @@
   `TaroAPI`-клиент (fetch на `shadowlinkapp.online/api/v1`, style + initData,
   таймаут 80с), `renderAIText` (escape + `**`→`<b>`), loading-состояние,
   `showInlineResult`, история; фоллбэк — бот (в WebApp) / локальный текст (сайт);
-  ассеты `?v=11`, стиль `.forecast__loading`/disabled. Проверки: `py_compile`,
-  импорт `api.main` (маршруты на месте), node --check, UTF-8 без BOM, браузерный
-  чек 21/21 (фоллбэк жив без API). Осталось: деплой VPS + проверка живого API.
+  ассеты `?v=11`, стиль `.forecast__loading`/disabled. (4) **Деплой на VPS**:
+  `pip install fastapi uvicorn` в venv, `pm2 taro-api` (`uvicorn api.main:app`
+  на 127.0.0.1:8001), nginx `location /api/` в vhost shadowlinkapp.online
+  (`proxy_pass` на 8001, `proxy_read_timeout 120s`; `$host`/`$remote_addr` —
+  осторожно с PowerShell-экранированием), `sudo nginx -t` + reload.
+  Проверено извне: `/api/health` → 200, прогноз/натал/аркан генерируют полные
+  ИИ-тексты (стиль «Мастер Йода» слышен). Прод-флоу в браузере на GitHub Pages:
+  прогноз ~19с → inline 2590 симв, натал → inline 3718 симв, CTA аркана в модалке
+  → inline 2723 симв. Локальные проверки: `py_compile`, импорт `api.main`,
+  node --check, UTF-8 без BOM, браузерный чек 21/21.
   (`api/`, `bot/services/ai.py`, `js/app.js`, `css/style.css`, `index.html`,
-  `requirements.txt`, `PROJECT_STATE.md`)
+  `requirements.txt`, nginx, pm2, `PROJECT_STATE.md`)
 
 - 2026-08-18 — **Зачистка VPS и освобождение домена shadowlinkapp.online.** Аудит
   сервера показал: на домене крутился Next.js `shadowlink-web` (порт 3000, pm2) +
