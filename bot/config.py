@@ -17,7 +17,7 @@ AI_API_KEY: str = os.getenv("AI_API_KEY", "") or os.getenv("DEEPSEEK_API_KEY", "
 
 DEFAULT_MODELS = {
     "deepseek": "deepseek-chat",
-    "openrouter": "deepseek/deepseek-chat-v3.1:free",
+    "openrouter": "google/gemma-4-26b-a4b-it:free",
     "gemini": "gemini-2.5-flash",
 }
 AI_MODEL: str = os.getenv("AI_MODEL", "") or DEFAULT_MODELS.get(AI_PROVIDER, "deepseek-chat")
