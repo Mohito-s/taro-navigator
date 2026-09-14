@@ -40,5 +40,5 @@ description: TARO project journal discipline. Use BEFORE writing any new code or
 - `PROJECT_STATE.md` — журнал (читать перед кодом, обновлять после).
 - `bot/` — aiogram 3 бот, SQLite `data/taro.db`.
 - `index.html` + `css/style.css` + `js/app.js` + `js/space.js` — мини-апп/сайт.
-- `.opencode/skills/` — навыки по направлениям (audit, taro-backend,
+- `.agents/skills/` — навыки по направлениям (audit, taro-backend,
   frontend-design, mini-app, three-js-scene, browser-verify).

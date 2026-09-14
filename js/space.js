@@ -108,62 +108,42 @@
     const c = document.createElement("canvas");
     c.width = c.height = size;
     const ctx = c.getContext("2d");
-    ctx.fillStyle = "#8d93a4";
+    
+    // Deep vibrant space blue/purple base
+    const grad = ctx.createLinearGradient(0, 0, size, size);
+    grad.addColorStop(0, "#1a0b2e");
+    grad.addColorStop(0.5, "#2b1055");
+    grad.addColorStop(1, "#10162a");
+    ctx.fillStyle = grad;
     ctx.fillRect(0, 0, size, size);
 
-    const base = [
-      [0.1, 0.16, 0.22, 0.34],
-      [0.42, 0.2, 0.36, 0.52],
-      [0.7, 0.5, 0.3, 0.46],
-      [0.24, 0.62, 0.26, 0.4],
-      [0.58, 0.78, 0.2, 0.32],
-      [0.82, 0.2, 0.18, 0.3],
-    ];
-    for (const [x, y, rx, ry] of base) {
-      const g = ctx.createRadialGradient(x * size, y * size, 2, x * size, y * size, (rx * size) / 2);
-      g.addColorStop(0, "rgba(120,125,142,0.55)");
-      g.addColorStop(0.55, "rgba(96,100,118,0.35)");
-      g.addColorStop(1, "rgba(96,100,118,0)");
+    // Glowing craters/nebula spots
+    for (let i = 0; i < 40; i++) {
+      const x = Math.random() * size;
+      const y = Math.random() * size;
+      const r = 20 + Math.random() * 60;
+      const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+      const colorType = Math.random();
+      if (colorType > 0.6) {
+        g.addColorStop(0, "rgba(84, 241, 255, 0.15)"); // cyan
+      } else if (colorType > 0.3) {
+        g.addColorStop(0, "rgba(139, 92, 246, 0.15)"); // violet
+      } else {
+        g.addColorStop(0, "rgba(255, 95, 178, 0.15)"); // pink
+      }
+      g.addColorStop(1, "rgba(0,0,0,0)");
       ctx.fillStyle = g;
-      ctx.fillRect((x - rx / 2) * size, (y - ry / 2) * size, rx * size, ry * size);
+      ctx.beginPath();
+      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.fill();
     }
 
-    for (let i = 0; i < 4600; i++) {
+    // Micro noise
+    for (let i = 0; i < 15000; i++) {
       const x = Math.random() * size;
       const y = Math.random() * size;
-      const r = 1 + Math.random() * 6;
-      const shade = 26 + Math.random() * 74;
-      ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.fillStyle = `rgba(${128 + shade * 0.18}, ${131 + shade * 0.18}, ${146 + shade * 0.25}, ${
-        0.1 + Math.random() * 0.3
-      })`;
-      ctx.fill();
-    }
-    for (let i = 0; i < 110; i++) {
-      const x = Math.random() * size;
-      const y = Math.random() * size;
-      const r = 12 + Math.random() * 30;
-      const g = ctx.createRadialGradient(x, y, 1, x, y, r);
-      const dark = 64 + Math.random() * 64;
-      g.addColorStop(0, `rgba(${dark}, ${dark}, ${dark + 16}, 0.72)`);
-      g.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.fillStyle = g;
-      ctx.fill();
-    }
-    for (let i = 0; i < 160; i++) {
-      const x = Math.random() * size;
-      const y = Math.random() * size;
-      const r = 1.5 + Math.random() * 5;
-      const g = ctx.createRadialGradient(x, y, 0.5, x, y, r);
-      g.addColorStop(0, "rgba(224,229,240,0.9)");
-      g.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2);
-      ctx.fillStyle = g;
-      ctx.fill();
+      ctx.fillStyle = Math.random() > 0.5 ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.05)";
+      ctx.fillRect(x, y, 2, 2);
     }
     return new THREE.CanvasTexture(c);
   }
@@ -172,9 +152,16 @@
 
   const moon = new THREE.Mesh(
     new THREE.SphereGeometry(1, 64, 64),
-    new THREE.MeshStandardMaterial({ map: moonTexture(), roughness: 1, metalness: 0 })
+    new THREE.MeshStandardMaterial({ map: moonTexture(), roughness: 0.6, metalness: 0.2 })
   );
   moonGroup.add(moon);
+  
+  // Atmospheric glow
+  const atmosphere = new THREE.Mesh(
+    new THREE.SphereGeometry(1.05, 64, 64),
+    new THREE.MeshBasicMaterial({ color: 0x54f1ff, transparent: true, opacity: 0.15, blending: THREE.AdditiveBlending })
+  );
+  moonGroup.add(atmosphere);
 
   const ring = new THREE.Mesh(
     new THREE.TorusGeometry(1.5, 0.032, 14, 140),

@@ -30,7 +30,7 @@ html::-webkit-scrollbar {
 }
 
 body {
-  font-family: "Manrope", system-ui, sans-serif;
+  font-family: "Outfit", system-ui, sans-serif;
   color: var(--text);
   background: var(--bg);
   overflow-x: hidden;
@@ -280,8 +280,8 @@ main {
 }
 
 .btn--primary:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 0 46px rgba(139, 92, 246, 0.7);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 0 0 46px rgba(139, 92, 246, 0.8), 0 0 15px rgba(84, 241, 255, 0.5);
 }
 
 .btn--ghost {
@@ -334,11 +334,28 @@ main {
 }
 
 .glass {
-  background: var(--glass);
-  border: 1px solid var(--border);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.02));
+  border: 1px solid transparent;
+  border-image: linear-gradient(120deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0.05)) 1;
   border-radius: 22px;
-  backdrop-filter: blur(18px);
+  backdrop-filter: blur(24px) saturate(120%);
+  -webkit-backdrop-filter: blur(24px) saturate(120%);
+  position: relative;
+  box-shadow: 0 8px 32px 0 rgba(3, 4, 12, 0.4);
 }
+
+/* Glass noise texture */
+.glass::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+  opacity: 0.05;
+  mix-blend-mode: overlay;
+  pointer-events: none;
+}
+
 
 .calc__card {
   max-width: 720px;

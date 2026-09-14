@@ -55,4 +55,14 @@ Windows-оболочку. Жёсткие правила:
 - `bot/` — aiogram 3 Telegram-бот, SQLite `data/taro.db`, Stars-оплата, ИИ-провайдеры.
 - `index.html` + `css/style.css` + `js/app.js` + `js/space.js` — сайт/мини-апп
   на GitHub Pages (ветка `main` = live).
-- Подробнее по направлениям — навыки в `.opencode/skills/`.
+- Подробнее по направлениям — навыки в `.agents/skills/`.
+
+## 6. Строгий протокол развертывания (Deployment Protocol)
+
+У нас есть слабый VPS (`roman@213.21.240.231`), поэтому мы минимизируем прямую сборку на сервере.
+Пайплайн работы:
+1. **Local Dev**: Вся разработка и изменения кода делаются только на локальном компьютере.
+2. **Local Testing**: Обязательно проверяем изменения локально (линтеры `flake8`/`ruff`, тесты в браузере).
+3. **GitHub Sync**: Коммитим стабильный код в основную ветку и пушим на GitHub (`Mohito-s/taro-navigator`).
+4. **Server Deploy**: Заходим на VPS по SSH, переходим в `~/apps/taro-navigator` и делаем `git pull`.
+5. **Restart**: Выполняем `pm2 restart taro-bot` (или `taro-api`). Никакой правки кода прямо на проде!
