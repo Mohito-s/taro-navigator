@@ -381,45 +381,90 @@ function bindTilt() {
   });
 }
 
-// === Натальная карта: 3D-круг Зодиака ===
+// === Натальная карта: 3D-круг Зодиака (Интерактивная раскладка планет) ===
 function renderNatalChart(natal) {
   const disc = document.getElementById("natal-disc");
   if (!disc) return;
+
+  // Если готового расчёта нет, пробуем посчитать синхронно на лету
+  let chart = (natal && natal.chart) || null;
+  if (!chart && natal && natal.day && window.TaroNatal && window.TaroNatal.computeSync) {
+    chart = window.TaroNatal.computeSync(natal);
+  }
+
   const names = Object.keys(SIGNS);
   const glyphs = names.map((n) => SIGNS[n].icon);
   const cx = 200, cy = 200, R = 180;
   let segs = "";
+
   for (let i = 0; i < 12; i++) {
     const a = (i / 12) * Math.PI * 2 - Math.PI / 2 + Math.PI / 12;
     const x = cx + Math.cos(a) * (R - 26);
     const y = cy + Math.sin(a) * (R - 26);
     segs += `<text class="natal__glyph" x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central">${glyphs[i]}</text>`;
     const a1 = (i / 12) * Math.PI * 2;
-    const a2 = ((i + 1) / 12) * Math.PI * 2;
     const x1 = cx + Math.cos(a1 - Math.PI / 2) * R;
     const y1 = cy + Math.sin(a1 - Math.PI / 2) * R;
     segs += `<line class="natal__tick" x1="${cx}" y1="${cy}" x2="${x1}" y2="${y1}" />`;
   }
-  // реальные планеты из расчёта (эфемериды) либо демо-раскладка
-  const chart = (natal && natal.chart) || null;
-  let dots = "";
-  function placeDot(lon, cls, glyph, label) {
-    const a = (lon / 360) * Math.PI * 2 - Math.PI / 2;
-    const x = cx + Math.cos(a) * (R * 0.62);
-    const y = cy + Math.sin(a) * (R * 0.62);
-    dots += `<circle class="${cls}" cx="${x}" cy="${y}" r="5.5"><title>${label}</title></circle>
-      <text class="natal__planet-label" x="${x + 9}" y="${y + 4}">${glyph}</text>`;
-  }
+
+  // Расставляем планеты на диске
+  const planetList = [];
   if (chart && chart.planets) {
-    chart.planets.forEach((p) => placeDot(p.pos.lon, "natal__planet", p.icon, p.name + " — " + p.pos.label));
-    if (chart.asc) placeDot(chart.asc.lon, "natal__planet--asc", "ASC", "Асцендент — " + chart.asc.label);
-    if (chart.mc) placeDot(chart.mc.lon, "natal__planet--mc", "MC", "МС — " + chart.mc.label);
+    chart.planets.forEach((p) => {
+      planetList.push({
+        lon: p.pos.lon,
+        cls: "natal__planet",
+        glyph: p.icon,
+        name: p.name,
+        label: p.name + " — " + p.pos.label
+      });
+    });
+    if (chart.asc) {
+      planetList.push({
+        lon: chart.asc.lon,
+        cls: "natal__planet--asc",
+        glyph: "ASC",
+        name: "Асцендент",
+        label: "Асцендент — " + chart.asc.label
+      });
+    }
+    if (chart.mc) {
+      planetList.push({
+        lon: chart.mc.lon,
+        cls: "natal__planet--mc",
+        glyph: "MC",
+        name: "МС",
+        label: "Медиум Цели — " + chart.mc.label
+      });
+    }
   } else {
-    [
-      { icon: "☉", label: "Солнце", deg: 35 },
-      { icon: "☽", label: "Луна", deg: 120 },
-      { icon: "ASC", label: "Асцендент", deg: 210 },
-    ].forEach((p) => placeDot(p.deg, p.icon === "ASC" ? "natal__planet--asc" : "natal__planet", p.icon, p.label));
+    planetList.push(
+      { lon: 35, cls: "natal__planet", glyph: "☉", name: "Солнце", label: "Солнце — 5° Тельца" },
+      { lon: 120, cls: "natal__planet", glyph: "☽", name: "Луна", label: "Луна — 0° Льва" },
+      { lon: 210, cls: "natal__planet--asc", glyph: "ASC", name: "Асцендент", label: "Асцендент — 0° Скорпиона" }
+    );
+  }
+
+  // Смещение орбиты при близком расположении (чтобы иконки не перекрывались)
+  let dots = "";
+  planetList.sort((a, b) => a.lon - b.lon);
+
+  for (let i = 0; i < planetList.length; i++) {
+    const p = planetList[i];
+    let rOffset = 0.62;
+    if (i > 0 && Math.abs(p.lon - planetList[i - 1].lon) < 8) {
+      rOffset = (i % 2 === 0) ? 0.70 : 0.54;
+    }
+    const a = (p.lon / 360) * Math.PI * 2 - Math.PI / 2;
+    const x = cx + Math.cos(a) * (R * rOffset);
+    const y = cy + Math.sin(a) * (R * rOffset);
+
+    dots += `
+      <g class="natal__planet-node" data-info="${p.label}" tabindex="0" role="button" aria-label="${p.label}">
+        <circle class="${p.cls}" cx="${x}" cy="${y}" r="6.5"><title>${p.label}</title></circle>
+        <text class="natal__planet-label" x="${x + 10}" y="${y + 4}">${p.glyph}</text>
+      </g>`;
   }
 
   disc.innerHTML = `
@@ -460,6 +505,22 @@ function renderNatalChart(natal) {
       <text x="200" y="200" text-anchor="middle" dominant-baseline="central" font-size="28" fill="#ffffff">☉</text>
     </svg>`;
 
+  // Интерактивный клик/ховер по планетам
+  const infoEl = document.getElementById("natal-planet-info");
+  disc.querySelectorAll(".natal__planet-node").forEach((node) => {
+    const info = node.getAttribute("data-info");
+    const show = () => {
+      if (infoEl && info) {
+        infoEl.innerHTML = `🪐 <b>${info}</b>`;
+        disc.querySelectorAll(".natal__planet-node").forEach((n) => n.classList.remove("active"));
+        node.classList.add("active");
+      }
+    };
+    node.addEventListener("mouseenter", show);
+    node.addEventListener("click", show);
+    node.addEventListener("touchstart", show, { passive: true });
+  });
+
   // лёгкий наклон всего диска за курсором
   const chartWrap = document.getElementById("natal-chart");
   if (chartWrap) {
@@ -474,6 +535,34 @@ function renderNatalChart(natal) {
     });
   }
 }
+
+// Интерактивное обновление натального диска прямо во время ввода данных (живой расчет)
+function initNatalLiveInput() {
+  const ids = ["n-day", "n-month", "n-year", "n-time", "n-city"];
+  const handler = () => {
+    const d = Number(document.getElementById("n-day")?.value);
+    const m = Number(document.getElementById("n-month")?.value);
+    const y = Number(document.getElementById("n-year")?.value);
+    const timeVal = document.getElementById("n-time")?.value || "";
+    const cityVal = document.getElementById("n-city")?.value || "";
+    if (d && m && y && d >= 1 && d <= 31 && m >= 1 && m <= 12 && y >= 1900 && y <= 2100) {
+      if (window.TaroNatal && window.TaroNatal.computeSync) {
+        const syncChart = window.TaroNatal.computeSync({ day: d, month: m, year: y, time: timeVal, city: cityVal });
+        if (syncChart) {
+          renderNatalChart({ day: d, month: m, year: y, time: timeVal, city: cityVal, chart: syncChart });
+        }
+      }
+    }
+  };
+  ids.forEach((id) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.addEventListener("input", handler);
+      el.addEventListener("change", handler);
+    }
+  });
+}
+initNatalLiveInput();
 const chartNatalInit = getSavedNatal();
 renderNatalChart(chartNatalInit);
 // Если сохранённая карта ещё без реального расчёта — считаем эфемериды на лету

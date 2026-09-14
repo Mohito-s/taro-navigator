@@ -368,8 +368,47 @@
     return transits.slice(0, 5); // Топ 5 самых точных
   }
 
+  function computeSync(input) {
+    if (!window.Astronomy || !input) return null;
+    var day = Number(input.day);
+    var month = Number(input.month);
+    var year = Number(input.year);
+    if (!day || !month || !year || day < 1 || day > 31 || month < 1 || month > 12 || year < 1900 || year > 2100) {
+      return null;
+    }
+    var hour = 12;
+    var minute = 0;
+    var time = input.time || "";
+    var tm = /^(\d{1,2}):(\d{2})/.exec(time);
+    if (tm) {
+      hour = Number(tm[1]);
+      minute = Number(tm[2]);
+    }
+    var cityKey = (input.city || "").trim().toLowerCase();
+    var place = FALLBACK_CITIES[cityKey] || null;
+    var tz = place ? Math.round(place.lon / 15) : 3;
+    var ut = Date.UTC(year, month - 1, day, hour - tz, minute, 0, 0);
+    var astro = Astronomy.MakeTime(new Date(ut));
+    var planets = calcPlanets(astro);
+    var asc = null;
+    var mc = null;
+    if (place) {
+      var angles = calcAngles(astro, place.lat, place.lon);
+      asc = angles.asc;
+      mc = angles.mc;
+    }
+    return {
+      havePlace: !!place,
+      place: place,
+      planets: planets,
+      asc: asc,
+      mc: mc
+    };
+  }
+
   window.TaroNatal = {
     compute: compute,
+    computeSync: computeSync,
     geocode: geocode,
     signOf: signOf,
     fmtDeg: fmtDeg,

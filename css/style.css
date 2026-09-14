@@ -836,10 +836,41 @@ main {
 .natal__tick { stroke: rgba(84, 241, 255, 0.4); }
 .natal__ring { fill: none; stroke: rgba(139, 92, 246, 0.5); }
 .natal__ring-outer { fill: rgba(10, 14, 34, 0.55); stroke: rgba(84, 241, 255, 0.45); }
-.natal__planet { fill: var(--pink); }
+.natal__planet { fill: var(--pink); transition: all 0.3s ease; }
 .natal__planet--asc { fill: var(--cyan); }
 .natal__planet--mc { fill: var(--violet); }
-.natal__planet-label { font: 600 11px/1 "Manrope", sans-serif; fill: #ffd6ec; }
+.natal__planet-label { font: 600 11px/1 "Manrope", sans-serif; fill: #ffd6ec; pointer-events: none; }
+.natal__planet-node {
+  cursor: pointer;
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.natal__planet-node:hover circle,
+.natal__planet-node.active circle {
+  r: 8px;
+  stroke: #ffffff;
+  stroke-width: 2px;
+  filter: drop-shadow(0 0 12px var(--cyan));
+}
+.natal__planet-node:hover text,
+.natal__planet-node.active text {
+  font-weight: 800;
+  fill: #ffffff;
+}
+
+.natal__planet-info {
+  margin-top: 14px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  font-size: 13px;
+  text-align: center;
+  color: var(--cyan);
+  border: 1px solid rgba(84, 241, 255, 0.3);
+  background: rgba(10, 14, 34, 0.75);
+  box-shadow: 0 4px 20px rgba(84, 241, 255, 0.15);
+  transition: opacity 0.25s, transform 0.25s;
+  width: 100%;
+  max-width: 360px;
+}
 .natal__note {
   grid-column: 1 / -1;
   text-align: center;
