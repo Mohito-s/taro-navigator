@@ -48,7 +48,7 @@ def system_prompt(style: str = "") -> str:
     persona = STYLE_PERSONAS.get(style, "")
     if not persona:
         return SYSTEM_PROMPT
-    return f"{SYSTEM_PROMPT}\n\nСтиль голоса: {persona}"
+    return f"{SYSTEM_PROMPT}\n\nВАЖНО: Стиль голоса — {style}. {persona} ОБЯЗАТЕЛЬНО используй специфичный словарь, тон и манеру речи этого персонажа в КАЖДОМ предложении. Не скатывайся в стандартный текст."
 
 
 def _arcana_payload(arcana: list[dict]) -> str:
@@ -197,16 +197,21 @@ def build_natal_forecast_prompt(user: dict) -> str:
     if planets_block:
         content += f"\n\n{planets_block}"
     content += (
-        "\n\nНапиши РАСШИРЕННЫЙ астрологический прогноз по натальной карте (~450–550 слов), "
-        "ТОЛЬКО по астрологии — НЕ упоминай карты Таро и арканы. Используй реальные положения "
-        "планет, Асцендент и аспекты из данных выше. Разделы:\n"
-        "🔭 Общий фон периода\n"
-        "♈ Солнечный знак: характер, энергия, темперамент\n"
-        "☽ Луна и эмоции\n"
-        "💞 Любовь и отношения\n"
-        "💼 Карьера и финансы\n"
-        "🪐 Совет из космоса\n"
-        "Пиши конкретно по данным человека, без общих фраз."
+        "\n\nТы — ПРОФЕССИОНАЛЬНЫЙ АСТРОЛОГ. Напиши ОГРОМНЫЙ и СУПЕР-ДЕТАЛЬНЫЙ разбор натальной карты "
+        "(не менее 800–1000 слов). Это должен быть полноценный лонгрид. "
+        "НЕ упоминай карты Таро и арканы, только чистая астрология. Обязательно "
+        "глубоко проанализируй Солнце, Луну, Асцендент, важные Дома и ключевые аспекты "
+        "планет из переданных данных.\n"
+        "Разделы:\n"
+        "🔭 Фундамент личности (Солнце, Луна и Асцендент)\n"
+        "✨ Планеты в знаках и их влияние\n"
+        "🏠 Ключевые астрологические Дома (где твоя сила)\n"
+        "♈ Психология и темперамент\n"
+        "💞 Любовь и отношения (Венера и аспекты)\n"
+        "💼 Карьера и финансы (МС, Юпитер, Сатурн)\n"
+        "🪐 Кармические задачи и Совет из космоса\n"
+        "Пиши конкретно по данным человека, избегай воды. "
+        "ВАЖНО: ОБЯЗАТЕЛЬНО пиши весь текст в стиле, указанном в системном промте (тон, словарь, манера речи)."
     )
     return content
 
@@ -380,7 +385,8 @@ def build_period_forecast_prompt(user: dict, horizon: str) -> str:
     content += (
         f"\n\n{PERIOD_INSTRUCTIONS.get(horizon, PERIOD_INSTRUCTIONS['day'])}"
         "Пиши конкретно, живо, обращаясь к человеку на «ты», без общих фраз и штампов. "
-        "Числа и даты можно упоминать как ориентиры, но не утверждай их как гарантию."
+        "Числа и даты можно упоминать как ориентиры, но не утверждай их как гарантию.\n"
+        "ВАЖНО: ОБЯЗАТЕЛЬНО пиши весь текст в стиле, указанном в системном промте (тон, словарь, манера речи персонажа)."
     )
     return content
 
@@ -395,24 +401,24 @@ def _period_forecast_fallback(user: dict, horizon: str) -> str:
     pick = arcana[(now.day + now.month) % max(n, 1)] if n else None
     card = ARCANA[pick["number"]] if pick else None
 
-    parts = [f"☀ <b>Общий фон {label}</b>\n{sign['text'] if sign else 'Звёзды готовят поворот.'}"]
+    parts = [f"☀ **Общий фон {label}**\n{sign['text'] if sign else 'Звёзды готовят поворот.'}"]
     if card:
         parts.append(
-            f"⚡ <b>Энергия и фокус</b>\nДень проходит под арканом «{card['name']}» "
+            f"⚡ **Энергия и фокус**\nДень проходит под арканом «{card['name']}» "
             f"({card['keyword']}). Это твой внутренний ориентир: "
             f"{card['text']}"
         )
     parts.append(
-        "💞 <b>Любовь и отношения</b>\n"
+        "💞 **Любовь и отношения**\n"
         f"Планета {sign['planet'] if sign else 'Венера'} советует держать лёгкость: "
         "честный разговор и пауза вместо давления решают больше."
     )
     parts.append(
-        "💼 <b>Работа и финансы</b>\nНе форсируй события: последовательные шаги "
+        "💼 **Работа и финансы**\nНе форсируй события: последовательные шаги "
         f"{('в ритме стихии ' + sign['element'].lower()) if sign else ''} принесут больше, чем рывок."
     )
     parts.append(
-        "🪐 <b>Совет</b>\nВыбери одно ключевое действие на этот период и доведи его "
+        "🪐 **Совет**\nВыбери одно ключевое действие на этот период и доведи его "
         "до конца — звёзды поддержат движение, а не ожидание."
     )
     return "\n\n".join(parts)
@@ -420,7 +426,7 @@ def _period_forecast_fallback(user: dict, horizon: str) -> str:
 
 async def generate_period_forecast(user: dict, horizon: str) -> str:
     """ИИ-прогноз на день/неделю/месяц с детерминированным фолбэком."""
-    max_tokens = {"day": 700, "week": 1000, "month": 1400}.get(horizon, 700)
+    max_tokens = {"day": 1200, "week": 1600, "month": 2000}.get(horizon, 1200)
     text = await _chat(
         {
             "model": AI_MODEL,
@@ -441,7 +447,10 @@ async def _chat(payload: dict) -> str | None:
     if not AI_API_KEY:
         return None
 
-    headers = {"Authorization": f"Bearer {AI_API_KEY}"}
+    headers = {
+        "Authorization": f"Bearer {AI_API_KEY}",
+        "User-Agent": "TaroNavigator/1.0",
+    }
     if AI_PROVIDER == "openrouter":
         headers["HTTP-Referer"] = "https://taro.app"
         headers["X-Title"] = "Taro Navigator"
@@ -487,7 +496,7 @@ async def generate_natal_forecast(user: dict, variation: int = 0) -> str:
                 {"role": "user", "content": build_natal_forecast_prompt(user)},
             ],
             "temperature": 0.9,
-            "max_tokens": 1100,
+            "max_tokens": 2500,
         }
     )
     if text:

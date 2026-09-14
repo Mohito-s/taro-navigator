@@ -1574,15 +1574,16 @@ button:disabled {
 
 /* --- Astro Weather --- */
 .astro-weather {
-  display: grid;
-  grid-template-columns: 1fr;
+  display: flex;
+  flex-wrap: wrap;
   gap: 16px;
   margin-bottom: 24px;
+  justify-content: center;
+  align-items: flex-start;
 }
-@media (min-width: 640px) {
-  .astro-weather {
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  }
+.astro-moon, .astro-transits {
+  flex: 1 1 280px;
+  max-width: 480px;
 }
 .astro-moon {
   display: flex;

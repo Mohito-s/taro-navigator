@@ -18,7 +18,8 @@ AI_API_KEY: str = os.getenv("AI_API_KEY", "") or os.getenv("DEEPSEEK_API_KEY", "
 DEFAULT_MODELS = {
     "deepseek": "deepseek-chat",
     "openrouter": "google/gemma-4-26b-a4b-it:free",
-    "gemini": "gemini-2.5-flash",
+    "gemini": "gemini-1.5-flash",
+    "groq": "groq/compound",
 }
 AI_MODEL: str = os.getenv("AI_MODEL", "") or DEFAULT_MODELS.get(AI_PROVIDER, "deepseek-chat")
 
@@ -26,6 +27,7 @@ OPENAI_COMPAT_BASES = {
     "deepseek": "https://api.deepseek.com",
     "openrouter": "https://openrouter.ai/api/v1",
     "gemini": "https://generativelanguage.googleapis.com/v1beta/openai",
+    "groq": "https://api.groq.com/openai/v1",
 }
 AI_BASE: str = AI_BASE_URL or OPENAI_COMPAT_BASES.get(AI_PROVIDER, OPENAI_COMPAT_BASES["deepseek"])
 
