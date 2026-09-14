@@ -8,9 +8,11 @@
 import asyncio
 import hashlib
 import hmac
+import html
 import json
 import logging
 import time
+import uuid
 from urllib.parse import unquote
 
 from fastapi import FastAPI, HTTPException, Request
@@ -18,6 +20,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 from bot.config import BOT_TOKEN
+from bot.db import db
 from bot.services import ai as ai_service
 from bot.services import numerology
 
@@ -141,6 +144,35 @@ class ForecastIn(BaseModel):
     initData: str = ""
 
 
+class SaveProfileIn(BaseModel):
+    session_id: str = ""
+    day: int
+    month: int
+    year: int
+    time: str = ""
+    city: str = ""
+    name: str = ""
+    style: str = ""
+    chart: dict | None = None
+    initData: str = ""
+
+
+def _extract_telegram_user(init_data: str) -> dict | None:
+    try:
+        for kv in init_data.split("&"):
+            if kv.startswith("user="):
+                val = unquote(kv.split("=", 1)[1])
+                return json.loads(val)
+    except Exception:
+        pass
+    return None
+
+
+@app.on_event("startup")
+async def on_startup():
+    await db.init_db()
+
+
 async def _guard(request: Request, init_data: str) -> None:
     ip = _client_ip(request)
     if _rate_limited(ip):
@@ -152,6 +184,50 @@ async def _guard(request: Request, init_data: str) -> None:
 @app.get("/api/health")
 async def health():
     return {"ok": True, "service": "taro-api"}
+
+
+@app.post("/api/v1/save_profile")
+async def save_profile(request: Request, body: SaveProfileIn):
+    await _guard(request, body.initData)
+    birth_date = f"{body.day:02d}.{body.month:02d}.{body.year}"
+    zodiac = numerology.get_zodiac(body.day, body.month)
+    arcana = numerology.get_arcana(body.day, body.month, body.year)
+    chart_json = json.dumps(body.chart, ensure_ascii=False) if body.chart else "{}"
+
+    safe_name = html.escape(body.name.strip())
+    safe_city = html.escape(body.city.strip())
+    safe_time = html.escape(body.time.strip())
+
+    tg_user = _extract_telegram_user(body.initData) if body.initData else None
+    if tg_user and "id" in tg_user:
+        await db.save_profile(
+            telegram_id=tg_user["id"],
+            username=tg_user.get("username", ""),
+            birth_date=birth_date,
+            birth_time=safe_time,
+            birth_place=safe_city,
+            zodiac=zodiac,
+            arcana=arcana,
+            name=safe_name,
+            planets=chart_json,
+        )
+        if body.style:
+            await db.set_style(tg_user["id"], body.style)
+        return {"ok": True, "saved_to": "telegram", "telegram_id": tg_user["id"]}
+
+    session_id = body.session_id.strip() or str(uuid.uuid4())
+    await db.save_web_profile(
+        session_id=session_id,
+        birth_date=birth_date,
+        birth_time=safe_time,
+        birth_place=safe_city,
+        zodiac=zodiac,
+        arcana=arcana,
+        name=safe_name,
+        planets=chart_json,
+        style=body.style or "cosmo",
+    )
+    return {"ok": True, "saved_to": "web_db", "session_id": session_id}
 
 
 @app.post("/api/v1/natal")

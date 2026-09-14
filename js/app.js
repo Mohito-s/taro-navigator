@@ -1,3 +1,40 @@
+
+// Сессия посетителя сайта для синхронизации с БД на сервере
+function getOrCreateSessionId() {
+  let id = localStorage.getItem("taro_session_id");
+  if (!id) {
+    id = "web_" + Math.random().toString(36).substring(2, 11) + "_" + Date.now();
+    try { localStorage.setItem("taro_session_id", id); } catch (e) {}
+  }
+  return id;
+}
+
+async function saveProfileToBackend(natal) {
+  if (!natal || !natal.day) return;
+  try {
+    const initData = (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) || "";
+    const styleObj = (typeof getSavedStyle === "function") ? getSavedStyle() : { name: "Космо" };
+    const payload = {
+      session_id: getOrCreateSessionId(),
+      day: natal.day,
+      month: natal.month,
+      year: natal.year,
+      time: natal.time || "",
+      city: natal.city || "",
+      name: natal.name || "",
+      style: styleObj ? styleObj.name : "Космо",
+      chart: natal.chart ? chartBrief(natal.chart) : null,
+      initData: initData
+    };
+    await fetch("/api/v1/save_profile", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload)
+    });
+  } catch (err) {
+    /* Сервер недоступен — данные в localStorage */
+  }
+}
 const ARCADES = [
   { card: "Шут", kw: "Новое начало" },
   { card: "Маг", kw: "Воля и мастерство" },
@@ -669,6 +706,7 @@ if (natalForm) {
       taroSend(JSON.stringify({ type: "natal", day: d, month: m, year: y, time: timeVal, city: cityVal, name: nameVal, chart: chartBrief(chart) }));
       syncNatalToApp(natal);
       renderNatalChart(natal);
+      saveProfileToBackend(natal);
       if (note) {
         if (window.__taroCanSend) {
           note.innerHTML = `✅ Натальная карта <b>${signName}</b> построена${chartSummary(chart)} — основа раскладов и прогнозов.`;
