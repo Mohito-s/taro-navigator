@@ -1571,3 +1571,74 @@ button:disabled {
     grid-column: 2;
   }
 }
+
+/* --- Astro Weather --- */
+.astro-weather {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+@media (min-width: 640px) {
+  .astro-weather {
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  }
+}
+.astro-moon {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px;
+}
+.astro-moon__icon {
+  font-size: 2.5rem;
+  line-height: 1;
+  filter: drop-shadow(0 0 10px rgba(84, 241, 255, 0.4));
+}
+.astro-moon__text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+#astro-moon-phase {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  font-size: 1.1rem;
+  letter-spacing: 0.03em;
+  color: var(--color-text);
+}
+#astro-moon-sign {
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+.astro-transits {
+  padding: 16px;
+}
+.astro-transits__title {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 1rem;
+  margin-bottom: 12px;
+  color: var(--color-accent);
+}
+.astro-transits__list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.astro-transits__list li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 6px 10px;
+  border-radius: 6px;
+}
+.astro-transits__list .orb {
+  margin-left: auto;
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.4);
+}

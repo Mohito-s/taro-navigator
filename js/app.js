@@ -708,6 +708,41 @@ if (natalFormInit && natalFormInit.day) {
   if (nc && natalFormInit.city) nc.value = natalFormInit.city;
 }
 
+// === Астропогода: Луна и Транзиты ===
+function renderAstroWeather() {
+  const box = document.getElementById("forecast-astro");
+  if (!box || !window.TaroNatal) return;
+  const n = getSavedNatal();
+  if (!n || !n.chart || !n.chart.planets) {
+    box.hidden = true;
+    return;
+  }
+
+  const moon = TaroNatal.computeLunarPhase();
+  if (moon) {
+    document.getElementById("astro-moon-icon").textContent = moon.icon;
+    document.getElementById("astro-moon-phase").textContent = moon.phaseName;
+    document.getElementById("astro-moon-sign").textContent = "в знаке " + moon.sign;
+  }
+
+  const transits = TaroNatal.computeTransits(n.chart.planets);
+  const list = document.getElementById("astro-transits-list");
+  if (transits && transits.length > 0) {
+    list.innerHTML = transits.map(t => 
+      `<li>
+         <span>${t.transitPlanet}</span>
+         <span style="color:var(--cyan)">${t.icon}</span>
+         <span>${t.natalPlanet}</span>
+         <span class="orb">${t.orb}°</span>
+       </li>`
+    ).join("");
+  } else {
+    list.innerHTML = "<li>Спокойное небо: точных транзитов нет.</li>";
+  }
+  box.hidden = false;
+}
+
+// === Нижняя навигация: переключение экранов ===
 // === Нижняя навигация: переключение экранов ===
 (function initTabs() {
   const tabs = Array.from(document.querySelectorAll(".tabbar__btn"));
@@ -727,11 +762,11 @@ if (natalFormInit && natalFormInit.day) {
         }
       });
     }
+    if (name === "forecast") renderAstroWeather();
     window.scrollTo(window.__taroWebApp ? 0 : { top: 0, behavior: "smooth" }, 0);
   }
   tabs.forEach((t) => t.addEventListener("click", () => activate(t.dataset.tab)));
 })();
-
 // === Telegram WebApp мост ===
 // Отправляет данные боту. Если WebView ещё не готов — кладём в очередь,
 // initTelegram() сбросит её сразу после инициализации.
@@ -1160,13 +1195,18 @@ document.querySelectorAll(".forecast__block").forEach((btn) => {
     btn.disabled = true;
     setLoading(box, FORECAST_HEADERS[horizon]);
     try {
-      const text = await taroApi("forecast", {
+      const payload = {
         day,
         month,
         year,
         horizon,
         chart: n.chart ? chartBrief(n.chart) : undefined,
-      });
+      };
+      if (window.TaroNatal && n.chart && n.chart.planets) {
+        payload.transits = TaroNatal.computeTransits(n.chart.planets);
+        payload.lunarPhase = TaroNatal.computeLunarPhase();
+      }
+      const text = await taroApi("forecast", payload);
       if (text) {
         showInlineResult(box, FORECAST_HEADERS[horizon], text);
         addHistory({ type: "forecast", icon: horizon === "day" ? "☀" : horizon === "week" ? "🌙" : "🪐", title: FORECAST_HEADERS[horizon], subtitle: `${zodiac(day, month)} · ${fmtDate(Date.now(), true)}`, text });

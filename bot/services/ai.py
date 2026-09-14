@@ -367,6 +367,16 @@ def build_period_forecast_prompt(user: dict, horizon: str) -> str:
     planets = _planets_payload(user)
     if planets:
         content += f"\n\n{planets}\nОпирайся на реальные положения планет, Асцендент и аспекты, где это уместно."
+
+    lunar_phase = user.get("lunarPhase")
+    if lunar_phase:
+        content += f"\n\nТекущая Луна: {lunar_phase.get('phaseName', '')} в знаке {lunar_phase.get('sign', '')}."
+        
+    transits = user.get("transits")
+    if transits:
+        transits_text = "\n".join([f"- {t.get('transitPlanet', '')} {t.get('aspectName', '')} {t.get('natalPlanet', '')} (орб {t.get('orb', '')}°)" for t in transits])
+        content += f"\n\nТекущие транзиты к натальной карте (самые точные):\n{transits_text}\nИспользуй эти транзиты и Луну для глубокого анализа прогноза."
+
     content += (
         f"\n\n{PERIOD_INSTRUCTIONS.get(horizon, PERIOD_INSTRUCTIONS['day'])}"
         "Пиши конкретно, живо, обращаясь к человеку на «ты», без общих фраз и штампов. "

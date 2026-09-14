@@ -210,6 +210,22 @@
         <h2 class="section__title">День · Неделя · Месяц</h2>
         <p class="section__subtitle">Рассчитан по твоей натальной карте и числам. Нажми на блок — звёзды ответят.</p>
       </div>
+      
+      <!-- Астропогода на сегодня -->
+      <div id="forecast-astro" class="astro-weather" hidden>
+        <div class="astro-moon glass reveal">
+          <span class="astro-moon__icon" id="astro-moon-icon">🌑</span>
+          <div class="astro-moon__text">
+            <div id="astro-moon-phase">Фаза Луны</div>
+            <div id="astro-moon-sign">Знаке</div>
+          </div>
+        </div>
+        <div class="astro-transits glass reveal d2">
+          <div class="astro-transits__title">Транзиты к твоей карте:</div>
+          <ul id="astro-transits-list" class="astro-transits__list"></ul>
+        </div>
+      </div>
+
       <div class="natal" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));">
         <button class="about__item glass reveal forecast__block" data-horizon="day" type="button">
           <span class="about__icon">☀</span>

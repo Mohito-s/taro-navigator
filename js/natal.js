@@ -306,10 +306,74 @@
     });
   }
 
+  function computeLunarPhase() {
+    if (!window.Astronomy) return null;
+    var now = Astronomy.MakeTime(new Date());
+    var phaseDeg = Astronomy.MoonPhase(now); 
+    var phaseName = "";
+    var icon = "";
+    if (phaseDeg < 15 || phaseDeg > 345) { phaseName = "Новолуние"; icon = "🌑"; }
+    else if (phaseDeg < 80) { phaseName = "Растущая Луна"; icon = "🌒"; }
+    else if (phaseDeg < 100) { phaseName = "Первая четверть"; icon = "🌓"; }
+    else if (phaseDeg < 165) { phaseName = "Растущая Луна"; icon = "🌔"; }
+    else if (phaseDeg < 195) { phaseName = "Полнолуние"; icon = "🌕"; }
+    else if (phaseDeg < 260) { phaseName = "Убывающая Луна"; icon = "🌖"; }
+    else if (phaseDeg < 280) { phaseName = "Последняя четверть"; icon = "🌗"; }
+    else { phaseName = "Убывающая Луна"; icon = "🌘"; }
+
+    var moonLon = Astronomy.EclipticGeoMoon(now).lon;
+    return {
+      phaseDeg: phaseDeg,
+      phaseName: phaseName,
+      icon: icon,
+      sign: signOf(moonLon).name,
+      signIcon: signOf(moonLon).icon
+    };
+  }
+
+  function computeTransits(natalPlanets) {
+    if (!window.Astronomy || !natalPlanets || !natalPlanets.length) return null;
+    var now = Astronomy.MakeTime(new Date());
+    var transitPlanets = calcPlanets(now);
+    
+    var transits = [];
+    for (var i = 0; i < transitPlanets.length; i++) {
+      var tP = transitPlanets[i];
+      for (var j = 0; j < natalPlanets.length; j++) {
+        var nP = natalPlanets[j];
+        // Исключаем слишком частые транзиты Луны для упрощения прогноза,
+        // но оставим Солнце, Венеру, Марс и медленные
+        if (tP.name === "Луна" && nP.name !== "Солнце" && nP.name !== "Луна") continue; 
+        
+        var sep = angularSep(tP.pos.lon, nP.pos.lon);
+        for (var k = 0; k < ASPECTS.length; k++) {
+          var asp = ASPECTS[k];
+          // Для транзитов используем узкий орбис (max 3 градуса)
+          var orb = Math.abs(sep - asp.deg);
+          if (orb <= 3) {
+             transits.push({
+               transitPlanet: tP.icon + " " + tP.name,
+               natalPlanet: nP.icon + " " + nP.name,
+               aspect: asp.key,
+               icon: asp.icon,
+               label: asp.label,
+               orb: orb.toFixed(1)
+             });
+          }
+        }
+      }
+    }
+    // Сортируем по точности
+    transits.sort(function(a, b) { return a.orb - b.orb; });
+    return transits.slice(0, 5); // Топ 5 самых точных
+  }
+
   window.TaroNatal = {
     compute: compute,
     geocode: geocode,
     signOf: signOf,
     fmtDeg: fmtDeg,
+    computeLunarPhase: computeLunarPhase,
+    computeTransits: computeTransits
   };
 })();
