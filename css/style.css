@@ -900,9 +900,12 @@ main {
   position: fixed;
   inset: 0;
   z-index: 50;
-  display: grid;
-  place-items: center;
-  padding: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 16px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 .modal[hidden] {
@@ -920,13 +923,27 @@ main {
 .modal__card {
   position: relative;
   z-index: 1;
-  max-width: 460px;
+  max-width: 480px;
   width: 100%;
+  max-height: calc(100dvh - 32px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
   padding: 30px 32px 28px;
   animation: popIn 0.3s cubic-bezier(0.2, 0.9, 0.3, 1.2);
-  background: linear-gradient(165deg, rgba(20, 24, 48, 0.92), rgba(8, 10, 26, 0.94));
+  background: linear-gradient(165deg, rgba(20, 24, 48, 0.95), rgba(8, 10, 26, 0.97));
   border: 1px solid rgba(139, 92, 246, 0.35);
   box-shadow: 0 0 70px rgba(139, 92, 246, 0.3);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(139, 92, 246, 0.5) transparent;
+}
+
+.modal__card::-webkit-scrollbar {
+  width: 6px;
+}
+
+.modal__card::-webkit-scrollbar-thumb {
+  background: rgba(139, 92, 246, 0.5);
+  border-radius: 4px;
 }
 
 @keyframes fadeIn {
