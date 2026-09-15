@@ -1,9 +1,45 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TARO — космический разбор личности</title>
+  <title>TARO NAVIGATOR — Рассчитать 10 Арканов Судьбы и Натальную Карту Онлайн Бесплатно</title>
+  <meta name="description" content="Бесплатный онлайн-калькулятор арканов судьбы, натальной карты и ежедневный астрологический ИИ-прогноз по дате рождения. Узнай свой космический код без регистрации." />
+  <meta name="keywords" content="арканы судьбы, натальная карта онлайн, расчет даты рождения, таро прогноз на сегодня, гороскоп и таро бесплатно" />
+  <meta name="robots" content="index, follow, noai, noimageai" />
+  <link rel="canonical" href="https://shadowlinkapp.online/" />
+
+  <!-- Open Graph / Facebook / Telegram -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://shadowlinkapp.online/" />
+  <meta property="og:title" content="TARO NAVIGATOR — Космический разбор личности онлайн" />
+  <meta property="og:description" content="22 аркана Таро, натальная карта и ежедневный ИИ-прогноз по вашей дате рождения. Бесплатно и без регистрации." />
+  <meta property="og:image" content="https://shadowlinkapp.online/favicon.jpg" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="TARO NAVIGATOR — Рассчитать арканы судьбы" />
+  <meta name="twitter:description" content="Бесплатный онлайн-калькулятор арканов судьбы и натальной карты." />
+  <meta name="twitter:image" content="https://shadowlinkapp.online/favicon.jpg" />
+
+  <!-- JSON-LD Schema.org -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "TARO NAVIGATOR",
+    "url": "https://shadowlinkapp.online/",
+    "description": "Бесплатный сервисный калькулятор 10 арканов судьбы, натальной карты и ИИ-прогнозов по дате рождения.",
+    "applicationCategory": "LifestyleApplication",
+    "operatingSystem": "All",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "RUB"
+    }
+  }
+  </script>
+
   <link rel="icon" type="image/jpeg" href="favicon.jpg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -19,7 +55,11 @@
         <span class="logo__mark">☾</span>
         <span class="logo__text">TARO<span>&nbsp;NAVIGATOR</span></span>
       </a>
-      
+      <div class="nav__actions">
+        <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Переключить тему">
+          <span class="theme-toggle__icon" id="theme-toggle-icon">🌙</span>
+        </button>
+      </div>
     </div>
   </header>
 
@@ -78,6 +118,9 @@
           </div>
           <div class="calc__foot">
             <button id="run" class="btn btn--primary btn--wide">🔮 Синхронизировать со звёздами</button>
+            <p class="calc__privacy-note">
+              Нажимая кнопку, вы соглашаетесь с <a href="#privacy" id="privacy-link" data-open-privacy>Политикой конфиденциальности</a>.
+            </p>
             <p id="calc-error" class="calc__error" hidden></p>
           </div>
         </div>
@@ -408,6 +451,29 @@
         id="modal-cta"
         type="button"
         >🔮 Расширенный разбор этого аркана</button>
+    </div>
+  </div>
+
+  <!-- МОДАЛЬНОЕ ОКНО: Политика конфиденциальности (152-ФЗ) -->
+  <div id="privacy-modal" class="modal" hidden>
+    <div class="modal__backdrop" data-close-privacy></div>
+    <div class="modal__card glass" role="dialog" aria-modal="true" aria-labelledby="privacy-title">
+      <button class="modal__close" data-close-privacy aria-label="Закрыть">✕</button>
+      <p class="modal__num">БЕЗОПАСНОСТЬ И ЗАКОН (152-ФЗ)</p>
+      <h3 class="modal__card-name" id="privacy-title">Политика конфиденциальности</h3>
+      <div class="privacy__content">
+        <p>Сервис <b>TARO NAVIGATOR</b> заботится о вашей приватности и полностью соблюдает законы о защите данных.</p>
+        <br>
+        <h4>1. Обезличенность данных</h4>
+        <p>Вводимые имя, дата, время и город рождения используются исключительно для математического и астрологического расчёта вашей карты. Мы не запрашиваем фамилию, номер телефона, email или паспортные данные.</p>
+        <br>
+        <h4>2. Хранение и удаление</h4>
+        <p>Данные сохраняются в памяти вашего устройства (localStorage) для вашего удобства. Вы можете в любой момент полностью стереть записи, нажав «Очистить историю» в разделе История.</p>
+        <br>
+        <h4>3. Защита</h4>
+        <p>Данные не передаются третьим лицам и не используются для рекламы или спама.</p>
+      </div>
+      <button class="btn btn--primary btn--wide modal__cta" data-close-privacy type="button" style="margin-top:20px;">Понятно и отлично</button>
     </div>
   </div>
 

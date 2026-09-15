@@ -1,4 +1,56 @@
 
+// Переключатель Светлой / Тёмной темы (Обсидиан / Перламутр)
+let __taroThemeInited = false;
+function initTheme() {
+  if (__taroThemeInited) return;
+  __taroThemeInited = true;
+
+  const savedTheme = localStorage.getItem("taro_theme") || "dark";
+  
+  function applyTheme(theme) {
+    document.documentElement.setAttribute("data-theme", theme);
+    const icon = document.getElementById("theme-toggle-icon");
+    if (icon) {
+      icon.textContent = theme === "light" ? "☀️" : "🌙";
+    }
+    try { localStorage.setItem("taro_theme", theme); } catch (e) {}
+  }
+  
+  applyTheme(savedTheme);
+
+  document.addEventListener("click", (e) => {
+    const btn = e.target.closest("#theme-toggle");
+    if (!btn) return;
+    const current = document.documentElement.getAttribute("data-theme") || "dark";
+    const next = current === "dark" ? "light" : "dark";
+    applyTheme(next);
+  });
+}
+
+// Модальное окно Политики Конфиденциальности (152-ФЗ)
+function initPrivacyModal() {
+  const modal = document.getElementById("privacy-modal");
+  if (!modal) return;
+  
+  document.querySelectorAll("[data-open-privacy]").forEach((el) => {
+    el.addEventListener("click", (e) => {
+      e.preventDefault();
+      modal.hidden = false;
+    });
+  });
+  
+  document.querySelectorAll("[data-close-privacy]").forEach((el) => {
+    el.addEventListener("click", () => {
+      modal.hidden = true;
+    });
+  });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  initTheme();
+  initPrivacyModal();
+});
+
 // Сессия посетителя сайта для синхронизации с БД на сервере
 function getOrCreateSessionId() {
   let id = localStorage.getItem("taro_session_id");
