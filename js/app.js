@@ -1657,75 +1657,85 @@ function renderAstroWeather() {
   box.hidden = false;
 }
 
-// === Нижняя навигация: переключение экранов ===
+// === Нижняя навигация & URL хэш-роутинг (#reads, #explore, #natal, #forecast, #profile, #history) ===
 (function initTabs() {
   const tabs = Array.from(document.querySelectorAll(".tabbar__btn"));
   const screens = Array.from(document.querySelectorAll(".screen"));
   if (!tabs.length) return;
 
-  let isTransitioning = false;
+  const validTabs = ["reads", "explore", "natal", "forecast", "profile", "history"];
 
-  function activate(name) {
+  function activate(name, updateHash = true) {
+    if (!validTabs.includes(name)) name = "reads";
+
     const currentTab = tabs.find((t) => t.classList.contains("tabbar__btn--active"));
     const currentTabName = currentTab ? currentTab.dataset.tab : null;
 
     if (currentTabName === name) {
-      window.scrollTo({ top: 0, behavior: "smooth" });
+      window.scrollTo(0, 0);
       return;
     }
-
-    if (isTransitioning) return;
-    isTransitioning = true;
 
     // Подсвечиваем активную кнопку навигации мгновенно
     tabs.forEach((t) => t.classList.toggle("tabbar__btn--active", t.dataset.tab === name));
 
-    const oldScreen = screens.find((s) => s.classList.contains("screen--active"));
+    // Обновляем хэш в URL адресе страницы
+    if (updateHash && window.location.hash !== "#" + name) {
+      if (window.history && window.history.pushState) {
+        window.history.pushState(null, "", "#" + name);
+      } else {
+        window.location.hash = "#" + name;
+      }
+    }
+
     const newScreen = document.getElementById("screen-" + name);
 
-    const switchDOM = () => {
-      screens.forEach((s) => s.classList.remove("screen--active"));
-      if (oldScreen) {
-        oldScreen.style.opacity = "";
-        oldScreen.style.transform = "";
-        oldScreen.style.transition = "";
-      }
+    // Сбрасываем скролл к вершине мгновенно без дёргания высоты
+    window.scrollTo(0, 0);
 
-      if (newScreen) {
-        newScreen.classList.add("screen--active");
-        newScreen.querySelectorAll(".reveal").forEach((el) => {
-          const r = el.getBoundingClientRect();
-          if (r.top < window.innerHeight) el.classList.add("visible");
-        });
-      }
+    if (newScreen) {
+      screens.forEach((s) => {
+        if (s !== newScreen) {
+          s.classList.remove("screen--active");
+        }
+      });
+      newScreen.classList.add("screen--active");
 
-      if (name === "explore") renderExploreGrid();
-      if (name === "forecast") renderAstroWeather();
-      if (name === "profile") renderProfile();
-      if (name === "history") renderHistory();
+      newScreen.querySelectorAll(".reveal").forEach((el) => {
+        const r = el.getBoundingClientRect();
+        if (r.top < window.innerHeight + 120) el.classList.add("visible");
+      });
+    }
 
-      if (window.__taroWebApp) {
-        window.scrollTo(0, 0);
-      } else {
-        window.scrollTo({ top: 0, behavior: "smooth" });
-      }
+    if (name === "explore") renderExploreGrid();
+    if (name === "forecast") renderAstroWeather();
+    if (name === "profile") renderProfile();
+    if (name === "history") renderHistory();
+  }
 
-      setTimeout(() => {
-        isTransitioning = false;
-      }, 50);
-    };
+  tabs.forEach((t) => {
+    t.addEventListener("click", (e) => {
+      e.preventDefault();
+      activate(t.dataset.tab, true);
+    });
+  });
 
-    if (oldScreen && newScreen && oldScreen !== newScreen) {
-      oldScreen.style.transition = "opacity 0.14s cubic-bezier(0.4, 0, 0.2, 1), transform 0.14s cubic-bezier(0.4, 0, 0.2, 1)";
-      oldScreen.style.opacity = "0";
-      oldScreen.style.transform = "translateY(-8px) scale(0.99)";
-      setTimeout(switchDOM, 140);
-    } else {
-      switchDOM();
+  // Реагируем на подгрузку страницы по хэшу и навигацию Назад / Вперёд в браузере
+  function activateFromHash() {
+    const hash = window.location.hash.replace("#", "").trim();
+    if (hash && validTabs.includes(hash)) {
+      activate(hash, false);
     }
   }
 
-  tabs.forEach((t) => t.addEventListener("click", () => activate(t.dataset.tab)));
+  window.addEventListener("popstate", activateFromHash);
+  window.addEventListener("hashchange", activateFromHash);
+
+  // Инициализация при первой загрузке
+  const initialHash = window.location.hash.replace("#", "").trim();
+  if (initialHash && validTabs.includes(initialHash)) {
+    activate(initialHash, false);
+  }
 })();
 // === Telegram WebApp мост ===
 // Отправляет данные боту. Если WebView ещё не готов — кладём в очередь,
