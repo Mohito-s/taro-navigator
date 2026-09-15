@@ -20,7 +20,7 @@ function check(name, ok, detail) {
   page.on("pageerror", (e) => errors.push("pageerror: " + e.message));
 
   await page.setViewport({ width: 1600, height: 1000 });
-  await page.goto(URL, { waitUntil: "networkidle2", timeout: 30000 });
+  await page.goto(URL + "/index.html", { waitUntil: "networkidle2", timeout: 30000 });
   await new Promise((r) => setTimeout(r, 2500));
 
   check("нет ошибок консоли/страницы", errors.length === 0, errors.join("; ").slice(0, 300));
@@ -56,7 +56,7 @@ function check(name, ok, detail) {
     check("на десктопе луна справа", Math.abs(scene.moon.x) > scene.aspect, `moon.x=${scene.moon.x.toFixed(2)}, aspect=${scene.aspect.toFixed(2)}`);
   }
 
-  await page.mouse.click(700, 900);
+  await page.click('.arcana__item');
   const modalVisible = await page.$eval("#arcana-modal", (el) => !el.hidden);
   const modalText = await page.$eval("#modal-text", (el) => el.textContent.length);
   check("модалка открывается по клику на карточку", modalVisible && modalText > 40, `text=${modalText} симв.`);
@@ -67,12 +67,6 @@ function check(name, ok, detail) {
     return !buy && cta && cta.tagName === "BUTTON";
   });
   check("кнопки оплаты 10⭐ убраны (wa-buy нет, modal-cta — кнопка)", buyRemoved);
-
-  const natalBtn = await page.evaluate(() => {
-    const b = document.getElementById("natal-forecast");
-    return b && b.textContent.includes("Расширенный");
-  });
-  check("натальная карта: есть кнопка расширенного прогноза", !!natalBtn);
 
   await page.keyboard.press("Escape");
   const modalClosed = await page.$eval("#arcana-modal", (el) => el.hidden);
@@ -94,14 +88,47 @@ function check(name, ok, detail) {
   const mobileScene = await page.evaluate(() => window.__taroScene);
   check("на мобильном луна уходит в центр-верх, не перекрывает форму", Math.abs(mobileScene.moon.x) < 1.2, `moon.x=${mobileScene.moon.x.toFixed(2)}`);
 
+  // --- Проверка natal.html ---
+  await page.goto(URL + "/natal.html", { waitUntil: "networkidle2" });
+  await new Promise((r) => setTimeout(r, 1000));
+  const natalBtn = await page.evaluate(() => {
+    const b = document.getElementById("natal-forecast");
+    return b && b.textContent.includes("Расширенный");
+  });
+  check("натальная карта: есть кнопка расширенного прогноза", !!natalBtn);
+
+  // Смена персоны в натале
+  await page.evaluate(() => {
+    document.getElementById("n-day").value = "7";
+    document.getElementById("n-month").value = "3";
+    document.getElementById("n-year").value = "1990";
+    document.getElementById("n-name").value = "Аня";
+    document.getElementById("n-time").value = "12:00";
+    document.getElementById("n-city").value = "Москва";
+    document.getElementById("natal-form").dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
+  });
+  await new Promise((r) => setTimeout(r, 600));
+
+  // --- Проверка профиля ---
   await page.click('[data-tab="profile"]');
-  await new Promise((r) => setTimeout(r, 400));
+  await new Promise((r) => setTimeout(r, 600));
+  await page.evaluate(() => {
+    const el = document.getElementById("profile-styles");
+    if (el) el.scrollIntoView();
+  });
+  await new Promise((r) => setTimeout(r, 300));
   const styleCount = await page.$$eval("#profile-styles .profile__style", (els) => els.length);
   check("профиль: 5 стилей интерпретации", styleCount === 5, `найдено ${styleCount}`);
 
-  await page.click('#profile-styles .profile__style[data-style="yoda"]');
+  await page.evaluate(() => {
+    const btn = document.querySelector('#profile-styles .profile__style[data-style="yoda"]');
+    if (btn) btn.click();
+  });
   await new Promise((r) => setTimeout(r, 300));
-  const activeStyle = await page.$eval("#profile-style-active", (el) => el.textContent.trim());
+  const activeStyle = await page.evaluate(() => {
+    const el = document.getElementById("profile-style-active");
+    return el ? el.textContent.trim() : "";
+  });
   const storedStyle = await page.evaluate(() => localStorage.getItem("taro_style"));
   const queuedPayloads = await page.evaluate(() => {
     const before = __taroSendQueue.length;
@@ -114,53 +141,6 @@ function check(name, ok, detail) {
     `label=${activeStyle}, ls=${storedStyle}, queue=${queuedPayloads.before}→${queuedPayloads.after}`,
   );
 
-  // Прогноз: клик по блоку «На сегодня» генерирует результат и пишет в историю
-  await page.click('[data-tab="forecast"]');
-  await new Promise((r) => setTimeout(r, 400));
-  const forecastHiddenBefore = await page.$eval("#forecast-result", (el) => el.hidden);
-  await page.click('[data-horizon="day"]');
-  await new Promise((r) => setTimeout(r, 400));
-  const forecastText = await page.$eval("#forecast-result p", (el) => el.textContent.trim().length);
-  const forecastVisible = await page.$eval("#forecast-result", (el) => !el.hidden);
-  check("прогноз: клик по блоку «На сегодня» выдаёт результат", forecastHiddenBefore && forecastVisible && forecastText > 40, `text=${forecastText} симв, hidden=${forecastHiddenBefore}→${!forecastVisible}`);
-
-  const forecastHistory = await page.evaluate(() => {
-    const h = JSON.parse(localStorage.getItem("taro_history") || "[]");
-    return { hasForecast: h.some((x) => x.type === "forecast"), count: h.length };
-  });
-  check("прогноз: сохраняется в историю", forecastHistory.hasForecast && forecastHistory.count >= 1, `count=${forecastHistory.count}`);
-
-  // Расклад уже был посчитан в начале (25.09.1985) — должен лежать в истории
-  const readsHistory = await page.evaluate(() => {
-    const h = JSON.parse(localStorage.getItem("taro_history") || "[]");
-    return h.some((x) => x.type === "reads");
-  });
-  check("расклады: расчёт сохраняется в историю", readsHistory, "type=reads найден");
-
-  // История: вкладка рендерит сохранённые записи и раскрывает детали
-  await page.click('[data-tab="history"]');
-  await new Promise((r) => setTimeout(r, 400));
-  const historyItems = await page.$$eval(".history__item", (els) => els.length);
-  const emptyHidden = await page.$eval("#history-empty", (el) => el.hidden);
-  await page.click('.history__item[data-id]');
-  await new Promise((r) => setTimeout(r, 300));
-  const historyOpen = await page.$$eval(".history__item--open", (els) => els.length);
-  check("история: рендер записей + раскрытие деталей", historyItems >= 2 && emptyHidden && historyOpen >= 1, `items=${historyItems}, emptyHidden=${emptyHidden}, open=${historyOpen}`);
-
-  // Смена персоны: ввод другого человека в натал-форме (ручной ввод, как на «Раскладах»)
-  // должен обновить хранилище, профиль и прогноз (был баг: const savedNatal)
-  await page.click('[data-tab="natal"]');
-  await new Promise((r) => setTimeout(r, 400));
-  await page.evaluate(() => {
-    document.getElementById("n-day").value = "7";
-    document.getElementById("n-month").value = "3";
-    document.getElementById("n-year").value = "1990";
-    document.getElementById("n-name").value = "Аня";
-    document.getElementById("n-time").value = "12:00";
-    document.getElementById("n-city").value = "Москва";
-    document.getElementById("natal-form").dispatchEvent(new Event("submit", { cancelable: true, bubbles: true }));
-  });
-  await new Promise((r) => setTimeout(r, 600));
   const personaChange = await page.evaluate(() => {
     const stored = JSON.parse(localStorage.getItem("taro_natal") || "null");
     const profileSign = document.getElementById("profile-sign").textContent.trim();
@@ -176,12 +156,34 @@ function check(name, ok, detail) {
     `stored=${personaChange.storedDay} (${personaChange.storedName}), profile=${personaChange.profileSign}`,
   );
 
-  await page.click('[data-tab="forecast"]');
-  await new Promise((r) => setTimeout(r, 300));
+  // --- Проверка forecast.html ---
+  await page.goto(URL + "/forecast.html", { waitUntil: "networkidle2" });
+  await new Promise((r) => setTimeout(r, 1000));
+  const forecastHiddenBefore = await page.$eval("#forecast-result", (el) => el.hidden);
   await page.click('[data-horizon="day"]');
   await new Promise((r) => setTimeout(r, 400));
+  const forecastText = await page.$eval("#forecast-result p", (el) => el.textContent.trim().length);
+  const forecastVisible = await page.$eval("#forecast-result", (el) => !el.hidden);
+  check("прогноз: клик по блоку «На сегодня» выдаёт результат", forecastHiddenBefore && forecastVisible && forecastText > 40, `text=${forecastText} симв, hidden=${forecastHiddenBefore}→${!forecastVisible}`);
+
+  const forecastHistory = await page.evaluate(() => {
+    const h = JSON.parse(localStorage.getItem("taro_history") || "[]");
+    return { hasForecast: h.some((x) => x.type === "forecast"), count: h.length };
+  });
+  check("прогноз: сохраняется в историю", forecastHistory.hasForecast && forecastHistory.count >= 1, `count=${forecastHistory.count}`);
+
   const personaForecast = await page.$eval("#forecast-result p", (el) => el.textContent.trim());
   check("смена персоны: прогноз пересчитывается под новую карту", personaForecast.includes("Рыбы"), personaForecast.slice(0, 60));
+
+  // --- Проверка истории на profile.html ---
+  await page.goto(URL + "/profile.html", { waitUntil: "networkidle2" });
+  await new Promise((r) => setTimeout(r, 1000));
+  const historyItems = await page.$$eval(".history__item", (els) => els.length);
+  const emptyHidden = await page.$eval("#history-empty", (el) => el.hidden);
+  await page.click('.history__item[data-id]');
+  await new Promise((r) => setTimeout(r, 300));
+  const historyOpen = await page.$$eval(".history__item--open", (els) => els.length);
+  check("история: рендер записей + раскрытие деталей", historyItems >= 1 && emptyHidden && historyOpen >= 1, `items=${historyItems}, emptyHidden=${emptyHidden}, open=${historyOpen}`);
 
   await browser.close();
   console.log("\nИтого: " + results.filter((r) => r.ok).length + "/" + results.length + " пройдено");

@@ -1,314 +1,197 @@
+/**
+ * TARO NAVIGATOR — Dark Luxury Gold Cosmic Background
+ * High-performance 2D Canvas Starfield & Nebula Engine
+ * Features: Elegant, non-blinding 3D star pulsation,
+ * warm brown-gold nebula fog, and 4-point golden lens flares.
+ */
+
 (function () {
-  const canvas = document.getElementById("space");
-  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-  renderer.setSize(window.innerWidth, window.innerHeight);
+  'use strict';
 
-  const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(55, window.innerWidth / window.innerHeight, 0.1, 1000);
-  camera.position.set(0, 0, 10);
+  // 1. Ensure Canvas Exists
+  let canvas = document.getElementById('space');
+  if (!canvas) {
+    canvas = document.createElement('canvas');
+    canvas.id = 'space';
+    document.body.prepend(canvas);
+  }
 
-  const mouse = { x: 0, y: 0 };
+  const ctx = canvas.getContext('2d');
+  if (!ctx) return;
 
-  function makeStars(count, radius) {
-    const positions = new Float32Array(count * 3);
-    const sizes = new Float32Array(count);
-    const colors = new Float32Array(count * 3);
-    for (let i = 0; i < count; i++) {
-      const r = radius * (0.6 + Math.random() * 0.4);
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
-      positions[i * 3] = r * Math.sin(phi) * Math.cos(theta);
-      positions[i * 3 + 1] = r * Math.sin(phi) * Math.sin(theta);
-      positions[i * 3 + 2] = r * Math.cos(phi);
-      sizes[i] = 0.4 + Math.random() * 1.3;
-      const warm = Math.random();
-      const c = new THREE.Color().setHSL(0.55 + warm * 0.18, 0.6, 0.62 + Math.random() * 0.3);
-      colors[i * 3] = c.r;
-      colors[i * 3 + 1] = c.g;
-      colors[i * 3 + 2] = c.b;
-    }
-    const geo = new THREE.BufferGeometry();
-    geo.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-    geo.setAttribute("aSize", new THREE.BufferAttribute(sizes, 1));
-    geo.setAttribute("aColor", new THREE.BufferAttribute(colors, 3));
+  let width = 0;
+  let height = 0;
+  let dpr = 1;
 
-    const mat = new THREE.ShaderMaterial({
-      transparent: true,
-      depthWrite: false,
-      uniforms: { uTime: { value: 0 } },
-      vertexShader: `
-        attribute float aSize;
-        attribute vec3 aColor;
-        uniform float uTime;
-        varying float vTw;
-        varying vec3 vColor;
-        void main() {
-          vec4 mv = modelViewMatrix * vec4(position, 1.0);
-          vTw = 0.55 + 0.45 * sin(uTime * (1.0 + aSize) + position.x * 40.0 + position.y * 30.0);
-          gl_PointSize = aSize * (3.0 / -mv.z) * vTw;
-          gl_Position = projectionMatrix * mv;
-          vColor = aColor;
-        }
-      `,
-      fragmentShader: `
-        varying float vTw;
-        varying vec3 vColor;
-        void main() {
-          float d = distance(gl_PointCoord, vec2(0.5));
-          float a = smoothstep(0.5, 0.0, d) * vTw;
-          gl_FragColor = vec4(vColor, a);
-        }
-      `,
+  // 2. Resize & DPR Setup
+  function resize() {
+    dpr = Math.min(window.devicePixelRatio || 1, 2);
+    width = window.innerWidth;
+    height = window.innerHeight;
+    canvas.width = width * dpr;
+    canvas.height = height * dpr;
+    canvas.style.width = width + 'px';
+    canvas.style.height = height + 'px';
+    ctx.scale(dpr, dpr);
+  }
+
+  window.addEventListener('resize', resize, { passive: true });
+  resize();
+
+  // 3. Color Palette Constants (Dark Luxury Gold)
+  const GOLD_COLORS = [
+    { r: 201, g: 169, b: 110 }, // Warm Gold #c9a96e
+    { r: 232, g: 220, b: 200 }, // Cream #e8dcc8
+    { r: 244, g: 208, b: 132 }, // Bright Gold #f4d084
+    { r: 180, g: 140, b: 80 },  // Deep Amber Gold #b48c50
+    { r: 255, g: 248, b: 230 }  // Radiant White Gold #fff8e6
+  ];
+
+  // 4. Generate Procedural Stars
+  const STAR_COUNT = Math.min(Math.floor((window.innerWidth * window.innerHeight) / 3200), 380);
+  const stars = [];
+
+  for (let i = 0; i < STAR_COUNT; i++) {
+    const colorObj = GOLD_COLORS[Math.floor(Math.random() * GOLD_COLORS.length)];
+    const isFlare = Math.random() < 0.07; // ~7% of stars have subtle 4-point lens flares
+    stars.push({
+      x: (Math.random() - 0.5) * 1.8,
+      y: (Math.random() - 0.5) * 1.8,
+      z: 0.8 + Math.random() * 2.5,   // Safe depth range z (0.8 to 3.3)
+      baseSize: isFlare ? 1.2 + Math.random() * 0.8 : 0.4 + Math.random() * 0.9,
+      color: colorObj,
+      twinkleSpeed: 0.6 + Math.random() * 1.8,
+      twinklePhase: Math.random() * Math.PI * 2,
+      flare: isFlare
     });
-
-    const points = new THREE.Points(geo, mat);
-    scene.add(points);
-    return { points, mat };
   }
 
-  function radialTexture(rgb, stops) {
-    const c = document.createElement("canvas");
-    c.width = c.height = 256;
-    const ctx = c.getContext("2d");
-    const g = ctx.createRadialGradient(128, 128, 0, 128, 128, 128);
-    g.addColorStop(0, rgb);
-    g.addColorStop(1, "rgba(0,0,0,0)");
-    ctx.fillStyle = g;
-    ctx.fillRect(0, 0, 256, 256);
-    return new THREE.CanvasTexture(c);
+  // 5. Nebula Cloud Nodes (Warm Gold & Bronze-Amber Drifting Fog)
+  const nebulae = [
+    { xRatio: 0.2, yRatio: 0.3, radiusRatio: 0.45, color: 'rgba(201, 169, 110, 0.055)', speedX: 0.00006, speedY: 0.00004 },
+    { xRatio: 0.8, yRatio: 0.7, radiusRatio: 0.5,  color: 'rgba(139, 85, 30, 0.045)',   speedX: -0.00005, speedY: 0.00005 },
+    { xRatio: 0.5, yRatio: 0.5, radiusRatio: 0.6,  color: 'rgba(180, 130, 60, 0.035)',  speedX: 0.00003, speedY: -0.00004 }
+  ];
+
+  // 6. Draw 4-Point Golden Lens Flare
+  function drawSparkle(ctx, cx, cy, radius, rgbStr, opacity) {
+    ctx.save();
+    ctx.translate(cx, cy);
+    ctx.fillStyle = rgbStr;
+    ctx.globalAlpha = opacity;
+
+    const flareLen = Math.min(radius * 3.2, 8.0);
+    const flareThickness = radius * 0.3;
+
+    // Horizontal ray
+    ctx.beginPath();
+    ctx.moveTo(-flareLen, 0);
+    ctx.quadraticCurveTo(0, flareThickness, flareLen, 0);
+    ctx.quadraticCurveTo(0, -flareThickness, -flareLen, 0);
+    ctx.fill();
+
+    // Vertical ray
+    ctx.beginPath();
+    ctx.moveTo(0, -flareLen);
+    ctx.quadraticCurveTo(flareThickness, 0, 0, flareLen);
+    ctx.quadraticCurveTo(-flareThickness, 0, 0, -flareLen);
+    ctx.fill();
+
+    ctx.restore();
   }
 
-  function makeGlow(color, scale, pos, opacity) {
-    const sprite = new THREE.Sprite(
-      new THREE.SpriteMaterial({
-        map: radialTexture(color, 0.7),
-        transparent: true,
-        opacity,
-        depthWrite: false,
-        blending: THREE.AdditiveBlending,
-      })
-    );
-    sprite.scale.set(scale, scale, 1);
-    sprite.position.copy(pos);
-    scene.add(sprite);
-    return sprite;
-  }
+  // 7. Animation Loop
+  let lastTime = performance.now();
 
-  scene.add(new THREE.AmbientLight(0x334, 0.85));
-  const sun = new THREE.DirectionalLight(0xffffff, 2.3);
-  sun.position.set(5, 6, 3);
-  scene.add(sun);
-  const rim = new THREE.PointLight(0x54f1ff, 1.6, 30);
-  rim.position.set(-6, 2, 5);
-  scene.add(rim);
+  function render(currentTime) {
+    const delta = (currentTime - lastTime) * 0.001;
+    lastTime = currentTime;
+    const t = currentTime * 0.001;
 
-  function moonTexture() {
-    const size = 512;
-    const c = document.createElement("canvas");
-    c.width = c.height = size;
-    const ctx = c.getContext("2d");
-    
-    // Deep vibrant space blue/purple base
-    const grad = ctx.createLinearGradient(0, 0, size, size);
-    grad.addColorStop(0, "#1a0b2e");
-    grad.addColorStop(0.5, "#2b1055");
-    grad.addColorStop(1, "#10162a");
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, size, size);
+    // Clear with dark charcoal background base
+    ctx.fillStyle = '#101013';
+    ctx.fillRect(0, 0, width, height);
 
-    // Glowing craters/nebula spots
-    for (let i = 0; i < 40; i++) {
-      const x = Math.random() * size;
-      const y = Math.random() * size;
-      const r = 20 + Math.random() * 60;
-      const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-      const colorType = Math.random();
-      if (colorType > 0.6) {
-        g.addColorStop(0, "rgba(84, 241, 255, 0.15)"); // cyan
-      } else if (colorType > 0.3) {
-        g.addColorStop(0, "rgba(139, 92, 246, 0.15)"); // violet
-      } else {
-        g.addColorStop(0, "rgba(255, 95, 178, 0.15)"); // pink
-      }
-      g.addColorStop(1, "rgba(0,0,0,0)");
-      ctx.fillStyle = g;
+    const centerX = width * 0.5;
+    const centerY = height * 0.5;
+    const maxDimension = Math.max(width, height);
+
+    // A. Render Drifting Brown-Gold Nebulae
+    for (let i = 0; i < nebulae.length; i++) {
+      const neb = nebulae[i];
+      neb.xRatio += neb.speedX;
+      neb.yRatio += neb.speedY;
+
+      if (neb.xRatio < -0.2) neb.xRatio = 1.2;
+      if (neb.xRatio > 1.2) neb.xRatio = -0.2;
+      if (neb.yRatio < -0.2) neb.yRatio = 1.2;
+      if (neb.yRatio > 1.2) neb.yRatio = -0.2;
+
+      const nx = neb.xRatio * width;
+      const ny = neb.yRatio * height;
+      const nr = neb.radiusRatio * maxDimension;
+
+      const grad = ctx.createRadialGradient(nx, ny, 0, nx, ny, nr);
+      grad.addColorStop(0, neb.color);
+      grad.addColorStop(0.6, neb.color.replace(/[\d\.]+\)$/, '0.01)'));
+      grad.addColorStop(1, 'rgba(16, 16, 19, 0)');
+
+      ctx.fillStyle = grad;
       ctx.beginPath();
-      ctx.arc(x, y, r, 0, Math.PI * 2);
+      ctx.arc(nx, ny, nr, 0, Math.PI * 2);
       ctx.fill();
     }
 
-    // Micro noise
-    for (let i = 0; i < 15000; i++) {
-      const x = Math.random() * size;
-      const y = Math.random() * size;
-      ctx.fillStyle = Math.random() > 0.5 ? "rgba(255,255,255,0.03)" : "rgba(0,0,0,0.05)";
-      ctx.fillRect(x, y, 2, 2);
-    }
-    return new THREE.CanvasTexture(c);
-  }
+    // B. Subtle Pulsing Cycle (Gentle Zoom In & Out Motion, No Blinding)
+    const globalZoom = 1 + Math.sin(t * 0.5) * 0.12;
+    const globalPulseGlow = 0.8 + Math.cos(t * 0.7) * 0.15;
 
-  const moonGroup = new THREE.Group();
+    // C. Render Stars with Controlled Size & Opacity
+    for (let i = 0; i < stars.length; i++) {
+      const star = stars[i];
 
-  const moon = new THREE.Mesh(
-    new THREE.SphereGeometry(1, 64, 64),
-    new THREE.MeshStandardMaterial({ map: moonTexture(), roughness: 0.6, metalness: 0.2 })
-  );
-  moonGroup.add(moon);
-  
-  // Atmospheric glow
-  const atmosphere = new THREE.Mesh(
-    new THREE.SphereGeometry(1.05, 64, 64),
-    new THREE.MeshBasicMaterial({ color: 0x54f1ff, transparent: true, opacity: 0.15, blending: THREE.AdditiveBlending })
-  );
-  moonGroup.add(atmosphere);
+      // Safe depth oscillation (min z = 0.65 to prevent close-up blinding)
+      const currentZ = Math.max(0.65, star.z + Math.sin(t * 0.5 + star.twinklePhase) * 0.18);
+      const depthScale = globalZoom / currentZ;
 
-  const ring = new THREE.Mesh(
-    new THREE.TorusGeometry(1.5, 0.032, 14, 140),
-    new THREE.MeshBasicMaterial({ color: 0x54f1ff, transparent: true, opacity: 0.38, blending: THREE.AdditiveBlending })
-  );
-  ring.rotation.set(0.42, 0, -0.3);
-  moonGroup.add(ring);
+      const sx = centerX + star.x * centerX * depthScale;
+      const sy = centerY + star.y * centerY * depthScale;
 
-  const ringWide = new THREE.Mesh(
-    new THREE.TorusGeometry(1.82, 0.014, 10, 140),
-    new THREE.MeshBasicMaterial({ color: 0x8b5cf6, transparent: true, opacity: 0.18, blending: THREE.AdditiveBlending })
-  );
-  ringWide.rotation.set(0.42, 0, -0.3);
-  moonGroup.add(ringWide);
-
-  const net = new THREE.Mesh(
-    new THREE.SphereGeometry(1.24, 18, 18),
-    new THREE.MeshBasicMaterial({ color: 0x8b5cf6, wireframe: true, transparent: true, opacity: 0.16 })
-  );
-  moonGroup.add(net);
-
-  const glow = makeGlow("rgba(84,152,255,0.85)", 7, new THREE.Vector3(0, 0, -0.6), 0.5);
-  scene.add(moonGroup);
-
-  makeGlow("rgba(139,92,246,0.5)", 26, new THREE.Vector3(-14, 6, -40), 0.55);
-  makeGlow("rgba(255,95,178,0.42)", 22, new THREE.Vector3(16, -8, -42), 0.45);
-  makeGlow("rgba(84,241,255,0.4)", 18, new THREE.Vector3(0, 10, -44), 0.4);
-
-  const stars = makeStars(2400, 30);
-
-  const METEO_COUNT = 5;
-  const meteors = [];
-  for (let i = 0; i < METEO_COUNT; i++) {
-    const geo = new THREE.BufferGeometry();
-    const arr = new Float32Array(6);
-    arr.fill(0);
-    geo.setAttribute("position", new THREE.BufferAttribute(arr, 3));
-    const mat = new THREE.LineBasicMaterial({ color: 0xbcd6ff, transparent: true, opacity: 0 });
-    const line = new THREE.Line(geo, mat);
-    line.frustumCulled = false;
-    scene.add(line);
-    meteors.push({ line, mat, arr, t: Math.random() });
-  }
-  function respawnMeteor(m) {
-    const start = new THREE.Vector3(
-      (Math.random() - 0.5) * 46,
-      14 + Math.random() * 16,
-      -8 - Math.random() * 22
-    );
-    const dir = new THREE.Vector3(-0.6 - Math.random() * 0.9, -1, 0.12).normalize();
-    m.start = start;
-    m.dir = dir;
-    m.dur = 1 + Math.random() * 1.4;
-    m.t = 0;
-    m.speed = 26 + Math.random() * 18;
-  }
-
-  let cfg = {};
-  let scrollFade = 1;
-  function layout() {
-    const w = window.innerWidth;
-    if (w >= 1280) cfg = { x: 4.3, y: 1.5, z: -3.2, s: 1.0, g: 0.5, camZ: 10 };
-    else if (w >= 1000) cfg = { x: 3.6, y: 1.0, z: -4.5, s: 0.9, g: 0.42, camZ: 11 };
-    else if (w >= 640) cfg = { x: 0, y: 3.6, z: -8, s: 0.72, g: 0.3, camZ: 12 };
-    else cfg = { x: 0, y: 3.8, z: -10, s: 0.58, g: 0.22, camZ: 12 };
-  }
-  layout();
-
-  let recorded = { x: cfg.x, y: cfg.y, s: cfg.s, g: cfg.g, camZ: cfg.camZ };
-
-  function easeOut(a, b, k) {
-    return a + (b - a) * k;
-  }
-
-  window.addEventListener("resize", () => {
-    layout();
-    camera.aspect = window.innerWidth / window.innerHeight;
-    camera.updateProjectionMatrix();
-    renderer.setSize(window.innerWidth, window.innerHeight);
-  });
-  window.addEventListener("scroll", () => {
-    scrollFade = Math.max(0, 1 - window.scrollY / (window.innerHeight * 1.1));
-  }, { passive: true });
-  window.addEventListener("mousemove", (e) => {
-    mouse.x = (e.clientX / window.innerWidth - 0.5) * 2;
-    mouse.y = (e.clientY / window.innerHeight - 0.5) * 2;
-  });
-
-  let prev = performance.now();
-  function animate(now) {
-    const delta = Math.min(0.05, (now - prev) / 1000);
-    prev = now;
-    const time = now * 0.001;
-
-    stars.mat.uniforms.uTime.value = time;
-    stars.points.rotation.y = time * 0.007;
-    stars.points.rotation.x = Math.sin(time * 0.05) * 0.05;
-
-    moonGroup.rotation.y += delta * 0.14;
-    moon.rotation.y += delta * 0.02;
-
-    recorded.x = easeOut(recorded.x, cfg.x + mouse.x * 0.35, 0.03 * delta * 60);
-    recorded.y = easeOut(recorded.y, cfg.y - mouse.y * 0.25, 0.03 * delta * 60);
-    recorded.s = easeOut(recorded.s, cfg.s, 0.04 * delta * 60);
-    recorded.g = easeOut(recorded.g, cfg.g, 0.04 * delta * 60);
-    recorded.camZ = easeOut(recorded.camZ, cfg.camZ, 0.03 * delta * 60);
-
-    moonGroup.position.set(recorded.x, recorded.y, cfg.z);
-    moonGroup.scale.setScalar(recorded.s * (0.2 + 0.8 * scrollFade));
-    glow.material.opacity = recorded.g * scrollFade;
-    glow.scale.setScalar(6.5 * recorded.s * (0.3 + 0.7 * scrollFade));
-    ring.material.opacity = 0.38 * scrollFade;
-    ringWide.material.opacity = 0.18 * scrollFade;
-    net.material.opacity = 0.16 * scrollFade;
-
-    camera.position.z = recorded.camZ;
-    camera.position.x += (mouse.x * 0.5 - camera.position.x) * 0.02;
-    camera.position.y += (-mouse.y * 0.35 - camera.position.y) * 0.02;
-    camera.lookAt(0, 0, 0);
-
-    window.__taroScene = {
-      width: window.innerWidth,
-      height: window.innerHeight,
-      scrollFade,
-      moon: { x: recorded.x, y: recorded.y, z: cfg.z, s: recorded.s },
-      camZ: recorded.camZ,
-      aspect: camera.aspect,
-    };
-
-    for (const m of meteors) {
-      m.t += delta;
-      const life = m.t / m.dur;
-      if (life >= 1) {
-        respawnMeteor(m);
+      if (sx < -20 || sx > width + 20 || sy < -20 || sy > height + 20) {
         continue;
       }
-      const p1 = m.start.clone().add(m.dir.multiplyScalar(m.t * m.speed));
-      const p2 = p1.clone().add(m.dir.clone().multiplyScalar(m.speed * 0.14));
-      m.arr[0] = p1.x; m.arr[1] = p1.y; m.arr[2] = p1.z;
-      m.arr[3] = p2.x; m.arr[4] = p2.y; m.arr[5] = p2.z;
-      m.line.geometry.attributes.position.needsUpdate = true;
-      m.mat.opacity = Math.sin(Math.PI * life) * 0.55;
+
+      const twinkle = 0.4 + 0.6 * Math.sin(t * star.twinkleSpeed + star.twinklePhase);
+      const alpha = Math.min(0.75, (1 / (currentZ * 1.1)) * twinkle * globalPulseGlow);
+
+      // Strictly cap radius at 2.8px to eliminate blinding circles
+      const renderRadius = Math.min(2.8, Math.max(0.4, (star.baseSize / currentZ) * globalZoom));
+      const { r, g, b } = star.color;
+      const rgbStr = `rgba(${r}, ${g}, ${b}, ${alpha.toFixed(3)})`;
+      const glowStr = `rgba(${r}, ${g}, ${b}, ${(alpha * 0.25).toFixed(3)})`;
+
+      // Soft Glow
+      if (renderRadius > 1.0) {
+        ctx.fillStyle = glowStr;
+        ctx.beginPath();
+        ctx.arc(sx, sy, renderRadius * 1.8, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Star Core
+      ctx.fillStyle = rgbStr;
+      ctx.beginPath();
+      ctx.arc(sx, sy, renderRadius, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Delicate 4-point flare
+      if (star.flare && renderRadius > 1.2 && alpha > 0.45) {
+        drawSparkle(ctx, sx, sy, renderRadius, rgbStr, alpha * 0.7);
+      }
     }
 
-    renderer.render(scene, camera);
-    requestAnimationFrame(animate);
+    requestAnimationFrame(render);
   }
-  meteors.forEach((m) => respawnMeteor(m));
-  requestAnimationFrame(animate);
+
+  requestAnimationFrame(render);
 })();

@@ -1,32 +1,58 @@
 ---
 name: frontend-design
-description: Use when working on the TARO web app visual design, layout, CSS, HTML, responsive behavior, or landing/mini-app styling. Covers the cosmic futuristic design language (dark space, stars, 3D moon, glassmorphism, neon cyan/violet/pink) and general modern frontend best practices.
+description: Use when working on the TARO web app visual design, layout, CSS, HTML, responsive behavior, or landing/mini-app styling. Covers the Dark Luxury Gold design language (charcoal-black bg, warm gold accents, dense dark cards, serif headings, tarot card illustrations) and general modern frontend best practices.
 ---
 
-# Frontend Design
+# Frontend Design — Dark Luxury Gold
 
-## The TARO design language
+## The TARO design language (v2 — Dark Luxury Gold)
 
-- **Palette:** deep-space background `#05060f`, accents cyan `#54f1ff`, violet `#8b5cf6`, pink `#ff5fb2`. Gradient = cyan → violet → pink.
-- **Fonts:** `Orbitron` for display/headings (futuristic), `Manrope` for body text.
-- **Signature effects:** glassmorphism cards (backdrop-filter blur + `rgba(255,255,255,.05)` fill + `1px` light border), neon text-shadows, dashed orbit rings, Roman-numeral arcane badges, gradient borders, shine-sweep buttons.
-- **Environment:** fixed full-screen Three.js canvas (`js/space.js`) renders starfield, 3D moon, rings, meteors, nebulas. It sits at `z-index:0`; content lives at `z-index:4`. Two pseudo-element overlays on `body` add aurora glows (`z-index:0`, `mix-blend-mode:screen`) and a vignette (`z-index:3`).
+- **Palette:**
+  - Background: charcoal-black `#111114`
+  - Cards: `#1c1c20` base, `#232328` elevated
+  - Gold accent: `#c9a96e`, gold-light/cream: `#e8dcc8`
+  - Gold glow: `rgba(201, 169, 110, 0.2)`
+  - Text: `#f0ece4` (primary), `#8a857c` (muted)
+  - Borders: `rgba(201, 169, 110, 0.18)` (gold), `rgba(255, 255, 255, 0.06)` (subtle)
+  - NO neon cyan/violet/pink. NO glassmorphism blur. NO gradient buttons.
+
+- **Fonts:** `Playfair Display` for display/headings (elegant serif), `Inter` for body/UI (clean sans-serif). Loaded from Google Fonts.
+
+- **Card style:**
+  - Dense, opaque background `#1c1c20` — not transparent/glass
+  - Thin gold border `1px solid rgba(201, 169, 110, 0.18)`
+  - Border-radius: `16px` (cards), `12px` (inputs), `999px` (pills/buttons)
+  - On hover: border brightens to `rgba(201, 169, 110, 0.4)`, subtle translateY(-4px)
+  - No backdrop-filter, no blur, no neon box-shadows
+
+- **Buttons:**
+  - Primary: gold outline `border: 1px solid #c9a96e`, text `#c9a96e`, hover fills gold
+  - Ghost: subtle border `rgba(255,255,255,0.1)`, text muted, hover highlights
+  - No gradient fills, no glow shadows
+
+- **Tarot card illustrations:**
+  - 22 generated art images in `img/cards/` (vintage mystical style, gold/cream on dark)
+  - Referenced as `<img>` in arcana grid, NOT emoji symbols
+  - Fallback: gold-tinted radial gradient placeholder
+
+- **Environment:** Optional Three.js canvas (`js/space.js`) with subtle starfield. Moon/rings dimmed or removed. Content at `z-index:4`. Canvas can be disabled without breaking layout.
 
 ## Rules for edits
 
-- Keep the 3D sky as pure background: no content element may rely on the canvas; the layout must look complete even if the canvas fails (JS disabled).
-- NEVER obstruct the content column on medium/narrow widths. The moon is repositioned in `space.js` `layout()` by breakpoint (≥1280, ≥1000, ≥640, <640) and dims with `scrollFade` on scroll. Preserve this pattern when touching layout.
-- Respect `prefers-reduced-motion` — wrap decorative animation in a media query (already present in `style.css`).
-- Reveal-on-scroll: elements with `.reveal` (plus `.d2..d5` delays) animate in via IntersectionObserver in `app.js`. New sections must use these classes.
+- Keep the 3D sky as pure background: no content element may rely on the canvas.
+- NEVER obstruct the content column on medium/narrow widths.
+- Respect `prefers-reduced-motion` — wrap decorative animation in a media query.
+- Reveal-on-scroll: elements with `.reveal` animate in via IntersectionObserver in `app.js`.
 - Mobile first where possible; test at 390px and 1600px before finishing.
-- No images from the internet for the visual language — textures are procedural (canvas-generated) so the site works offline. Fonts load from Google Fonts (allowed).
-- Keep spacing consistent (8px grid, section padding ~90px desktop / ~60px mobile).
+- No images from the internet — textures are procedural or generated via AI.
+- Keep spacing consistent (8px grid, section padding ~80px desktop / ~48px mobile).
 - Russian copy, "ты"-form, no lorem.
-- Mini App is a tabbed SPA: 5 screens (`<section class="screen" id="screen-reads|natal|forecast|history|profile">`) switched by a fixed bottom `<nav class="tabbar">`. The Three.js canvas stays a global background. For Mini App SDK/routing/haptics/CloudStorage/sendData conventions see the `mini-app` skill.
+- Multi-page architecture: `index.html`, `natal.html`, `forecast.html`, `profile.html`.
+  Bottom `<nav class="tabbar">` with 4-5 tabs. Each page loads shared CSS/JS.
 
 ## Before/after any visual change
 
 1. Edit files under repo root (`index.html`, `css/style.css`, `js/app.js`, `js/space.js`).
-2. Serve: `python -m http.server 8000` (repo root; the site was moved from `web/` to root).
-3. Run the automated check: `node tools/browser-check/check.cjs` (expect 11/11).
-4. If a new breakpoint/behavior was touched, the puppeteer script may need a new assertion — add it rather than removing coverage.
+2. Serve: `python -m http.server 8000` (repo root).
+3. Run the automated check: `node tools/browser-check/check.cjs`.
+4. If a new breakpoint/behavior was touched, add a puppeteer assertion.

@@ -137,6 +137,185 @@ const ARCANA_TEXT = {
   21: "Мир — танец целого: завершение большого пути и гармония всех частей. Ты способен видеть взаимосвязь всего и находить целостность даже в противоречиях. Финал одного круга — начало следующего.",
 };
 
+const ARCANA_IMAGES = [
+  'img/cards/00-fool.png',
+  'img/cards/01-magician.png',
+  'img/cards/02-priestess.png',
+  'img/cards/03-empress.png',
+  'img/cards/04-emperor.png',
+  'img/cards/05-hierophant.png',
+  'img/cards/06-lovers.png',
+  'img/cards/07-chariot.png',
+  'img/cards/08-strength.png',
+  'img/cards/09-hermit.png',
+  'img/cards/10-wheel.png',
+  'img/cards/11-justice.png',
+  'img/cards/12-hanged.png',
+  'img/cards/13-death.png',
+  'img/cards/14-temperance.png',
+  'img/cards/15-devil.png',
+  'img/cards/16-tower.png',
+  'img/cards/17-star.png',
+  'img/cards/18-moon.png',
+  'img/cards/19-sun.png',
+  'img/cards/20-judgement.png',
+  'img/cards/21-world.png',
+];
+
+function getArcanaSVG(n, cardName) {
+  const roman = ROMAN[n] || "";
+  let art = '';
+  switch(n) {
+    case 0: // Шут
+      art = `<path d="M60 40 L60 80 M45 40 Q60 25 75 40 M60 80 L40 105 L80 105 Z" fill="none" stroke="#c9a96e" stroke-width="1.8"/>
+             <circle cx="60" cy="30" r="8" fill="none" stroke="#e8dcc8" stroke-width="1.5"/>
+             <path d="M35 115 C50 100 70 100 85 115" stroke="#c9a96e" stroke-width="1.5" fill="none"/>
+             <circle cx="90" cy="35" r="5" fill="#c9a96e"/>`;
+      break;
+    case 1: // Маг
+      art = `<path d="M50 45 C50 38 70 38 70 45 C70 52 50 52 50 45 Z M70 45 C70 38 90 38 90 45 C90 52 70 52 70 45 Z" fill="none" stroke="#e8dcc8" stroke-width="1.6"/>
+             <line x1="60" y1="60" x2="60" y2="100" stroke="#c9a96e" stroke-width="2"/>
+             <circle cx="60" cy="60" r="3" fill="#e8dcc8"/>
+             <path d="M40 90 L80 90 M45 105 L75 105" stroke="#c9a96e" stroke-width="1.5"/>
+             <polygon points="60,70 65,80 55,80" fill="#c9a96e"/>`;
+      break;
+    case 2: // Жрица
+      art = `<path d="M40 40 L40 110 M80 40 L80 110" stroke="#c9a96e" stroke-width="3"/>
+             <text x="34" y="32" fill="#e8dcc8" font-size="10" font-family="serif">B</text>
+             <text x="74" y="32" fill="#e8dcc8" font-size="10" font-family="serif">J</text>
+             <circle cx="60" cy="65" r="14" fill="none" stroke="#e8dcc8" stroke-width="1.8"/>
+             <path d="M48 65 A 14 14 0 0 0 72 65" fill="#c9a96e" opacity="0.4"/>
+             <path d="M45 95 Q60 85 75 95" stroke="#c9a96e" stroke-width="1.5" fill="none"/>`;
+      break;
+    case 3: // Императрица
+      art = `<circle cx="60" cy="55" r="16" fill="none" stroke="#c9a96e" stroke-width="1.8"/>
+             <path d="M52 47 L60 38 L68 47 M46 55 L74 55 M60 71 L60 100 M50 85 L70 85" stroke="#c9a96e" stroke-width="1.8" fill="none"/>
+             <circle cx="60" cy="100" r="4" fill="#e8dcc8"/>
+             <path d="M35 110 Q60 100 85 110" stroke="#c9a96e" stroke-width="1.2" fill="none"/>`;
+      break;
+    case 4: // Император
+      art = `<rect x="42" y="45" width="36" height="50" rx="4" fill="none" stroke="#c9a96e" stroke-width="1.8"/>
+             <path d="M50 45 L50 35 L60 40 L70 35 L70 45" fill="none" stroke="#e8dcc8" stroke-width="1.5"/>
+             <line x1="60" y1="55" x2="60" y2="85" stroke="#c9a96e" stroke-width="2"/>
+             <line x1="52" y1="65" x2="68" y2="65" stroke="#c9a96e" stroke-width="2"/>
+             <circle cx="60" cy="55" r="3" fill="#e8dcc8"/>`;
+      break;
+    case 5: // Иерофант
+      art = `<path d="M60 35 L60 95 M45 48 L75 48 M48 62 L72 62 M52 76 L68 76" stroke="#c9a96e" stroke-width="2"/>
+             <path d="M40 105 L55 90 L60 100 L65 90 L80 105" fill="none" stroke="#e8dcc8" stroke-width="1.5"/>
+             <circle cx="60" cy="35" r="3" fill="#e8dcc8"/>`;
+      break;
+    case 6: // Влюблённые
+      art = `<path d="M60 45 C45 30 30 50 60 75 C90 50 75 30 60 45 Z" fill="rgba(201,169,110,0.2)" stroke="#c9a96e" stroke-width="1.8"/>
+             <path d="M35 85 L45 65 L55 85 M65 85 L75 65 L85 85" stroke="#e8dcc8" stroke-width="1.5" fill="none"/>
+             <line x1="60" y1="75" x2="60" y2="105" stroke="#c9a96e" stroke-width="1.2" stroke-dasharray="2 2"/>`;
+      break;
+    case 7: // Колесница
+      art = `<rect x="40" y="65" width="40" height="30" rx="3" fill="none" stroke="#c9a96e" stroke-width="1.8"/>
+             <circle cx="45" cy="100" r="8" fill="none" stroke="#e8dcc8" stroke-width="1.5"/>
+             <circle cx="75" cy="100" r="8" fill="none" stroke="#e8dcc8" stroke-width="1.5"/>
+             <polygon points="60,35 70,55 50,55" fill="none" stroke="#c9a96e" stroke-width="1.6"/>
+             <line x1="60" y1="55" x2="60" y2="65" stroke="#c9a96e" stroke-width="1.5"/>`;
+      break;
+    case 8: // Сила
+      art = `<path d="M50 45 C50 38 70 38 70 45 C70 52 50 52 50 45 Z M70 45 C70 38 90 38 90 45 C90 52 70 52 70 45 Z" fill="none" stroke="#c9a96e" stroke-width="1.6"/>
+             <path d="M45 70 Q60 55 75 70 Q70 95 60 100 Q50 95 45 70 Z" fill="none" stroke="#e8dcc8" stroke-width="1.8"/>
+             <circle cx="60" cy="75" r="4" fill="#c9a96e"/>`;
+      break;
+    case 9: // Отшельник
+      art = `<polygon points="60,35 64,47 77,47 66,55 70,67 60,59 50,67 54,55 43,47 56,47" fill="none" stroke="#e8dcc8" stroke-width="1.4"/>
+             <path d="M60 67 L60 105 M45 105 L75 105" stroke="#c9a96e" stroke-width="1.8"/>
+             <path d="M40 45 Q30 75 45 105" stroke="#c9a96e" stroke-width="1.2" fill="none"/>`;
+      break;
+    case 10: // Колесо Фортуны
+      art = `<circle cx="60" cy="65" r="25" fill="none" stroke="#c9a96e" stroke-width="2"/>
+             <circle cx="60" cy="65" r="10" fill="none" stroke="#e8dcc8" stroke-width="1.4"/>
+             <line x1="60" y1="40" x2="60" y2="90" stroke="#c9a96e" stroke-width="1.2"/>
+             <line x1="35" y1="65" x2="85" y2="65" stroke="#c9a96e" stroke-width="1.2"/>
+             <line x1="42" y1="47" x2="78" y2="83" stroke="#c9a96e" stroke-width="1.2"/>
+             <line x1="42" y1="83" x2="78" y2="47" stroke="#c9a96e" stroke-width="1.2"/>`;
+      break;
+    case 11: // Справедливость
+      art = `<line x1="60" y1="35" x2="60" y2="105" stroke="#e8dcc8" stroke-width="2"/>
+             <line x1="35" y1="50" x2="85" y2="50" stroke="#c9a96e" stroke-width="2"/>
+             <path d="M35 50 L25 70 Q35 80 45 70 Z M85 50 L75 70 Q85 80 95 70 Z" fill="none" stroke="#c9a96e" stroke-width="1.5"/>
+             <polygon points="60,30 64,38 56,38" fill="#e8dcc8"/>`;
+      break;
+    case 12: // Повешенный
+      art = `<path d="M35 35 L85 35 M60 35 L60 65 L45 80 M60 65 L75 80 M60 85 L60 105" stroke="#c9a96e" stroke-width="2" fill="none"/>
+             <circle cx="60" cy="95" r="8" fill="none" stroke="#e8dcc8" stroke-width="1.5"/>`;
+      break;
+    case 13: // Смерть
+      art = `<path d="M60 35 L75 65 L60 95 L45 65 Z" fill="none" stroke="#c9a96e" stroke-width="1.8"/>
+             <circle cx="60" cy="65" r="10" fill="none" stroke="#e8dcc8" stroke-width="1.5"/>
+             <path d="M54 65 L66 65 M60 59 L60 71" stroke="#e8dcc8" stroke-width="1.5"/>
+             <path d="M40 105 C50 95 70 95 80 105" stroke="#c9a96e" stroke-width="1.2" fill="none"/>`;
+      break;
+    case 14: // Умеренность
+      art = `<path d="M45 45 C45 45 35 65 45 80 M75 45 C75 45 85 65 75 80" stroke="#c9a96e" stroke-width="1.5" fill="none"/>
+             <path d="M40 50 Q60 55 50 85 M80 50 Q60 55 70 85" stroke="#e8dcc8" stroke-width="1.5" fill="none"/>
+             <path d="M45 65 Q60 60 75 65" stroke="#c9a96e" stroke-width="1.5" stroke-dasharray="2 2" fill="none"/>`;
+      break;
+    case 15: // Дьявол
+      art = `<polygon points="60,35 65,48 78,48 68,57 72,70 60,61 48,70 52,57 42,48 55,48" fill="none" stroke="#e8dcc8" stroke-width="1.5"/>
+             <path d="M45 75 L60 62 L75 75 L60 105 Z" fill="none" stroke="#c9a96e" stroke-width="1.8"/>
+             <circle cx="60" cy="85" r="4" fill="#c9a96e"/>`;
+      break;
+    case 16: // Башня
+      art = `<polygon points="45,105 50,45 70,45 75,105" fill="none" stroke="#c9a96e" stroke-width="1.8"/>
+             <path d="M45 45 L60 30 L75 45" fill="none" stroke="#e8dcc8" stroke-width="1.8"/>
+             <path d="M68 25 L55 55 L65 55 L50 85" stroke="#e8dcc8" stroke-width="2" fill="none"/>`;
+      break;
+    case 17: // Звезда
+      art = `<polygon points="60,30 64,45 78,45 67,54 71,68 60,59 49,68 53,54 42,45 56,45" fill="rgba(201,169,110,0.2)" stroke="#e8dcc8" stroke-width="1.6"/>
+             <circle cx="38" cy="40" r="2" fill="#c9a96e"/>
+             <circle cx="82" cy="40" r="2" fill="#c9a96e"/>
+             <circle cx="32" cy="65" r="2" fill="#c9a96e"/>
+             <circle cx="88" cy="65" r="2" fill="#c9a96e"/>
+             <path d="M35 90 Q60 80 85 90 M40 100 Q60 90 80 100" stroke="#c9a96e" stroke-width="1.5" fill="none"/>`;
+      break;
+    case 18: // Луна
+      art = `<circle cx="60" cy="55" r="18" fill="none" stroke="#e8dcc8" stroke-width="1.8"/>
+             <path d="M60 37 A 18 18 0 0 1 78 55 A 18 18 0 0 1 60 73 A 14 14 0 0 0 60 37" fill="#c9a96e" opacity="0.6"/>
+             <path d="M40 105 L40 85 L48 85 L48 105 M80 105 L80 85 L72 85 L72 105" stroke="#c9a96e" stroke-width="1.5" fill="none"/>
+             <path d="M50 100 Q60 92 70 100" stroke="#e8dcc8" stroke-width="1.2" fill="none"/>`;
+      break;
+    case 19: // Солнце
+      art = `<circle cx="60" cy="60" r="16" fill="none" stroke="#e8dcc8" stroke-width="2"/>
+             <path d="M60 38 L60 28 M60 82 L60 92 M38 60 L28 60 M82 60 L92 60 M44 44 L37 37 M76 76 L83 83 M44 76 L37 83 M76 44 L83 37" stroke="#c9a96e" stroke-width="1.8"/>
+             <circle cx="54" cy="56" r="2" fill="#e8dcc8"/>
+             <circle cx="66" cy="56" r="2" fill="#e8dcc8"/>
+             <path d="M54 66 Q60 71 66 66" stroke="#e8dcc8" stroke-width="1.5" fill="none"/>`;
+      break;
+    case 20: // Суд
+      art = `<path d="M60 35 L60 75 M45 45 L75 45" stroke="#e8dcc8" stroke-width="2"/>
+             <path d="M60 55 L85 65 L60 75" fill="rgba(201,169,110,0.2)" stroke="#c9a96e" stroke-width="1.5"/>
+             <path d="M35 105 L45 90 M60 105 L60 88 M85 105 L75 90" stroke="#c9a96e" stroke-width="1.8"/>`;
+      break;
+    case 21: // Мир
+      art = `<ellipse cx="60" cy="65" rx="22" ry="30" fill="none" stroke="#c9a96e" stroke-width="1.8" stroke-dasharray="4 2"/>
+             <path d="M60 45 L60 85 M48 60 L72 60" stroke="#e8dcc8" stroke-width="1.6"/>
+             <circle cx="60" cy="65" r="6" fill="none" stroke="#c9a96e" stroke-width="1.4"/>`;
+      break;
+    default:
+      art = `<circle cx="60" cy="65" r="20" fill="none" stroke="#c9a96e" stroke-width="1.5"/>`;
+  }
+
+  return `
+    <svg viewBox="0 0 120 160" width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
+      <rect x="3" y="3" width="114" height="154" rx="8" fill="#151518" stroke="#c9a96e" stroke-width="1.2"/>
+      <rect x="7" y="7" width="106" height="146" rx="5" fill="none" stroke="rgba(201,169,110,0.3)" stroke-width="0.8"/>
+      <text x="60" y="20" fill="#c9a96e" font-size="8" font-family="'Playfair Display', Georgia, serif" font-weight="600" text-anchor="middle" letter-spacing="1">${roman}</text>
+      <line x1="20" y1="24" x2="100" y2="24" stroke="rgba(201,169,110,0.2)" stroke-width="0.8"/>
+      <g>
+        ${art}
+      </g>
+      <line x1="20" y1="134" x2="100" y2="134" stroke="rgba(201,169,110,0.2)" stroke-width="0.8"/>
+      <text x="60" y="145" fill="#e8dcc8" font-size="7.5" font-family="'Playfair Display', Georgia, serif" font-weight="600" text-anchor="middle" letter-spacing="0.5">${cardName.toUpperCase()}</text>
+    </svg>
+  `;
+}
+
 const SIGNS = {
   Овен: { dates: "21.03 – 19.04", element: "Огонь", planet: "Марс", icon: "♈︎" },
   Телец: { dates: "20.04 – 20.05", element: "Земля", planet: "Венера", icon: "♉︎" },
@@ -309,18 +488,24 @@ function renderResult(day, month, year, opts = {}) {
       <p>Дата рождения: ${String(day).padStart(2, "0")}.${String(month).padStart(2, "0")}.${year}</p>
     </div>`;
 
+  const getArcanaSymbol = (n) => {
+    const symbols = ["✨", "🪄", "🔮", "👑", "🏛️", "📜", "💖", "⚔️", "🦁", "🕯️", "☸️", "⚖️", "⏳", "🦋", "☯️", "🔥", "⚡", "⭐", "🌙", "☉", "🎺", "🌍"];
+    return symbols[n] || "✦";
+  };
+
   $("arcana-grid").innerHTML = arc
     .map(
       (a, i) => `
-      <div class="arcana__item glass" data-idx="${i}" tabindex="0" role="button" aria-label="Подробнее: ${a.pos} — ${a.card}" style="animation-delay:${i * 60}ms">
-        <div class="arcana__inner">
-          <div class="arcana__sheen"></div>
-          <div class="arcana__num">АРКАН ${ROMAN[a.n]}</div>
-          <div class="arcana__title">${a.pos}</div>
-          <div class="arcana__card">${a.card}</div>
-          <span class="arcana__kw">${a.kw}</span>
-          <span class="arcana__more">Подробнее ›</span>
+      <div class="arcana__item bento-card gold-glow-hover glass" data-idx="${i}" tabindex="0" role="button" aria-label="Подробнее: ${a.pos} — ${a.card}" style="animation-delay:${i * 60}ms">
+        <div class="arcana__num">АРКАН ${ROMAN[a.n]} · ${a.pos}</div>
+        <div class="arcana__card">${a.card}</div>
+        <span class="arcana__kw">${a.kw}</span>
+        <div class="arcana__illustration">
+          <img src="${ARCANA_IMAGES[a.n]}" alt="${a.card}" onerror="if(!this.dataset.t1){this.dataset.t1=1;this.src=this.src.replace('.png','.jpg');}else if(!this.dataset.t2){this.dataset.t2=1;this.src=this.src.replace('.jpg','.webp');}else{this.style.display='none';}" onload="this.style.display='block';" style="display:none;" />
+          <div class="arcana__svg-card">${getArcanaSVG(a.n, a.card)}</div>
         </div>
+        <button class="arcana__btn" type="button">СМОТРЕТЬ ЗНАЧЕНИЕ</button>
+        <div class="arcana__author">@TaroNavigator</div>
       </div>`
     )
     .join("");
@@ -395,12 +580,38 @@ function closeModal() {
 function openModal(item) {
   lastModalArcana = item.n;
   $("modal-num").textContent = `АРКАН ${ROMAN[item.n]}`;
-  $("modal-pos").textContent = item.pos;
   $("modal-card").textContent = item.card;
   $("modal-kw").textContent = item.kw;
-  const intro = POSITION_INTROS[item.pos];
-  const base = ARCANA_TEXT[item.n] || "Эта карта хранит свою тайну.";
-  $("modal-text").textContent = (intro ? `В позиции «${item.pos}» этот аркан означает: ${intro}\n\n` : "") + base;
+
+  const imgEl = $("modal-img");
+  if (imgEl) {
+    const numStr = String(item.n).padStart(2, "0");
+    imgEl.dataset.t1 = "";
+    imgEl.dataset.t2 = "";
+    imgEl.style.display = "none";
+    imgEl.onerror = function () {
+      if (!this.dataset.t1) {
+        this.dataset.t1 = "1";
+        this.src = this.src.replace(".png", ".jpg");
+      } else if (!this.dataset.t2) {
+        this.dataset.t2 = "1";
+        this.src = this.src.replace(".jpg", ".webp");
+      } else {
+        this.style.display = "none";
+      }
+    };
+    imgEl.onload = function () {
+      this.style.display = "block";
+    };
+    imgEl.src = ARCANA_IMAGES[item.n] || `img/cards/${numStr}.jpg`;
+  }
+
+  const textEl = $("modal-text");
+  if (textEl) {
+    textEl.hidden = true;
+    textEl.textContent = "";
+  }
+
   resetModalCta();
   modal.hidden = false;
   document.body.style.overflow = "hidden";
@@ -436,10 +647,513 @@ function buildExtendedArcanaText(item) {
   );
 }
 
+// === Библиотека книг про Таро и эзотерику ===
+const TARO_BOOKS = [
+  {
+    id: "b1",
+    title: "78 ступеней мудрости",
+    subtitle: "Библия современного Таро и юнгианских архетипов",
+    author: "Рэйчел Поллак",
+    year: "1980",
+    school: "Школа Уэйта / Психология",
+    level: "Для всех уровней",
+    coverIcon: "📖",
+    coverImage: "img/books/b1-pollack.png",
+    pdfUrl: "books/pollack-78-steps.pdf",
+    desc: "Фундаментальный труд, объединивший традицию Райдера-Уэйта с глубинной психологией Карла Юнга, мифологией и каббалой. Считается главным учебным пособием XXI века.",
+    chapters: [
+      {
+        title: "📌 Обзор & Концепция",
+        content: `
+          <h3>78 ступеней мудрости — Рэйчел Поллак</h3>
+          <p>Рэйчел Поллак совершила революцию в мировой тарологии, объединив традицию Райдера-Уэйта с глубинной психологией Карла Юнга, мифологией и архаическими символами бессознательного.</p>
+          <p>Книга рассматривает Таро не как инструментарий бытового гадания, а как <b>живую карту человеческого развития</b>, где 22 Старших Аркана представляют собой «Путешествие Героя» через три последовательные стадии осознанности.</p>
+          <div class="book-reader__quote">«Таро — это священная книга в картинках, отражающая наше путешествие от абсолютной невинности Шута до полного космического единения Мира.»</div>
+        `
+      },
+      {
+        title: "📜 Триады Арканов",
+        content: `
+          <h3>Три Раунда Духовной Индивидуации</h3>
+          <p>Поллак делит 21 нумерованный Старший Аркан на три равных ряда по 7 карт:</p>
+          <h4>1. Первый ряд (Арканы I – VII): Материальный Мир и Эго</h4>
+          <p>От Мага до Колесницы. Герой осваивает внешний мир, правила общества, развивает волю, разум и формирует эго-идентичность.</p>
+          <h4>2. Второй ряд (Арканы VIII – XIV): Поворот Внутрь и Психология</h4>
+          <p>От Силы до Умеренности. Путешествие в глубины бессознательного, встреча с тенью, крах иллюзий и обретение душевной гармонии.</p>
+          <h4>3. Третий ряд (Арканы XV – XXI): Духовная Трансформация</h4>
+          <p>От Дьявола до Мира. Освобождение от цепей материальных привязнностей, прорыв сквозь Башню и окончательное космическое объединение.</p>
+        `
+      },
+      {
+        title: "🔮 Ключи: Шут и Маг",
+        content: `
+          <h3>Глубинный разбор ключей первых карт</h3>
+          <h4>0. Шут (The Fool) — Чистый Потенциал</h4>
+          <p>Шут — это бессознательное состояние перед началом творения. Он стоит на краю пропасти, держа белую розу (чистоту) и посох с узелком (сохраненный опыт прошлых воплощений). Белая собака — инстинкты, предупреждающие, но не останавливающие порыв.</p>
+          <h4>I. Маг (The Magician) — Сознательная Воля</h4>
+          <p>Маг поднимает жезл вверх, а другой рукой указывает на землю («Что вверху, то и внизу»). На его столе лежат четыре инструмента мастей — кубок, меч, пентакль и жезл. Маг переводит тонкие идеи в материальную форму.</p>
+        `
+      },
+      {
+        title: "💡 Практика и Упражнения",
+        content: `
+          <h3>Психотерапевтическая работа с картами</h3>
+          <p>Рэйчел Поллак рекомендует использовать Таро в качестве проективного теста для диалога со своим бессознательным:</p>
+          <ul>
+            <li><b>Расклад «Зеркало Тени»:</b> Вытащите карту из колоды на вопрос «Что я отрицаю в себе прямо сейчас?». Рассмотрите символы карты как подавленные качества.</li>
+            <li><b>Медитация на Аркан:</b> Выберите карту дня и назовите три ассоциации, которые вызывает её образ перед тем, как читать официальное значение.</li>
+          </ul>
+        `
+      }
+    ]
+  },
+  {
+    id: "b2",
+    title: "Иллюстрированный ключ к Таро",
+    subtitle: "Официальное руководство к классической колоде",
+    author: "Артур Эдвард Уэйт",
+    year: "1910",
+    school: "Классика Райдера-Уэйта",
+    level: "Начинающим и практикам",
+    coverIcon: "🗝️",
+    desc: "Первоисточник от создателя самой популярной в мире колоды Таро. Описывает канонический символизм, историю карт и оригинальный расклад «Кельтский крест».",
+    chapters: [
+      {
+        title: "📌 Введение Уэйта",
+        content: `
+          <h3>Иллюстрированный ключ к Таро — А. Э. Уэйт</h3>
+          <p>Настоящий труд был написан Артуром Эдвардом Уэйтом — магом, исследователем Каббалы и членом Герметического Ордена «Золотой Зари». В 1909 году под его руководством художница Памела Колман Смит нарисовала 78 карт, перевернувших мир тарологии.</p>
+          <div class="book-reader__quote">«Истинное Таро — это символизм; оно не говорит ни на каком другом языке и не предстает ни в каких иных знаках.»</div>
+        `
+      },
+      {
+        title: "📜 Символы Младших Арканов",
+        content: `
+          <h3>Четыре Элемента Мира</h3>
+          <p>Уэйт впервые прорисовал живописные сюжетами даже на численных картах от Туза до Десятки:</p>
+          <ul>
+            <li><b>Жезлы (Wands):</b> Огонь, страсть, инициатива, воля и предпринимательский дух.</li>
+            <li><b>Кубки (Cups):</b> Вода, эмоции, любовь, интуиция и творческие порывы.</li>
+            <li><b>Мечи (Swords):</b> Воздух, интеллект, мысль, испытания и концептуальный выбор.</li>
+            <li><b>Пентакли (Pentacles):</b> Земля, материя, финансы, ресурсы и здоровье.</li>
+          </ul>
+        `
+      },
+      {
+        title: "✝️ Расклад «Кельтский Крест»",
+        content: `
+          <h3>Канонический 10-карточный алгоритм Уэйта</h3>
+          <p>Уэйт передал алгоритм главного расклада в 10 позициях:</p>
+          <ol style="padding-left:20px; color:#d8cfc2; line-height:1.7;">
+            <li>1. Сигнификатор / Суть вопроса.</li>
+            <li>2. Что препятствует или помогает (поперек).</li>
+            <li>3. Основание / Прошлое.</li>
+            <li>4. Недавнее прошлое / Уходящие влияния.</li>
+            <li>5. Высшая цель / Стремления.</li>
+            <li>6. Ближайшее будущее.</li>
+            <li>7. Собственная позиция / Отношение к себе.</li>
+            <li>8. Окружение и друзья.</li>
+            <li>9. Надежды и опасения.</li>
+            <li>10. Окончательный результат.</li>
+          </ol>
+        `
+      }
+    ]
+  },
+  {
+    id: "b3",
+    title: "Таро Райдера-Уэйта. Символы и значения",
+    subtitle: "Главный европейский самоучитель по арканам",
+    author: "Хайо Банцхаф",
+    year: "1999",
+    school: "Школа Уэйта",
+    level: "Начинающим",
+    coverIcon: "🔮",
+    desc: "Самый структурированный самоучитель от немецкого астролога Хайо Банцхафа. Четкие трактовки для работы, отношений, совета карты и ежедневных прогнозов.",
+    chapters: [
+      {
+        title: "📌 Структура Банцхафа",
+        content: `
+          <h3>Методика немецкого астролога</h3>
+          <p>Хайо Банцхаф упорядочил толкования так, чтобы практик мог быстро найти нужную сферу жизни без туманных абстракций.</p>
+          <div class="book-reader__quote">«Карты Таро помогают нам увидеть не неизбежное будущее, а вектор движения нашей собственной энергии.»</div>
+        `
+      },
+      {
+        title: "📜 Анализ по Сферам",
+        content: `
+          <h3>Четыре измерения каждой карты</h3>
+          <p>Для каждого аркана Банцхаф приводит 4 четких блока:</p>
+          <ul>
+            <li><b>Общее значение:</b> Архетипическая суть и энергетический фон.</li>
+            <li><b>Работа и карьера:</b> Профессиональные перспективы, переговоры, задачи.</li>
+            <li><b>Сознание и психология:</b> Каким мыслям и осознаниям учит карта.</li>
+            <li><b>Личные отношения:</b> Любовь, доверие, страсти и партнерство.</li>
+          </ul>
+        `
+      }
+    ]
+  },
+  {
+    id: "b4",
+    title: "Книга Тота",
+    subtitle: "Сакральная герметическая система Таро Кроули",
+    author: "Алистер Кроули",
+    year: "1944",
+    school: "Таро Тота (Телема)",
+    level: "Продвинутый / Мастер",
+    coverIcon: "👁️",
+    desc: "Шедевр оккультной мысли, раскрывающий взаимосвязь Таро с астрологией, Древом Сефирот, египетской мифологией и алхимической философией.",
+    chapters: [
+      {
+        title: "📌 Герметизм Телемы",
+        content: `
+          <h3>Книга Тота — Алистер Кроули</h3>
+          <p>Колода Таро Тота была создана Алистером Кроули при участии художницы Фриды Харрис. Она отражает законы Нового Эона и динамическую сакральную геометрию.</p>
+          <div class="book-reader__quote">«Таро — это иллюстрированная энциклопедия оккультной философии древних.»</div>
+        `
+      },
+      {
+        title: "📜 Ату Тота и Изменения",
+        content: `
+          <h3>Особые имена Старших Арканов</h3>
+          <p>Кроули скорректировал имена нескольких Ату (Старших Арканов):</p>
+          <ul>
+            <li><b>VIII. Регулирование (Adjustment):</b> Вместо Справедливости — равновесие космических сил.</li>
+            <li><b>XI. Вожделение (Lust):</b> Вместо Силы — радость интеграции с животной энергией.</li>
+            <li><b>XIV. Искусство (Art):</b> Вместо Умеренности — алхимическое слияние противоположностей.</li>
+            <li><b>XX. Эон (The Aeon):</b> Вместо Страшного Суда — проявление Новой Эпохи Гора.</li>
+          </ul>
+        `
+      }
+    ]
+  },
+  {
+    id: "b5",
+    title: "Путь Таро",
+    subtitle: "Марсельское Таро, психомагия и символизм",
+    author: "Алехандро Ходоровский",
+    year: "2004",
+    school: "Марсельская школа",
+    level: "Для всех уровней",
+    coverIcon: "🏛️",
+    desc: "Результат 40-летнего исследования знаменитого режиссера и психотерапевта. Взгляд на Марсельское Таро как на архитектурный язык бессознательного.",
+    chapters: [
+      {
+        title: "📌 Психомагия Ходоровского",
+        content: `
+          <h3>Марсельское Таро как Живой Храм</h3>
+          <p>Алехандро Ходоровский воссоздал оригинальное Марсельское Таро XVII века и доказал, что карты являются геометрической и цветовой мандалой исцеления.</p>
+          <div class="book-reader__quote">«Таро — это собор без стен, запечатленный в пачке карт.»</div>
+        `
+      },
+      {
+        title: "📜 Цветовой Код",
+        content: `
+          <h3>Язык 10 цветов Марсельской системы</h3>
+          <p>В Марсельском Таро каждый цвет имеет символический статус: Голубой (Духовность/Интуиция), Железо-Желтый (Материальная мудрость), Красный (Жизненное усилие/Кровь), Белый (Чистая Непорочность).</p>
+        `
+      }
+    ]
+  },
+  {
+    id: "b6",
+    title: "Полная книга перевёрнутых карт Таро",
+    subtitle: "Глубокий анализ скрытых смыслов и теней",
+    author: "Мэри Грир",
+    year: "2002",
+    school: "Школа Уэйта / Теневая работа",
+    level: "Продвинутый",
+    coverIcon: "🔄",
+    desc: "Фундаментальная книга Мэри Грир о работе с перевернутыми картами. 12 методов толкования теневых аспект арканов и внутренних блоков.",
+    chapters: [
+      {
+        title: "📌 12 Метод Грир",
+        content: `
+          <h3>Как читать перевернутые карты</h3>
+          <p>Мэри Грир показывает, что перевернутая карта — это не «плохой знак», а направленная внутрь энергия:</p>
+          <ul>
+            <li>1. Внутренний процесс (то, что происходит в душе, а не снаружи).</li>
+            <li>2. Блокировка или замедление проявления.</li>
+            <li>3. Теневой аспект (отрицаемое качество).</li>
+            <li>4. Переизбыток или недостаток энергии аркана.</li>
+          </ul>
+        `
+      }
+    ]
+  },
+  {
+    id: "b7",
+    title: "Юнг и Таро: Архетипическое путешествие",
+    subtitle: "Психологическое осмысление Старших Арканов",
+    author: "Салли Николс",
+    year: "1980",
+    school: "Юнгианский психоанализ",
+    level: "Продвинутый",
+    coverIcon: "🌌",
+    desc: "Исследование Салли Николс, получившее высокое признание юнгианцев. Взгляд на 22 Аркана как на этапы алхимической индивидуации души.",
+    chapters: [
+      {
+        title: "📌 Процесс Индивидуации",
+        content: `
+          <h3>Архетипы в образах Таро</h3>
+          <p>Салли Николс детально показывает, как Шут встречается с Персоной (Маг и Жрица), сталкивается со своей Тенью (Дьявол) и приходит к Самости (Мир).</p>
+        `
+      }
+    ]
+  },
+  {
+    id: "b8",
+    title: "Прыжок в бездну вершины: Таро Кроули",
+    subtitle: "Практическое руководство по Таро Тота",
+    author: "Олег Телемский",
+    year: "2012",
+    school: "Таро Тота",
+    level: "Практикам",
+    coverIcon: "📜",
+    desc: "Увлекательный и глубокий путеводитель по символике колоды Кроули, написанный исследователем юнгианства и герметической традиции.",
+    chapters: [
+      {
+        title: "📌 Путеводитель Телемского",
+        content: `
+          <h3>Азбука Телемы</h3>
+          <p>Олег Телемский снимает покров загадочности с терминов Кроули, делая колоду Тота живым инструментом самопознания и диалога с Бессознательным.</p>
+        `
+      }
+    ]
+  }
+];
+
+const TARO_SCHOOLS = [
+  {
+    icon: "🃏",
+    title: "Школа Райдера-Уэйта (1910)",
+    desc: "Самая популярная традиция в мире, созданная членом Ордена «Золотой Зари» А. Э. Уэйтом и художницей Памелой Смит. Главное историческое отличие — впервые Младшие Арканы получили рисунки с сюжетными персонажами.",
+    details: "<b>Особенности:</b> Глубокий христианский мистицизм, Каббала, астрология и наглядный психо-символический язык. Идеально подходит для начинающих, бытовых раскладов и интуитивного анализа."
+  },
+  {
+    icon: "👁️",
+    title: "Школа Алистера Кроули / Таро Тота (1944)",
+    desc: "Оккультно-герметическая система Телемы, отражающая философию Нового Эона Гора. Иллюстрации художницы Фриды Харрис выполнены с использованием сакральной геометрии и динамического света.",
+    details: "<b>Особенности:</b> Прямые астрологические деканаты, Древо Сефирот, египетская пантеология и переименованные арканы (Регулирование, Вожделение, Искусство, Эон). Для глубоких оккультных медитаций и трансформаций."
+  },
+  {
+    icon: "🏛️",
+    title: "Марсельское Таро (XVII век)",
+    desc: "Каноническая древняя европейская система. Младшие Арканы выполнены в виде абстрактно-числовых геометрических фигур (кубки, мечи, монеты, жезлы) без сюжетных сцен.",
+    details: "<b>Особенности:</b> Первичная каноническая палитра цветов (красный, синий, желтый), геометрический ритм и психомагическая работа с архетипами (по системе Алехандро Ходоровского)."
+  },
+  {
+    icon: "📜",
+    title: "Египетская Школа / Папюс (XIX век)",
+    desc: "Французская оккультная традиция (Элифас Леви, Папюс, Поль Кристиан), связывающая Таро с древними священными книгами Тота и египетскими иероглифами.",
+    details: "<b>Особенности:</b> Строгая привязка 22 Старших Арканов к 22 буквам иврита и астрологическим домам. Академический герметический стиль для исследователей академического оккультизма."
+  },
+  {
+    icon: "✨",
+    title: "Современные Психологические Оракулы",
+    desc: "Направление XXI века, объединяющее юнгианский психоанализ, авторские арт-колоды и Метафорические Ассоциативные Карты (МАК).",
+    details: "<b>Особенности:</b> Свободный диалог с личным бессознательным без жестких оккультных догм. Созданы для арт-терапии, работы с эмоциональными блоками и самоисследования."
+  }
+];
+
+function renderExploreGrid() {
+  const grid = $("explore-grid");
+  if (!grid || grid.children.length > 0) return;
+  grid.innerHTML = ARCADES.map(
+    (a, i) => `
+    <div class="arcana__item bento-card gold-glow-hover glass" data-arcana="${i}" tabindex="0" role="button" aria-label="Подробнее: ${a.card}" style="animation-delay:${(i % 10) * 50}ms">
+      <div class="arcana__num">АРКАН ${ROMAN[i]}</div>
+      <div class="arcana__card">${a.card}</div>
+      <span class="arcana__kw">${a.kw}</span>
+      <div class="arcana__illustration">
+        <img src="${ARCANA_IMAGES[i]}" alt="${a.card}" onerror="if(!this.dataset.t1){this.dataset.t1=1;this.src=this.src.replace('.png','.jpg');}else if(!this.dataset.t2){this.dataset.t2=1;this.src=this.src.replace('.jpg','.webp');}else{this.style.display='none';}" onload="this.style.display='block';" style="display:none;" />
+        <div class="arcana__svg-card">${getArcanaSVG(i, a.card)}</div>
+      </div>
+      <button class="arcana__btn" type="button">СМОТРЕТЬ ЗНАЧЕНИЕ</button>
+      <div class="arcana__author">@TaroNavigator</div>
+    </div>`
+  ).join("");
+  bindTilt();
+}
+
+function renderExploreBooks() {
+  const grid = $("explore-books-grid");
+  if (!grid || grid.children.length > 0) return;
+  grid.innerHTML = TARO_BOOKS.map(
+    (b, i) => `
+    <div class="bento-card book-card gold-glow-hover glass" data-book-id="${b.id}" tabindex="0" role="button" aria-label="Книга: ${b.title}" style="animation-delay:${i * 50}ms">
+      <div class="book-card__cover">
+        ${b.coverImage ? `<img class="book-card__img" src="${b.coverImage}" alt="${b.title}" />` : `<div class="book-card__fallback-cover"><span class="book-card__icon">${b.coverIcon}</span><span class="book-card__fallback-title">${b.title}</span></div>`}
+        <span class="book-card__badge">${b.school}</span>
+      </div>
+      <h3 class="book-card__title">${b.title}</h3>
+      <div class="book-card__author">${b.author} (${b.year})</div>
+      <p class="book-card__desc">${b.desc}</p>
+      <div class="book-card__meta">
+        <span>🎓 ${b.level}</span>
+        <span style="color:var(--gold); font-weight:600;">📖 Читать книгу онлайн ➔</span>
+      </div>
+    </div>`
+  ).join("");
+}
+
+function renderExploreSchools() {
+  const grid = $("explore-schools-grid");
+  if (!grid || grid.children.length > 0) return;
+  grid.innerHTML = TARO_SCHOOLS.map(
+    (s, i) => `
+    <div class="bento-card school-card gold-glow-hover glass" style="animation-delay:${i * 60}ms">
+      <div class="school-card__head">
+        <span class="school-card__icon">${s.icon}</span>
+        <h3 class="school-card__title">${s.title}</h3>
+      </div>
+      <p class="school-card__desc">${s.desc}</p>
+      <div class="school-card__section">${s.details}</div>
+    </div>`
+  ).join("");
+}
+
+// Открытие интерактивной читалки книги прямо на сайте
+function openBookModal(book) {
+  const modal = $("book-modal");
+  if (!modal) return;
+  $("book-modal-school").textContent = book.school.toUpperCase();
+  $("book-modal-title").textContent = book.title;
+  $("book-modal-author").textContent = `${book.author} · ${book.year} год · ${book.level}`;
+
+  const coverWrap = $("book-modal-cover-wrap");
+  if (coverWrap) {
+    coverWrap.innerHTML = book.coverImage
+      ? `<img src="${book.coverImage}" alt="${book.title}" class="book-modal__cover-img" />`
+      : `<div class="book-modal__cover-fallback">${book.coverIcon || "📖"}</div>`;
+  }
+
+  const navBox = $("book-reader-nav");
+  const contentBox = $("book-reader-content");
+  const actionBtn = $("book-modal-action-btn");
+
+  if (navBox && contentBox) {
+    const chapters = Array.from(book.chapters || []);
+    let pdfIdx = -1;
+    if (book.pdfUrl) {
+      pdfIdx = chapters.length;
+      chapters.push({
+        title: "📄 Полный PDF (в браузере)",
+        isPdf: true,
+        content: `
+          <h3>Оригинал книги в формате PDF</h3>
+          <p>Вы можете читать полную версию прямо в браузере без скачивания:</p>
+          <iframe src="${book.pdfUrl}#toolbar=0" class="book-reader__pdf-iframe" title="${book.title}"></iframe>`
+      });
+    }
+
+    navBox.innerHTML = chapters
+      .map(
+        (ch, idx) => `
+        <button class="book-reader__tab ${idx === 0 ? "book-reader__tab--active" : ""}" data-chapter-idx="${idx}" type="button">
+          ${ch.title}
+        </button>`
+      )
+      .join("");
+
+    const showChapter = (idx) => {
+      navBox.querySelectorAll(".book-reader__tab").forEach((b, i) => b.classList.toggle("book-reader__tab--active", i === idx));
+      const ch = chapters[idx] || chapters[0];
+      contentBox.innerHTML = ch.content;
+      contentBox.scrollTop = 0;
+    };
+
+    showChapter(0);
+
+    navBox.onclick = (e) => {
+      const tabBtn = e.target.closest("[data-chapter-idx]");
+      if (tabBtn) {
+        const idx = Number(tabBtn.dataset.chapterIdx);
+        showChapter(idx);
+      }
+    };
+
+    if (actionBtn) {
+      if (book.pdfUrl && pdfIdx !== -1) {
+        actionBtn.textContent = "📄 Открыть полный PDF в браузере ➔";
+        actionBtn.onclick = () => {
+          showChapter(pdfIdx);
+          contentBox.scrollIntoView({ behavior: "smooth" });
+        };
+      } else {
+        actionBtn.textContent = "📜 Читать главы книги ➔";
+        actionBtn.onclick = () => {
+          showChapter(0);
+          contentBox.scrollIntoView({ behavior: "smooth" });
+        };
+      }
+    }
+  }
+
+  modal.hidden = false;
+  document.body.style.overflow = "hidden";
+}
+
+// Закрытие модального окна книги
+document.addEventListener("click", (e) => {
+  if (e.target.closest("[data-close-book]")) {
+    const modal = $("book-modal");
+    if (modal) modal.hidden = true;
+    document.body.style.overflow = "";
+  }
+});
+
+// Переключение табов в разделе Исследуй (Арканы / Книги / Школы)
+document.addEventListener("click", (e) => {
+  const tabBtn = e.target.closest("[data-explore-tab]");
+  if (tabBtn) {
+    const target = tabBtn.dataset.exploreTab;
+    document.querySelectorAll("[data-explore-tab]").forEach((b) => b.classList.toggle("explore__tab--active", b === tabBtn));
+
+    const arcGrid = $("explore-grid");
+    const booksGrid = $("explore-books-grid");
+    const schoolsGrid = $("explore-schools-grid");
+
+    if (arcGrid) {
+      arcGrid.hidden = target !== "arcana";
+      arcGrid.style.display = target === "arcana" ? "grid" : "none";
+    }
+    if (booksGrid) {
+      booksGrid.hidden = target !== "books";
+      booksGrid.style.display = target === "books" ? "grid" : "none";
+    }
+    if (schoolsGrid) {
+      schoolsGrid.hidden = target !== "schools";
+      schoolsGrid.style.display = target === "schools" ? "grid" : "none";
+    }
+
+    if (target === "arcana") renderExploreGrid();
+    if (target === "books") renderExploreBooks();
+    if (target === "schools") renderExploreSchools();
+    return;
+  }
+
+  // Клик по карточке книги
+  const bookCard = e.target.closest(".book-card");
+  if (bookCard) {
+    const bookId = bookCard.dataset.bookId;
+    const book = TARO_BOOKS.find((b) => b.id === bookId);
+    if (book) openBookModal(book);
+  }
+});
+
 document.addEventListener("click", (e) => {
   const cardEl = e.target.closest(".arcana__item");
   if (cardEl) {
-    openModal(lastArc[Number(cardEl.dataset.idx)]);
+    if (cardEl.dataset.idx !== undefined && lastArc[Number(cardEl.dataset.idx)]) {
+      openModal(lastArc[Number(cardEl.dataset.idx)]);
+    } else if (cardEl.dataset.arcana !== undefined) {
+      const n = Number(cardEl.dataset.arcana);
+      if (ARCADES[n]) {
+        openModal({ n, pos: "Галерея", card: ARCADES[n].card, kw: ARCADES[n].kw });
+      }
+    }
     return;
   }
   if (e.target.closest("[data-close]")) closeModal();
@@ -447,7 +1161,15 @@ document.addEventListener("click", (e) => {
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") closeModal();
   if (e.key === "Enter" && e.target.classList && e.target.classList.contains("arcana__item")) {
-    openModal(lastArc[Number(e.target.dataset.idx)]);
+    const cardEl = e.target;
+    if (cardEl.dataset.idx !== undefined && lastArc[Number(cardEl.dataset.idx)]) {
+      openModal(lastArc[Number(cardEl.dataset.idx)]);
+    } else if (cardEl.dataset.arcana !== undefined) {
+      const n = Number(cardEl.dataset.arcana);
+      if (ARCADES[n]) {
+        openModal({ n, pos: "Галерея", card: ARCADES[n].card, kw: ARCADES[n].kw });
+      }
+    }
   }
 });
 
@@ -460,9 +1182,9 @@ function bindTilt() {
       const r = el.getBoundingClientRect();
       const px = (e.clientX - r.left) / r.width;
       const py = (e.clientY - r.top) / r.height;
-      const rx = (0.5 - py) * 15;
-      const ry = (px - 0.5) * 15;
-      el.style.transform = `rotateX(${rx}deg) rotateY(${ry}deg)`;
+      const rx = (0.5 - py) * 12;
+      const ry = (px - 0.5) * 12;
+      el.style.transform = `translateY(-6px) rotateX(${rx}deg) rotateY(${ry}deg)`;
       el.style.setProperty("--mx", px * 100 + "%");
       el.style.setProperty("--my", py * 100 + "%");
     });
@@ -562,38 +1284,50 @@ function renderNatalChart(natal) {
     <svg viewBox="0 0 400 400" aria-label="Натальная карта">
       <defs>
         <radialGradient id="discBg" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="rgba(62,42,116,0.95)" />
-          <stop offset="58%" stop-color="rgba(22,18,52,0.92)" />
-          <stop offset="100%" stop-color="rgba(6,8,22,0.97)" />
+          <stop offset="0%" stop-color="#1c1b22" />
+          <stop offset="65%" stop-color="#141417" />
+          <stop offset="100%" stop-color="#0e0e10" />
         </radialGradient>
-        <radialGradient id="core" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="rgba(84,241,255,0.95)" />
-          <stop offset="100%" stop-color="rgba(84,241,255,0)" />
+        <radialGradient id="sunCore" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="rgba(201,169,110,0.95)" />
+          <stop offset="50%" stop-color="rgba(201,169,110,0.3)" />
+          <stop offset="100%" stop-color="rgba(201,169,110,0)" />
         </radialGradient>
-        <linearGradient id="ringGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stop-color="#54f1ff" />
-          <stop offset="50%" stop-color="#8b5cf6" />
-          <stop offset="100%" stop-color="#ff5fb2" />
+        <linearGradient id="ringGoldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#e8dcc8" />
+          <stop offset="40%" stop-color="#c9a96e" />
+          <stop offset="80%" stop-color="#a68540" />
+          <stop offset="100%" stop-color="#e8dcc8" />
         </linearGradient>
-        <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
-          <feGaussianBlur stdDeviation="2.4" result="b" />
+        <filter id="goldGlow" x="-60%" y="-60%" width="220%" height="220%">
+          <feGaussianBlur stdDeviation="2.8" result="b" />
           <feMerge><feMergeNode in="b" /><feMergeNode in="SourceGraphic" /></feMerge>
         </filter>
       </defs>
 
-      <circle cx="200" cy="200" r="192" fill="url(#discBg)" stroke="url(#ringGrad)" stroke-width="2.5" />
-      <circle cx="200" cy="200" r="150" fill="none" stroke="rgba(84,241,255,0.35)" stroke-width="1" />
-      <circle cx="200" cy="200" r="96" fill="none" stroke="rgba(139,92,246,0.5)" stroke-width="1" />
-      <circle cx="200" cy="200" r="60" fill="none" stroke="rgba(255,95,178,0.32)" stroke-width="1" stroke-dasharray="3 6" />
+      <!-- Тёмно-золотая основа диска -->
+      <circle cx="200" cy="200" r="192" fill="url(#discBg)" stroke="url(#ringGoldGrad)" stroke-width="2.5" filter="url(#goldGlow)" />
+      <circle cx="200" cy="200" r="188" fill="none" stroke="rgba(201,169,110,0.18)" stroke-width="1" />
+      <circle cx="200" cy="200" r="150" fill="none" stroke="rgba(201,169,110,0.35)" stroke-width="1" />
+      <circle cx="200" cy="200" r="96" fill="none" stroke="rgba(201,169,110,0.25)" stroke-width="1" stroke-dasharray="3 3" />
+      <circle cx="200" cy="200" r="60" fill="none" stroke="rgba(232,220,200,0.2)" stroke-width="1" stroke-dasharray="2 4" />
 
-      <g class="natal__spin" filter="url(#glow)">
+      <!-- Аспектные направляющие линии -->
+      <line x1="200" y1="50" x2="200" y2="350" stroke="rgba(201,169,110,0.15)" stroke-dasharray="2 4" />
+      <line x1="50" y1="200" x2="350" y2="200" stroke="rgba(201,169,110,0.15)" stroke-dasharray="2 4" />
+
+      <!-- Вращающийся диск зодиака -->
+      <g class="natal__spin">
         ${segs}
       </g>
 
+      <!-- Интерактивные точки планет -->
       ${dots}
 
-      <circle cx="200" cy="200" r="36" fill="url(#core)" />
-      <text x="200" y="200" text-anchor="middle" dominant-baseline="central" font-size="28" fill="#ffffff">☉</text>
+      <!-- Дыхание центрального Солнца -->
+      <circle class="natal__sun-core" cx="200" cy="200" r="38" fill="url(#sunCore)" filter="url(#goldGlow)" />
+      <circle cx="200" cy="200" r="18" fill="#1c1c20" stroke="#c9a96e" stroke-width="1.5" />
+      <text x="200" y="200" text-anchor="middle" dominant-baseline="central" font-size="20" fill="#c9a96e">☉</text>
     </svg>`;
 
   // Интерактивный клик/ховер по планетам
@@ -924,32 +1658,73 @@ function renderAstroWeather() {
 }
 
 // === Нижняя навигация: переключение экранов ===
-// === Нижняя навигация: переключение экранов ===
 (function initTabs() {
   const tabs = Array.from(document.querySelectorAll(".tabbar__btn"));
   const screens = Array.from(document.querySelectorAll(".screen"));
   if (!tabs.length) return;
+
+  let isTransitioning = false;
+
   function activate(name) {
-    tabs.forEach((t) => t.classList.toggle("tabbar__btn--active", t.dataset.tab === name));
-    screens.forEach((s) => s.classList.toggle("screen--active", s.id === "screen-" + name));
-    // подсветим reveal-элементы активного экрана (на случай, если они ещё не проявились)
-    const active = document.getElementById("screen-" + name);
-    if (active) {
-      active.querySelectorAll(".reveal").forEach((el) => {
-        if (!el.classList.contains("visible")) {
-          // принудительно покажем, если экран уже в зоне видимости
-          const r = el.getBoundingClientRect();
-          if (r.top < innerHeight) el.classList.add("visible");
-        }
-      });
-    }
-    if (name === "forecast") renderAstroWeather();
-    if (window.__taroWebApp) {
-      window.scrollTo(0, 0);
-    } else {
+    const currentTab = tabs.find((t) => t.classList.contains("tabbar__btn--active"));
+    const currentTabName = currentTab ? currentTab.dataset.tab : null;
+
+    if (currentTabName === name) {
       window.scrollTo({ top: 0, behavior: "smooth" });
+      return;
+    }
+
+    if (isTransitioning) return;
+    isTransitioning = true;
+
+    // Подсвечиваем активную кнопку навигации мгновенно
+    tabs.forEach((t) => t.classList.toggle("tabbar__btn--active", t.dataset.tab === name));
+
+    const oldScreen = screens.find((s) => s.classList.contains("screen--active"));
+    const newScreen = document.getElementById("screen-" + name);
+
+    const switchDOM = () => {
+      screens.forEach((s) => s.classList.remove("screen--active"));
+      if (oldScreen) {
+        oldScreen.style.opacity = "";
+        oldScreen.style.transform = "";
+        oldScreen.style.transition = "";
+      }
+
+      if (newScreen) {
+        newScreen.classList.add("screen--active");
+        newScreen.querySelectorAll(".reveal").forEach((el) => {
+          const r = el.getBoundingClientRect();
+          if (r.top < window.innerHeight) el.classList.add("visible");
+        });
+      }
+
+      if (name === "explore") renderExploreGrid();
+      if (name === "forecast") renderAstroWeather();
+      if (name === "profile") renderProfile();
+      if (name === "history") renderHistory();
+
+      if (window.__taroWebApp) {
+        window.scrollTo(0, 0);
+      } else {
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      setTimeout(() => {
+        isTransitioning = false;
+      }, 50);
+    };
+
+    if (oldScreen && newScreen && oldScreen !== newScreen) {
+      oldScreen.style.transition = "opacity 0.14s cubic-bezier(0.4, 0, 0.2, 1), transform 0.14s cubic-bezier(0.4, 0, 0.2, 1)";
+      oldScreen.style.opacity = "0";
+      oldScreen.style.transform = "translateY(-8px) scale(0.99)";
+      setTimeout(switchDOM, 140);
+    } else {
+      switchDOM();
     }
   }
+
   tabs.forEach((t) => t.addEventListener("click", () => activate(t.dataset.tab)));
 })();
 // === Telegram WebApp мост ===
@@ -1054,6 +1829,7 @@ document.addEventListener("click", (e) => {
       ? buildExtendedArcanaText(arcItem)
       : "Эта карта хранит свою тайну — открой бота и попроси расширенный разбор.";
     $("modal-text").textContent = text;
+    $("modal-text").hidden = false;
     const link = document.createElement("a");
     link.href = "tg://resolve?domain=MyGoodTaro_bot";
     link.target = "_blank";
@@ -1070,6 +1846,7 @@ document.addEventListener("click", (e) => {
       const text = await taroApi("arcana", { day: c.day, month: c.month, year: c.year, arcana_n: lastModalArcana });
       if (text) {
         $("modal-text").textContent = text;
+        $("modal-text").hidden = false;
         if (arcItem) addHistory({ type: "arcana", icon: "🃏", title: `Разбор аркана «${arcItem.card}»`, subtitle: arcItem.pos, text });
         cta.textContent = "🔮 Разбор готов";
         cta.disabled = false;
@@ -1162,23 +1939,25 @@ function renderProfile() {
 }
 
 function renderStyleGrid() {
-  const grid = document.getElementById("profile-styles");
-  const activeLabel = document.getElementById("profile-style-active");
+  const grids = document.querySelectorAll("#profile-styles, .profile__styles-grid");
+  const activeLabels = document.querySelectorAll("#profile-style-active, .profile-style-active");
   const active = getSavedStyle();
-  if (activeLabel) activeLabel.textContent = active.name;
-  if (!grid) return;
-  grid.innerHTML = "";
-  TARO_STYLES.forEach((s) => {
-    const el = document.createElement("button");
-    el.type = "button";
-    el.className = "profile__style" + (s.id === active.id ? " profile__style--active" : "");
-    el.dataset.style = s.id;
-    el.innerHTML =
-      `<span class="style-emoji">${s.emoji}</span>` +
-      `<span class="style-name">${s.name}</span>` +
-      `<span class="style-desc">${s.desc}</span>`;
-    el.addEventListener("click", () => selectStyle(s));
-    grid.appendChild(el);
+  activeLabels.forEach((el) => el.textContent = active.name);
+  if (!grids.length) return;
+  grids.forEach((grid) => {
+    grid.innerHTML = "";
+    TARO_STYLES.forEach((s) => {
+      const el = document.createElement("button");
+      el.type = "button";
+      el.className = "profile__style" + (s.id === active.id ? " profile__style--active" : "");
+      el.dataset.style = s.id;
+      el.innerHTML =
+        `<span class="style-emoji">${s.emoji}</span>` +
+        `<span class="style-name">${s.name}</span>` +
+        `<span class="style-desc">${s.desc}</span>`;
+      el.addEventListener("click", () => selectStyle(s));
+      grid.appendChild(el);
+    });
   });
 }
 
@@ -1190,7 +1969,11 @@ function selectStyle(style) {
   taroSend(JSON.stringify({ type: "style", style: style.name }));
 }
 
-renderProfile();
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", renderProfile);
+} else {
+  renderProfile();
+}
 
 // === История раскладов и прогнозов ===
 const HISTORY_KEY = "taro_history";

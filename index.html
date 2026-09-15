@@ -43,15 +43,15 @@
   <link rel="icon" type="image/jpeg" href="favicon.jpg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Outfit:wght@300;400;600;800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=13" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css?v=20" />
 </head>
 <body>
-  <canvas id="space"></canvas>
+
 
   <header class="nav reveal">
     <div class="nav__inner">
-      <a class="logo" href="#top">
+      <a class="logo" href="index.html">
         <span class="logo__mark">☾</span>
         <span class="logo__text">TARO<span>&nbsp;NAVIGATOR</span></span>
       </a>
@@ -64,7 +64,7 @@
   </header>
 
   <main>
-    <!-- ЭКРАН 1: Расклады (главная) -->
+    <!-- ЭКРАН 1: РАСКЛАДЫ -->
     <section class="screen screen--active" id="screen-reads">
       <section class="hero" id="top">
         <div class="hero__content">
@@ -87,7 +87,12 @@
 
       <section class="calc" id="calculator">
         <div class="section__head reveal">
-          <p class="section__eyebrow">СТАНЦИЯ ВВОДА</p>
+          <p class="section__eyebrow">
+            СТАНЦИЯ ВВОДА
+            <span class="info-tip" tabindex="0" aria-label="Подсказка">ℹ️
+              <span class="info-bubble">Введи число, месяц и год рождения. Наш астро-движок мгновенно рассчитает твой знак зодиака и 10 ключевых позиций арканов судьбы!</span>
+            </span>
+          </p>
           <h2 class="section__title">Космический паспорт</h2>
           <p class="section__subtitle">Введи дату рождения — остальное посчитают звёзды.</p>
         </div>
@@ -101,19 +106,19 @@
             <label class="field">
               <span class="field__ico">☀</span>
               <span class="field__name">День</span>
-              <input id="day" type="number" min="1" max="31" placeholder="12" />
+              <input id="day" type="number" min="1" max="31" placeholder="12" inputmode="numeric" />
             </label>
             <span class="field__sep"></span>
             <label class="field">
               <span class="field__ico">☽</span>
               <span class="field__name">Месяц</span>
-              <input id="month" type="number" min="1" max="12" placeholder="5" />
+              <input id="month" type="number" min="1" max="12" placeholder="5" inputmode="numeric" />
             </label>
             <span class="field__sep"></span>
             <label class="field">
               <span class="field__ico">✦</span>
               <span class="field__name">Год</span>
-              <input id="year" type="number" min="1900" max="2100" placeholder="1998" />
+              <input id="year" type="number" min="1900" max="2100" placeholder="1998" inputmode="numeric" />
             </label>
           </div>
           <div class="calc__foot">
@@ -128,10 +133,15 @@
         <div id="result" hidden>
           <div id="zodiac-card" class="zodiac glass reveal"></div>
           <div class="result__head reveal">
-            <h3 class="result__heading">Твои арканы судьбы</h3>
+            <h3 class="result__heading">
+              Твои арканы судьбы
+              <span class="info-tip" tabindex="0" aria-label="Подсказка">ℹ️
+                <span class="info-bubble">Десять уникальных позиций, вычисленных из даты рождения. Кликни на любую карточку, чтобы открыть подробный разбор!</span>
+              </span>
+            </h3>
             <p class="result__note">Десять позиций, рассчитанных из цифр даты рождения</p>
           </div>
-          <div id="arcana-grid" class="arcana"></div>
+          <div id="arcana-grid" class="arcana bento-grid"></div>
           <div id="webapp-actions" class="webapp-actions" hidden>
             <button class="btn btn--primary" id="wa-save">💾 Сохранить в боте</button>
           </div>
@@ -146,8 +156,8 @@
           <p class="section__subtitle">Каждая деталь — как эстетическая карточка из Pinterest.</p>
         </div>
 
-        <div class="pinterest-grid">
-          <div class="pinterest-card glass glass--hologram reveal">
+        <div class="pinterest-grid bento-grid">
+          <div class="pinterest-card bento-card gold-glow-hover glass reveal">
             <div class="pinterest-badge">✨ ВИБРАЦИЯ ДНЯ</div>
             <div class="pinterest-card__icon">🔮</div>
             <h3>Аркан Колеса Судьбы</h3>
@@ -158,7 +168,7 @@
             </div>
           </div>
 
-          <div class="pinterest-card glass glass--hologram reveal d2">
+          <div class="pinterest-card bento-card gold-glow-hover glass reveal d2">
             <div class="pinterest-badge">🌑 ЛУННЫЙ РИТМ</div>
             <div class="pinterest-card__icon">☽</div>
             <h3>Транзиты & Небо</h3>
@@ -169,7 +179,7 @@
             </div>
           </div>
 
-          <div class="pinterest-card glass glass--hologram reveal d3">
+          <div class="pinterest-card bento-card gold-glow-hover glass reveal d3">
             <div class="pinterest-badge">📜 КОД ПАСПОРТА</div>
             <div class="pinterest-card__icon">✦</div>
             <h3>10 Позиций Судьбы</h3>
@@ -184,230 +194,322 @@
 
       <section class="about" id="about">
         <div class="section__head reveal">
-          <p class="section__eyebrow">ЧЁРНАЯ ДЫРА ЗНАНИЙ</p>
-          <h2 class="section__title">Тайны системы</h2>
-          <p class="section__subtitle">Четыре принципа, за которыми код, а не магия (ну, почти).</p>
+          <p class="section__eyebrow">ТАЙНЫ СИСТЕМЫ</p>
+          <h2 class="section__title">Четыре принципа кода</h2>
+          <p class="section__subtitle">За нашими разборами точность эфемерид и астрономический код.</p>
         </div>
-        <div class="about__grid">
-          <div class="about__item glass reveal">
+        <div class="about__grid bento-grid">
+          <div class="about__item bento-card gold-glow-hover glass reveal">
             <span class="about__num">01</span>
             <span class="about__icon">☉</span>
             <h3>Детерминированная база</h3>
             <p>12 знаков зодиака и 22 старших аркана Таро — человеческая мудрость, проверенная веками.</p>
           </div>
-          <div class="about__item glass reveal d2">
+          <div class="about__item bento-card gold-glow-hover glass reveal d2">
             <span class="about__num">02</span>
             <span class="about__icon">✦</span>
             <h3>Числа рождения</h3>
             <p>10 позиций арканов судьбы считаются строго из цифр твоей даты. Без случайности и подкрутки.</p>
           </div>
-          <div class="about__item glass reveal d3">
+          <div class="about__item bento-card gold-glow-hover glass reveal d3">
             <span class="about__num">03</span>
             <span class="about__icon">⚡</span>
             <h3>ИИ-разбор</h3>
             <p>Нейросеть превращает сухие данные в живой персональный портрет твоей личности.</p>
           </div>
-          <div class="about__item glass reveal d4">
+          <div class="about__item bento-card gold-glow-hover glass reveal d4">
             <span class="about__num">04</span>
-            <span class="about__icon">₿</span>
-            <h3>Расширенные разборы</h3>
-            <p>Бесплатный разбор — всем. Полный портрет и прогнозы по натальной карте — в тестовой версии бесплатно.</p>
+            <span class="about__icon">🌌</span>
+            <h3>Эфемериды VSOP87</h3>
+            <p>Настоящие небесные координаты планет на момент твоего рождения.</p>
           </div>
         </div>
       </section>
 
       <section class="cta reveal tg-cta">
         <div class="cta__inner glass">
-          <div class="cta__glow"></div>
           <p class="cta__eyebrow">ГОТОВ К ВЗЛЁТУ?</p>
-          <h2 class="cta__title">Твой созвездие ждёт в Telegram</h2>
+          <h2 class="cta__title">Твоё созвездие ждёт в Telegram</h2>
           <p class="cta__text">
-            Полная версия — с регистрацией профиля, историей разборов и расширенными
-            ИИ-прогнозами по натальной карте.
+            Полная версия — с регистрацией профиля, историей разборов и расширенными ИИ-прогнозами.
           </p>
           <a class="btn btn--primary tg-cta" href="tg://resolve?domain=MyGoodTaro_bot">🚀 Открыть бота</a>
         </div>
       </section>
 
       <footer class="footer">
-        <div class="footer__stars"></div>
         <p>TARO NAVIGATOR · космический тандем астрономии и кода</p>
       </footer>
     </section>
 
-    <!-- ЭКРАН 2: Натал -->
+    <!-- ЭКРАН 2: НАТАЛ -->
     <section class="screen" id="screen-natal">
-      <div class="screen__head">
-        <p class="section__eyebrow">НАТАЛЬНАЯ КАРТА</p>
-        <h2 class="section__title">Твоя карта рождения</h2>
-        <p class="section__subtitle">Введи точное время и город — построим космический снимок момента твоего появления.</p>
-      </div>
-      <div class="natal">
-        <form class="natal__form glass" id="natal-form">
-          <h3>✧ Координаты рождения</h3>
-          <div class="calc__inputs natal__inputs">
-            <label class="field">
-              <span class="field__ico">☀</span>
-              <span class="field__name">День</span>
-              <input id="n-day" type="number" min="1" max="31" placeholder="12" inputmode="numeric" />
-            </label>
-            <span class="field__sep"></span>
-            <label class="field">
-              <span class="field__ico">☽</span>
-              <span class="field__name">Месяц</span>
-              <input id="n-month" type="number" min="1" max="12" placeholder="5" inputmode="numeric" />
-            </label>
-            <span class="field__sep"></span>
-            <label class="field">
-              <span class="field__ico">✦</span>
-              <span class="field__name">Год</span>
-              <input id="n-year" type="number" min="1900" max="2100" placeholder="1998" inputmode="numeric" />
-            </label>
+      <div class="calc">
+        <div class="section__head reveal">
+          <p class="section__eyebrow">
+            НАТАЛЬНАЯ КАРТА
+            <span class="info-tip" tabindex="0" aria-label="Подсказка">ℹ️
+              <span class="info-bubble">Укажи время и город рождения для точного геокодинга и расчёта Асцендента (ASC) и домов Порфирия.</span>
+            </span>
+          </p>
+          <h2 class="section__title">Космическая астрология</h2>
+          <p class="section__subtitle">Точные небесные координаты планет на момент твоего рождения (VSOP87).</p>
+        </div>
+
+        <form class="calc__card glass reveal d2" id="natal-form">
+          <div class="calc__head">
+            <span class="calc__head-ico">☉</span>
+            <span>ДАННЫЕ РОЖДЕНИЯ</span>
           </div>
-          <div class="natal__row">
-            <span>Имя</span>
-            <input id="n-name" type="text" placeholder="Твоё имя" maxlength="40" />
+          <div class="natal__inputs-grid">
+            <label class="field">
+              <span class="field__ico">👤</span>
+              <span class="field__name">Имя</span>
+              <input id="n-name" type="text" placeholder="Мария" />
+            </label>
+            <div class="natal__date-group">
+              <label class="field">
+                <span class="field__ico">☀</span>
+                <span class="field__name">День</span>
+                <input id="n-day" type="number" min="1" max="31" placeholder="12" inputmode="numeric" required />
+              </label>
+              <span class="field__sep"></span>
+              <label class="field">
+                <span class="field__ico">☽</span>
+                <span class="field__name">Месяц</span>
+                <input id="n-month" type="number" min="1" max="12" placeholder="5" inputmode="numeric" required />
+              </label>
+              <span class="field__sep"></span>
+              <label class="field">
+                <span class="field__ico">✦</span>
+                <span class="field__name">Год</span>
+                <input id="n-year" type="number" min="1900" max="2100" placeholder="1998" inputmode="numeric" required />
+              </label>
+            </div>
           </div>
-          <div class="natal__row">
-            <span>Время рождения (по местному)</span>
-            <input id="n-time" type="time" />
-          </div>
-          <div class="natal__row">
-            <span>Город рождения</span>
-            <input id="n-city" type="text" placeholder="Москва" />
+          <div class="natal__inputs-row">
+            <label class="field">
+              <span class="field__ico">⏰</span>
+              <span class="field__name">Время рождения
+                <span class="info-tip" tabindex="0" aria-label="Подсказка">ℹ️
+                  <span class="info-bubble">Точное время рождения нужно для определения знака Асцендента и системы домов.</span>
+                </span>
+              </span>
+              <input id="n-time" type="time" />
+            </label>
+            <label class="field">
+              <span class="field__ico">📍</span>
+              <span class="field__name">Город рождения
+                <span class="info-tip" tabindex="0" aria-label="Подсказка">ℹ️
+                  <span class="info-bubble">Город нужен для определения точных географических координат (широта/долгота) и расчёта Асцендента (ASC).</span>
+                </span>
+              </span>
+              <input id="n-city" type="text" placeholder="Москва" />
+            </label>
           </div>
           <button class="btn btn--primary btn--wide" type="submit">🌌 Построить карту</button>
         </form>
-        <div class="natal__chart" id="natal-chart">
+
+        <div class="natal__chart reveal d2" id="natal-chart">
           <div class="natal__stars" id="natal-stars" aria-hidden="true"></div>
           <div class="natal__disc" id="natal-disc"></div>
           <div class="natal__planet-info glass" id="natal-planet-info">🪐 Наведи или нажми на планету на диске для деталей.</div>
         </div>
-        <p class="natal__note">Полный расчёт домов и аспектов — в расширенном ИИ-прогнозе.</p>
-        <button class="btn btn--ghost btn--wide natal__forecast-btn" id="natal-forecast" type="button">
+
+        <p class="natal__note reveal">Полный расчёт домов и аспектов — в расширенном ИИ-прогнозе.</p>
+        <button class="btn btn--ghost btn--wide natal__forecast-btn reveal d2" id="natal-forecast" type="button">
           ✨ Расширенный прогноз по натальной карте
         </button>
         <div class="forecast__result glass reveal" id="natal-extended" hidden></div>
       </div>
     </section>
 
-    <!-- ЭКРАН 3: Прогноз -->
+    <!-- ЭКРАН 3: ПРОГНОЗ -->
     <section class="screen" id="screen-forecast">
-      <div class="screen__head">
-        <p class="section__eyebrow">ПРОГНОЗ</p>
-        <h2 class="section__title">День · Неделя · Месяц</h2>
-        <p class="section__subtitle">Рассчитан по твоей натальной карте и числам. Нажми на блок — звёзды ответят.</p>
-      </div>
-      
-      <!-- Астропогода на сегодня -->
-      <div id="forecast-astro" class="astro-weather" hidden>
-        <div class="astro-moon glass reveal">
-          <span class="astro-moon__icon" id="astro-moon-icon">🌑</span>
-          <div class="astro-moon__text">
-            <div id="astro-moon-phase">Фаза Луны</div>
-            <div id="astro-moon-sign">Знаке</div>
+      <div class="calc">
+        <div class="section__head reveal">
+          <p class="section__eyebrow">
+            АСТРОПОВОДЫ & ТРАНЗИТЫ
+            <span class="info-tip" tabindex="0" aria-label="Подсказка">ℹ️
+              <span class="info-bubble">Выбери временной горизонт. Астро-движок сопоставит положение транзитных планет с твоим натальным кодом.</span>
+            </span>
+          </p>
+          <h2 class="section__title">Прогноз по звёздам</h2>
+          <p class="section__subtitle">Ежедневные космические вибрации и астрономическая погода.</p>
+        </div>
+
+        <!-- Астропогода: Луна и Транзиты -->
+        <div class="forecast__astro glass reveal" id="forecast-astro">
+          <div class="astro__head">
+            <span class="astro__icon">🌌</span>
+            <h3>Астрономическая погода сейчас</h3>
           </div>
-        </div>
-        <div class="astro-transits glass reveal d2">
-          <div class="astro-transits__title">Транзиты к твоей карте:</div>
-          <ul id="astro-transits-list" class="astro-transits__list"></ul>
-        </div>
-      </div>
-
-      <div class="natal" style="grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));">
-        <button class="about__item glass reveal forecast__block" data-horizon="day" type="button">
-          <span class="about__icon">☀</span>
-          <h3>На сегодня</h3>
-          <p>Короткий импульс от звёзд: на что направить энергию прямо сейчас.</p>
-          <span class="forecast__hint">Нажми ➜</span>
-        </button>
-        <button class="about__item glass reveal d2 forecast__block" data-horizon="week" type="button">
-          <span class="about__icon">🌙</span>
-          <h3>На неделю</h3>
-          <p>Волны транзитов и благоприятные окна для важных шагов.</p>
-          <span class="forecast__hint">Нажми ➜</span>
-        </button>
-        <button class="about__item glass reveal d3 forecast__block" data-horizon="month" type="button">
-          <span class="about__icon">🪐</span>
-          <h3>На месяц</h3>
-          <p>Широкий цикл развития и темы, которые принесут рост.</p>
-          <span class="forecast__hint">Нажми ➜</span>
-        </button>
-      </div>
-      <div class="forecast__result glass reveal" id="forecast-result" hidden></div>
-    </section>
-
-    <!-- ЭКРАН 4: История -->
-    <section class="screen" id="screen-history">
-      <div class="screen__head">
-        <p class="section__eyebrow">ИСТОРИЯ</p>
-        <h2 class="section__title">Прошлые расклады</h2>
-        <p class="section__subtitle">Сохранённые расклады и прогнозы — всё ниже.</p>
-      </div>
-      <div class="history" id="history-list"></div>
-      <div class="history__empty glass reveal" id="history-empty">
-        <div class="zodiac__ring"><span class="zodiac__icon">📜</span></div>
-        <h3>Пока пусто</h3>
-        <p>Посчитай расклад в «Расклады» или прогноз в «Прогноз» — они появятся здесь.</p>
-        <button class="btn btn--ghost" id="history-clear" type="button" hidden>Очистить историю</button>
-      </div>
-    </section>
-
-    <!-- ЭКРАН 5: Профиль -->
-    <section class="screen" id="screen-profile">
-      <div class="screen__head">
-        <p class="section__eyebrow">ПРОФИЛЬ</p>
-        <h2 class="section__title">Настройки и баланс</h2>
-        <p class="section__subtitle">Твой знак, звёзды и голос, которым говорит с тобой навигатор.</p>
-      </div>
-      <div class="profile">
-        <div class="profile__card glass reveal">
-          <div class="calc__head"><span class="calc__head-ico">👤</span><span>ТВОЙ АККАУНТ</span></div>
-          <div class="profile__body">
-            <div class="profile__sign" id="profile-sign">—</div>
-            <div class="profile__meta" id="profile-meta">Заполни натальную карту, чтобы увидеть свой профиль.</div>
-            <div class="zodiac__tags" style="justify-content: center; margin: 0 0 14px;">
-              <span class="zodiac__tag zodiac__tag--elem">⭐ Stars: <b id="profile-stars">0</b></span>
-              <span class="zodiac__tag zodiac__tag--plnt">Стиль: <b id="profile-style-active">Космо</b></span>
+          <div class="astro__grid">
+            <div class="astro__moon">
+              <span class="moon__icon" id="astro-moon-icon">🌔</span>
+              <div class="moon__info">
+                <span class="moon__phase" id="astro-moon-phase">Растущая Луна</span>
+                <span class="moon__sign" id="astro-moon-sign">в знаке Телец</span>
+              </div>
             </div>
-            <a class="btn btn--primary btn--wide tg-cta" href="tg://resolve?domain=MyGoodTaro_bot">Открыть в Telegram</a>
+            <div class="astro__transits">
+              <h4>Активные транзиты к карте:</h4>
+              <ul class="transits__list" id="astro-transits-list">
+                <li><span>Солнце</span> <span style="color:var(--cyan)">△</span> <span>Юпитер</span> <span class="orb">0.4°</span></li>
+              </ul>
+            </div>
           </div>
         </div>
 
-        <div class="profile__styles">
-          <div class="section__head reveal">
-            <p class="section__eyebrow">ГОЛОС НАВИГАТОРА</p>
-            <h3 class="profile__styles-title">Стиль интерпретации</h3>
-            <p class="section__subtitle">Выбери образ, в котором звёзды говорят с тобой.</p>
+        <div class="forecast__grid bento-grid reveal d2">
+          <button class="forecast__block bento-card gold-glow-hover glass" data-horizon="day" type="button">
+            <span class="forecast__icon">☀</span>
+            <h3>На сегодня</h3>
+            <p>Короткий совет и главный аркан дня</p>
+            <span class="btn btn--ghost btn--sm">Рассчитать ›</span>
+          </button>
+          <button class="forecast__block bento-card gold-glow-hover glass" data-horizon="week" type="button">
+            <span class="forecast__icon">🌙</span>
+            <h3>На неделю</h3>
+            <p>Энергия 7 дней и ключевые повороты</p>
+            <span class="btn btn--ghost btn--sm">Рассчитать ›</span>
+          </button>
+          <button class="forecast__block bento-card gold-glow-hover glass" data-horizon="month" type="button">
+            <span class="forecast__icon">🪐</span>
+            <h3>На месяц</h3>
+            <p>Глубокая трансформация и тренды</p>
+            <span class="btn btn--ghost btn--sm">Рассчитать ›</span>
+          </button>
+        </div>
+
+        <div class="forecast__result glass reveal" id="forecast-result" hidden></div>
+      </div>
+    </section>
+
+    <!-- ЭКРАН 4: ИСТОРИЯ -->
+    <section class="screen" id="screen-history">
+      <div class="calc">
+        <div class="section__head reveal">
+          <p class="section__eyebrow">ИСТОРИЯ РАСКЛАДОВ</p>
+          <h2 class="section__title">Сохранённые разборы</h2>
+          <p class="section__subtitle">Все твои предыдущие расклады, натальные вычисления и ИИ-прогнозы.</p>
+        </div>
+        <div class="glass reveal d2" style="padding: 24px; max-width: 720px; margin: 0 auto;">
+          <div class="history__top-bar" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:18px;">
+            <h3>Твои записи</h3>
+            <button class="btn btn--ghost btn--sm" id="history-clear-btn" type="button" onclick="clearHistory()">🗑 Очистить</button>
           </div>
-          <div class="profile__style-grid" id="profile-styles"></div>
+          <div id="history-page-list" class="history__list"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ЭКРАН: ИССЛЕДУЙ (галерея 22 арканов, книг и школ) -->
+    <section class="screen" id="screen-explore">
+      <div class="calc">
+        <div class="section__head reveal">
+          <p class="section__eyebrow">БИБЛИОТЕКА & ГАЛЕРЕЯ ТАРО</p>
+          <h2 class="section__title">Исследуй Таро</h2>
+          <p class="section__subtitle">Изучи 22 старших аркана, культовые книги тарологов и ключевые школы эзотерической традиции.</p>
+        </div>
+
+        <!-- Переключатель категорий -->
+        <div class="explore__tabs reveal">
+          <button class="explore__tab explore__tab--active" data-explore-tab="arcana" type="button">🃏 22 Аркана</button>
+          <button class="explore__tab" data-explore-tab="books" type="button">📚 Книги и Учебники</button>
+          <button class="explore__tab" data-explore-tab="schools" type="button">🔮 Традиции и Школы</button>
+        </div>
+
+        <div id="explore-grid" class="arcana bento-grid reveal d2"></div>
+        <div id="explore-books-grid" class="bento-grid reveal d2" hidden></div>
+        <div id="explore-schools-grid" class="bento-grid reveal d2" hidden></div>
+      </div>
+    </section>
+
+    <!-- ЭКРАН 5: ПРОФИЛЬ -->
+    <section class="screen" id="screen-profile">
+      <div class="calc">
+        <div class="section__head reveal">
+          <p class="section__eyebrow">
+            ЛИЧНЫЙ КАБИНЕТ
+            <span class="info-tip" tabindex="0" aria-label="Подсказка">ℹ️
+              <span class="info-bubble">Здесь хранится твой космический паспорт, сохранённая история раскладов и выбор персоны ИИ-интерпретатора.</span>
+            </span>
+          </p>
+          <h2 class="section__title">Космический паспорт</h2>
+          <p class="section__subtitle">Твои сохранённые данные, астрологический код и история.</p>
+        </div>
+
+        <div class="profile__card glass reveal d2">
+          <div class="profile__header">
+            <div class="profile__avatar">🪐</div>
+            <div class="profile__user">
+              <h3 id="profile-sign">Загрузка паспорта…</h3>
+              <p id="profile-meta">Введи дату рождения на главной</p>
+            </div>
+          </div>
+
+          <div class="profile__section">
+            <h4>Голос ИИ-интерпретатора
+              <span class="info-tip" tabindex="0" aria-label="Подсказка">ℹ️
+                <span class="info-bubble">Выбери архетип, в стиле которого нейросеть будет форматировать свои ответы и советы.</span>
+              </span>
+            </h4>
+            <p class="profile__sub">Текущий стиль: <b id="profile-style-active">Космо</b></p>
+            <div class="profile__styles-grid" id="profile-styles"></div>
+          </div>
+
+          <div class="profile__section">
+            <div class="profile__history-head">
+              <h4>История разборов
+                <span class="info-tip" tabindex="0" aria-label="Подсказка">ℹ️
+                  <span class="info-bubble">Ваша история разборов хранится локально в вашем браузере. Вы можете очистить её в любой момент.</span>
+                </span>
+              </h4>
+              <button class="btn btn--ghost btn--sm" id="history-clear" type="button">🗑 Очистить историю</button>
+            </div>
+            <div id="history-list" class="history__list"></div>
+            <p id="history-empty" class="history__empty">История пока пуста. Рассчитай свой код на главной странице!</p>
+          </div>
+
+          <div class="profile__footer">
+            <a href="#privacy" class="privacy-link" data-open-privacy>📜 Политика конфиденциальности (152-ФЗ)</a>
+          </div>
         </div>
       </div>
     </section>
   </main>
 
-  <!-- НИЖНЯЯ НАВИГАЦИЯ (всегда видна) -->
+  <!-- НИЖНЯЯ НАВИГАЦИЯ -->
   <nav class="tabbar">
-    <button class="tabbar__btn tabbar__btn--active" data-tab="reads" aria-label="Расклады">
+    <button class="tabbar__btn tabbar__btn--active" type="button" data-tab="reads" aria-label="Главная">
       <span class="tabbar__ico">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="3.5" y="5" width="12.5" height="15.5" rx="2.6"/>
-          <rect x="8" y="2.5" width="12.5" height="15.5" rx="2.6"/>
+          <path d="M3 9.5L12 3l9 6.5V20a1.5 1.5 0 01-1.5 1.5h-15A1.5 1.5 0 013 20V9.5z"/>
+          <path d="M9 21.5V14h6v7.5"/>
         </svg>
       </span>
-      <span class="tabbar__label">Расклады</span>
+      <span class="tabbar__label">Главная</span>
     </button>
-    <button class="tabbar__btn" data-tab="natal" aria-label="Натал">
+    <button class="tabbar__btn" type="button" data-tab="explore" aria-label="Исследуй">
       <span class="tabbar__ico">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <circle cx="12" cy="12" r="8.6"/>
-          <circle cx="12" cy="12" r="4.4" stroke-dasharray="1.6 2.2"/>
-          <circle cx="12" cy="12" r="1.1" fill="currentColor" stroke="none"/>
+          <circle cx="11" cy="11" r="7.5"/>
+          <path d="M16.5 16.5L21 21"/>
         </svg>
       </span>
-      <span class="tabbar__label">Натал</span>
+      <span class="tabbar__label">Исследуй</span>
     </button>
-    <button class="tabbar__btn" data-tab="forecast" aria-label="Прогноз">
+    <button class="tabbar__btn" type="button" data-tab="natal" aria-label="Создать">
+      <span class="tabbar__ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="9"/>
+          <path d="M12 8v8M8 12h8"/>
+        </svg>
+      </span>
+      <span class="tabbar__label">Создать</span>
+    </button>
+    <button class="tabbar__btn" type="button" data-tab="forecast" aria-label="Прогноз">
       <span class="tabbar__ico">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 3 L13.7 9.5 L20 11 L13.7 12.5 L12 19 L10.3 12.5 L4 11 L10.3 9.5 Z"/>
@@ -415,18 +517,7 @@
       </span>
       <span class="tabbar__label">Прогноз</span>
     </button>
-    <button class="tabbar__btn" data-tab="history" aria-label="История">
-      <span class="tabbar__ico">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
-          <rect x="5" y="3" width="14" height="18" rx="2.6"/>
-          <line x1="8.5" y1="8" x2="15.5" y2="8"/>
-          <line x1="8.5" y1="12" x2="15.5" y2="12"/>
-          <line x1="8.5" y1="16" x2="12.5" y2="16"/>
-        </svg>
-      </span>
-      <span class="tabbar__label">История</span>
-    </button>
-    <button class="tabbar__btn" data-tab="profile" aria-label="Профиль">
+    <button class="tabbar__btn" type="button" data-tab="profile" aria-label="Профиль">
       <span class="tabbar__ico">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="12" cy="8" r="3.6"/>
@@ -437,20 +528,47 @@
     </button>
   </nav>
 
+  <!-- МОДАЛЬНОЕ ОКНО: Разбор Аркана -->
   <div id="arcana-modal" class="modal" hidden>
     <div class="modal__backdrop" data-close></div>
-    <div class="modal__card glass" role="dialog" aria-modal="true" aria-labelledby="modal-card">
+    <div class="modal__card modal__card--arcana glass" role="dialog" aria-modal="true" aria-labelledby="modal-card">
       <button class="modal__close" data-close aria-label="Закрыть">✕</button>
       <p class="modal__num" id="modal-num">АРКАН XVII</p>
-      <p class="modal__pos" id="modal-pos">Личность</p>
       <h3 class="modal__card-name" id="modal-card">Звезда</h3>
       <span class="modal__kw" id="modal-kw">Надежда и вдохновение</span>
-      <p class="modal__text" id="modal-text"></p>
-      <button
-        class="btn btn--primary btn--wide modal__cta"
-        id="modal-cta"
-        type="button"
-        >🔮 Расширенный разбор этого аркана</button>
+      <div class="modal__img-wrap" id="modal-img-wrap">
+        <img id="modal-img" src="" alt="" />
+      </div>
+      <button class="btn btn--primary btn--wide modal__cta" id="modal-cta" type="button">🔮 Расширенный разбор этого аркана</button>
+      <div class="modal__text" id="modal-text" hidden></div>
+    </div>
+  </div>
+
+  <!-- МОДАЛЬНОЕ ОКНО: Интерактивная книга Таро / Читалка -->
+  <div id="book-modal" class="modal" hidden>
+    <div class="modal__backdrop" data-close-book></div>
+    <div class="modal__card modal__card--reader glass" role="dialog" aria-modal="true" aria-labelledby="book-modal-title">
+      <button class="modal__close" data-close-book aria-label="Закрыть">✕</button>
+      
+      <div class="book-modal__header">
+        <div id="book-modal-cover-wrap" class="book-modal__cover-wrap"></div>
+        <div class="book-modal__meta-wrap">
+          <p class="modal__num" id="book-modal-school">ШКОЛА ТАРО</p>
+          <h3 class="modal__card-name" id="book-modal-title">Название Книги</h3>
+          <span class="modal__kw" id="book-modal-author">Автор</span>
+        </div>
+      </div>
+
+      <!-- Навигация по главам книги -->
+      <div id="book-reader-nav" class="book-reader__nav"></div>
+
+      <!-- Содержимое читалки -->
+      <div id="book-reader-content" class="book-reader__content"></div>
+
+      <div class="book-modal__actions" style="margin-top:16px; display:flex; flex-direction:column; gap:8px;">
+        <button class="btn btn--primary btn--wide" id="book-modal-action-btn" type="button">📖 Читать книгу в браузере</button>
+        <button class="btn btn--ghost btn--wide" data-close-book type="button">Закрыть окно</button>
+      </div>
     </div>
   </div>
 
@@ -468,7 +586,7 @@
         <p>Вводимые имя, дата, время и город рождения используются исключительно для математического и астрологического расчёта вашей карты. Мы не запрашиваем фамилию, номер телефона, email или паспортные данные.</p>
         <br>
         <h4>2. Хранение и удаление</h4>
-        <p>Данные сохраняются в памяти вашего устройства (localStorage) для вашего удобства. Вы можете в любой момент полностью стереть записи, нажав «Очистить историю» в разделе История.</p>
+        <p>Данные сохраняются в памяти вашего устройства (localStorage) для вашего удобства. Вы можете в любой момент полностью стереть записи, нажав «Очистить историю» в разделе Профиль.</p>
         <br>
         <h4>3. Защита</h4>
         <p>Данные не передаются третьим лицам и не используются для рекламы или спама.</p>
@@ -477,10 +595,9 @@
     </div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js"></script>
-  <script src="js/space.js?v=13"></script>
-  <script src="js/natal.js?v=13"></script>
-  <script src="js/app.js?v=13"></script>
+  <script src="js/natal.js?v=21"></script>
+  <script src="js/space.js?v=21"></script>
+  <script src="js/app.js?v=21"></script>
 </body>
 </html>

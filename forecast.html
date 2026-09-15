@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Астрологический ИИ-Прогноз — TARO NAVIGATOR</title>
+  <meta name="description" content="Ежедневный, недельный и месячный персональный астрологический ИИ-прогноз по натальной карте и арканам Таро." />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://shadowlinkapp.online/forecast.html" />
+  <link rel="icon" type="image/jpeg" href="favicon.jpg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css?v=20" />
+</head>
+<body>
+
+  <header class="nav reveal">
+    <div class="nav__inner">
+      <a class="logo" href="index.html">
+        <span class="logo__mark">☾</span>
+        <span class="logo__text">TARO<span>&nbsp;NAVIGATOR</span></span>
+      </a>
+      <div class="nav__actions">
+        <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Переключить тему">
+          <span class="theme-toggle__icon" id="theme-toggle-icon">🌙</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <!-- ЭКРАН 1: РАСКЛАДЫ -->
+    <section class="screen" id="screen-reads">
+      <section class="calc" id="calculator">
+        <div class="calc__card glass">
+          <div class="calc__inputs">
+            <label class="field"><span class="field__name">День</span><input id="day" type="number" placeholder="12" /></label>
+            <label class="field"><span class="field__name">Месяц</span><input id="month" type="number" placeholder="5" /></label>
+            <label class="field"><span class="field__name">Год</span><input id="year" type="number" placeholder="1998" /></label>
+          </div>
+          <button id="run" class="btn btn--primary btn--wide">🔮 Синхронизировать со звёздами</button>
+        </div>
+        <div id="result" hidden>
+          <div id="zodiac-card" class="zodiac glass"></div>
+          <div id="arcana-grid" class="arcana"></div>
+        </div>
+      </section>
+    </section>
+
+    <!-- ЭКРАН 2: НАТАЛ -->
+    <section class="screen" id="screen-natal">
+      <div class="calc">
+        <div class="section__head reveal">
+          <h2 class="section__title">Космическая астрология</h2>
+        </div>
+        <form class="calc__card glass reveal d2" id="natal-form">
+          <input id="n-day" type="number" placeholder="12" />
+          <input id="n-month" type="number" placeholder="5" />
+          <input id="n-year" type="number" placeholder="1998" />
+          <input id="n-name" type="text" placeholder="Мария" />
+          <input id="n-time" type="time" />
+          <input id="n-city" type="text" placeholder="Москва" />
+          <button class="btn btn--primary btn--wide" type="submit">🌌 Построить карту</button>
+        </form>
+        <div class="natal__chart reveal d2" id="natal-chart">
+          <div class="natal__disc" id="natal-disc"></div>
+          <div class="natal__planet-info glass" id="natal-planet-info">🪐 Детали планет</div>
+        </div>
+        <button class="btn btn--ghost btn--wide" id="natal-forecast" type="button">✨ Расширенный прогноз</button>
+        <div class="forecast__result glass" id="natal-extended" hidden></div>
+      </div>
+    </section>
+
+    <!-- ЭКРАН 3: ПРОГНОЗ (АКТИВНЫЙ НА FORECAST.HTML) -->
+    <section class="screen screen--active" id="screen-forecast">
+      <div class="calc">
+        <div class="section__head reveal">
+          <p class="section__eyebrow">
+            АСТРОПОВОДЫ & ТРАНЗИТЫ
+            <span class="info-tip" tabindex="0" aria-label="Подсказка">ℹ️
+              <span class="info-bubble">Выбери временной горизонт. Астро-движок сопоставит положение транзитных планет с твоим натальным кодом.</span>
+            </span>
+          </p>
+          <h2 class="section__title">Прогноз по звёздам</h2>
+          <p class="section__subtitle">Ежедневные космические вибрации и астрономическая погода.</p>
+        </div>
+
+        <!-- Астропогода: Луна и Транзиты -->
+        <div class="forecast__astro glass reveal" id="forecast-astro">
+          <div class="astro__head">
+            <span class="astro__icon">🌌</span>
+            <h3>Астрономическая погода сейчас</h3>
+          </div>
+          <div class="astro__grid">
+            <div class="astro__moon">
+              <span class="moon__icon" id="astro-moon-icon">🌔</span>
+              <div class="moon__info">
+                <span class="moon__phase" id="astro-moon-phase">Растущая Луна</span>
+                <span class="moon__sign" id="astro-moon-sign">в знаке Телец</span>
+              </div>
+            </div>
+            <div class="astro__transits">
+              <h4>Активные транзиты к карте:</h4>
+              <ul class="transits__list" id="astro-transits-list">
+                <li><span>Солнце</span> <span style="color:var(--cyan)">△</span> <span>Юпитер</span> <span class="orb">0.4°</span></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="forecast__grid reveal d2">
+          <button class="forecast__block glass" data-horizon="day" type="button">
+            <span class="forecast__icon">☀</span>
+            <h3>На сегодня</h3>
+            <p>Короткий совет и главный аркан дня</p>
+            <span class="btn btn--ghost btn--sm">Рассчитать ›</span>
+          </button>
+          <button class="forecast__block glass" data-horizon="week" type="button">
+            <span class="forecast__icon">🌙</span>
+            <h3>На неделю</h3>
+            <p>Энергия 7 дней и ключевые повороты</p>
+            <span class="btn btn--ghost btn--sm">Рассчитать ›</span>
+          </button>
+          <button class="forecast__block glass" data-horizon="month" type="button">
+            <span class="forecast__icon">🪐</span>
+            <h3>На месяц</h3>
+            <p>Глубокая трансформация и тренды</p>
+            <span class="btn btn--ghost btn--sm">Рассчитать ›</span>
+          </button>
+        </div>
+
+        <div class="forecast__result glass reveal" id="forecast-result" hidden></div>
+      </div>
+    </section>
+
+    <!-- ЭКРАН 4: ИСТОРИЯ -->
+    <section class="screen" id="screen-history">
+      <div class="calc">
+        <div class="section__head reveal">
+          <h2 class="section__title">Сохранённые разборы</h2>
+        </div>
+      </div>
+    </section>
+
+    <!-- ЭКРАН 5: ПРОФИЛЬ -->
+    <section class="screen" id="screen-profile">
+      <div class="calc">
+        <div class="section__head reveal">
+          <p class="section__eyebrow">ЛИЧНЫЙ КАБИНЕТ</p>
+          <h2 class="section__title">Космический паспорт</h2>
+        </div>
+        <div class="profile__card glass reveal d2">
+          <div class="profile__header">
+            <div class="profile__avatar">🪐</div>
+            <div class="profile__user">
+              <h3 id="profile-sign">Загрузка паспорта…</h3>
+              <p id="profile-meta">Введи дату рождения на главной</p>
+            </div>
+          </div>
+          <div class="profile__section">
+            <h4>Голос ИИ-интерпретатора</h4>
+            <p class="profile__sub">Текущий стиль: <b id="profile-style-active">Космо</b></p>
+            <div class="profile__styles-grid" id="profile-styles"></div>
+          </div>
+          <div class="profile__section">
+            <div class="profile__history-head">
+              <h4>История разборов</h4>
+              <button class="btn btn--ghost btn--sm" id="history-clear" type="button">🗑 Очистить историю</button>
+            </div>
+            <div id="history-list" class="history__list"></div>
+            <p id="history-empty" class="history__empty">История пока пуста.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- НИЖНЯЯ НАВИГАЦИЯ -->
+  <nav class="tabbar">
+    <button class="tabbar__btn" type="button" data-tab="reads" aria-label="Расклады">
+      <span class="tabbar__ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <rect x="3.5" y="5" width="12.5" height="15.5" rx="2.6"/>
+          <rect x="8" y="2.5" width="12.5" height="15.5" rx="2.6"/>
+        </svg>
+      </span>
+      <span class="tabbar__label">Расклады</span>
+    </button>
+    <button class="tabbar__btn" type="button" data-tab="natal" aria-label="Натал">
+      <span class="tabbar__ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="8.6"/>
+          <circle cx="12" cy="12" r="4.4" stroke-dasharray="1.6 2.2"/>
+          <circle cx="12" cy="12" r="1.1" fill="currentColor" stroke="none"/>
+        </svg>
+      </span>
+      <span class="tabbar__label">Натал</span>
+    </button>
+    <button class="tabbar__btn tabbar__btn--active" type="button" data-tab="forecast" aria-label="Прогноз">
+      <span class="tabbar__ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 3 L13.7 9.5 L20 11 L13.7 12.5 L12 19 L10.3 12.5 L4 11 L10.3 9.5 Z"/>
+        </svg>
+      </span>
+      <span class="tabbar__label">Прогноз</span>
+    </button>
+    <button class="tabbar__btn" type="button" data-tab="profile" aria-label="Профиль">
+      <span class="tabbar__ico">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="8" r="3.6"/>
+          <path d="M5 20 a7 7 0 0 1 14 0"/>
+        </svg>
+      </span>
+      <span class="tabbar__label">Профиль</span>
+    </button>
+  </nav>
+
+  <script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js"></script>
+  <script src="js/natal.js?v=21"></script>
+  <script src="js/space.js?v=21"></script>
+  <script src="js/app.js?v=21"></script>
+</body>
+</html>
