@@ -182,7 +182,9 @@ const $ = (id) => document.getElementById(id);
 
 // === API полных ИИ-разборов (FastAPI на shadowlinkapp.online/api) ===
 // Каждая вкладка рендерит свой полный разбор прямо здесь, без ухода в бота.
-const TARO_API_BASE = "https://shadowlinkapp.online/api/v1";
+const TARO_API_BASE = (location.hostname === "localhost" || location.hostname === "127.0.0.1")
+  ? "/api/v1"
+  : "https://shadowlinkapp.online/api/v1";
 
 async function taroApi(path, body) {
   const payload = Object.assign({ style: getSavedStyle().name }, body);
@@ -890,7 +892,11 @@ function renderAstroWeather() {
       });
     }
     if (name === "forecast") renderAstroWeather();
-    window.scrollTo(window.__taroWebApp ? 0 : { top: 0, behavior: "smooth" }, 0);
+    if (window.__taroWebApp) {
+      window.scrollTo(0, 0);
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   }
   tabs.forEach((t) => t.addEventListener("click", () => activate(t.dataset.tab)));
 })();
