@@ -138,6 +138,13 @@
 
 ## ЛОГ ИСПРАВЛЕНИЙ (последние изменения сверху)
 
+- 2026-09-16 — **Финальный фикс исчезновения/сдвига мобильного меню (tabbar overflow).**
+  1) **`overflow-x: hidden` на `html` и `main`:** В `css/style.css` добавлены `overflow-x: hidden; max-width: 100%` на элемент `html` и `overflow-x: hidden; max-width: 100vw` на `main`. Это блокирует горизонтальный скролл на уровне документа — не только на `body` (который в WebKit на мобилке не всегда блокирует overflow под fixed-элементами).
+  2) **`overflow-x: hidden; width: 100%; max-width: 100%` на `.screen`:** Каждый экран SPA теперь жёстко ограничен шириной viewport — контент внутри не может вытолкнуть layout за 100% ширины.
+  3) **Фикс grid-minmax для мобильных:** В `.bento-grid` и `.forecast__grid` `minmax(280px, 1fr)` / `minmax(240px, 1fr)` заменены на `minmax(min(280px, 100%), 1fr)` и `minmax(min(240px, 100%), 1fr)` — на узком экране колонки не форсируют ширину шире viewport.
+  4) **Правильный порядок переключения экранов в `initTabs()`:** В `js/app.js` старый экран скрывается **до** `scrollTo({top:0, left:0, behavior:'instant'})`, а новый показывается после. Добавлен явный сброс `documentElement.scrollLeft = 0` и `body.scrollLeft = 0`.
+  5) **Деплой:** commit `45765d2`, git pull на VPS, pm2 restart all, static rsync — всё успешно.
+
 - 2026-09-16 — **Настоящий URL хэш-роутинг и полное устранение исчезновения меню на мобильных.**
   1) **Полноценный SPA URL-роутинг по хэшу (`#reads`, `#explore`, `#natal`, `#forecast`, `#profile`, `#history`):** В `js/app.js` внедрен роутер на `window.history.pushState` / `hashchange` / `popstate`. Клик по любому табу обновляет URL адреса (например `https://shadowlinkapp.online/#profile`), поддерживаются кнопки «Назад/Вперёд» в браузере и прямые ссылки на конкретные разделы.
   2) **Ликвидация 0px провала высоты и сдвига меню:** В `css/style.css` убраны анимации `transform: translateY` с контейнеров `.screen--active`, вызывавшие перерасчет координат `position: fixed`. В `js/app.js` переключение экранов переведено на мгновенную смену фаз без 140ms задержки скрытия, исключая схлопывание высоты страницы до 0px и испарение таббара при прокрутке.
