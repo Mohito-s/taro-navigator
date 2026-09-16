@@ -1690,15 +1690,20 @@ function renderAstroWeather() {
 
     const newScreen = document.getElementById("screen-" + name);
 
-    // Сбрасываем скролл к вершине мгновенно без дёргания высоты
-    window.scrollTo(0, 0);
-
     if (newScreen) {
+      // Сначала скрываем старый экран — убираем его горизонтальный overflow из layout
       screens.forEach((s) => {
         if (s !== newScreen) {
           s.classList.remove("screen--active");
         }
       });
+
+      // Теперь сбрасываем скролл — старый экран уже скрыт и не создаёт overflow
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+      document.documentElement.scrollLeft = 0;
+      document.body.scrollLeft = 0;
+
+      // Показываем новый экран
       newScreen.classList.add("screen--active");
 
       newScreen.querySelectorAll(".reveal").forEach((el) => {
