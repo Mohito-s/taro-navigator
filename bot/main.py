@@ -7,7 +7,8 @@ from aiogram.types import BotCommand, MenuButtonWebApp, WebAppInfo
 
 from bot.config import BOT_TOKEN, MINI_APP_URL
 from bot.db import db as db_module
-from bot.handlers import daily, report, start, webapp, wizard
+from bot.handlers import admin_poster, daily, report, start, webapp, wizard
+from bot.services.channel_poster import channel_poster_cron
 
 
 async def main():
@@ -22,6 +23,8 @@ async def main():
         [
             BotCommand(command="start", description="Главное меню"),
             BotCommand(command="card", description="Карта дня"),
+            BotCommand(command="test_card", description="Предпросмотр поста (Админ)"),
+            BotCommand(command="post_card", description="Опубликовать в канал (Админ)"),
             BotCommand(command="cancel", description="Отменить"),
         ]
     )
@@ -40,9 +43,12 @@ async def main():
             menu_button=MenuButtonWebApp(text="open", web_app=WebAppInfo(url=MINI_APP_URL))
         )
 
-    dp.include_routers(start.router, wizard.router, daily.router, webapp.router)
+    dp.include_routers(start.router, wizard.router, daily.router, webapp.router, admin_poster.router)
 
-    logging.info("Bot started")
+    # Запускаем фоновый планировщик публикации карты дня в канал
+    asyncio.create_task(channel_poster_cron(bot))
+
+    logging.info("Bot started with Channel Poster enabled")
     await dp.start_polling(bot)
 
 

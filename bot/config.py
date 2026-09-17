@@ -7,6 +7,8 @@ load_dotenv()
 BOT_TOKEN: str = os.getenv("BOT_TOKEN", "")
 DB_PATH: str = os.getenv("DB_PATH", "data/taro.db")
 MINI_APP_URL: str = os.getenv("MINI_APP_URL", "").strip()
+CHANNEL_ID: str = os.getenv("CHANNEL_ID", "-1004437866558").strip()
+ADMIN_ID: int = int(os.getenv("ADMIN_ID", "830960097"))
 
 # Тестовый режим: отключает оплату Stars, чтобы прогнать весь флоу локально без платежа.
 TEST_MODE: bool = os.getenv("TEST_MODE", "false").strip().lower() in ("1", "true", "yes", "on")
