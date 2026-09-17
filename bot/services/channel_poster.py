@@ -12,7 +12,7 @@ from aiogram.types import (
     WebAppInfo,
 )
 
-from bot.config import ADMIN_ID, CHANNEL_ID, MINI_APP_URL
+from bot.config import ADMIN_ID, AI_MODEL, CHANNEL_ID, MINI_APP_URL
 from bot.services.ai import _chat
 from bot.texts.arcana_base import ARCANA
 
@@ -78,7 +78,7 @@ async def generate_card_post_text(card_num: int) -> str:
 
     ai_text = await _chat(
         {
-            "model": "google/gemma-4-26b-a4b-it:free",
+            "model": AI_MODEL,
             "messages": [
                 {
                     "role": "system",
