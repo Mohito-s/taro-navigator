@@ -839,7 +839,7 @@ main {
   object-fit: contain;
   background: transparent !important;
   border-radius: 8px;
-  z-index: 2;
+  z-index: 3;
   filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 16px rgba(201, 169, 110, 0.42));
   transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), filter 0.35s ease;
 }
@@ -855,7 +855,7 @@ main {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 2;
+  z-index: 1;
   transition: transform 0.3s ease, filter 0.3s ease;
   filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.7)) drop-shadow(0 0 14px rgba(201, 169, 110, 0.35));
 }

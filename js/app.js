@@ -138,28 +138,28 @@ const ARCANA_TEXT = {
 };
 
 const ARCANA_IMAGES = [
-  'img/cards/00-fool.png',
-  'img/cards/01-magician.png',
-  'img/cards/02-priestess.png',
-  'img/cards/03-empress.png',
-  'img/cards/04-emperor.png',
-  'img/cards/05-hierophant.png',
-  'img/cards/06-lovers.png',
-  'img/cards/07-chariot.png',
-  'img/cards/08-strength.png',
-  'img/cards/09-hermit.png',
-  'img/cards/10-wheel.png',
-  'img/cards/11-justice.png',
-  'img/cards/12-hanged.png',
+  'img/cards/00-fool.jpg',
+  'img/cards/01-magician.jpg',
+  'img/cards/02-priestess.jpg',
+  'img/cards/03-empress.jpg',
+  'img/cards/04-emperor.jpg',
+  'img/cards/05-hierophant.jpg',
+  'img/cards/06-lovers.jpg',
+  'img/cards/07-chariot.jpg',
+  'img/cards/08-strength.jpg',
+  'img/cards/09-hermit.jpg',
+  'img/cards/10-wheel.jpg',
+  'img/cards/11-justice.jpg',
+  'img/cards/12-hanged.jpg',
   'img/cards/13-death.png',
   'img/cards/14-temperance.png',
   'img/cards/15-devil.png',
-  'img/cards/16-tower.png',
+  'img/cards/16-tower.jpg',
   'img/cards/17-star.png',
-  'img/cards/18-moon.png',
-  'img/cards/19-sun.png',
-  'img/cards/20-judgement.png',
-  'img/cards/21-world.png',
+  'img/cards/18-moon.jpg',
+  'img/cards/19-sun.jpg',
+  'img/cards/20-judgement.jpg',
+  'img/cards/21-world.jpg',
 ];
 
 function getArcanaSVG(n, cardName) {
@@ -501,7 +501,7 @@ function renderResult(day, month, year, opts = {}) {
         <div class="arcana__card">${a.card}</div>
         <span class="arcana__kw">${a.kw}</span>
         <div class="arcana__illustration">
-          <img src="${ARCANA_IMAGES[a.n]}" alt="${a.card}" onerror="if(!this.dataset.t1){this.dataset.t1=1;this.src=this.src.replace('.png','.jpg');}else if(!this.dataset.t2){this.dataset.t2=1;this.src=this.src.replace('.jpg','.webp');}else{this.style.display='none';}" onload="this.style.display='block';" style="display:none;" />
+          <img src="${ARCANA_IMAGES[a.n]}" alt="${a.card}" onerror="if(!this.dataset.t1){this.dataset.t1=1;this.src=this.src.endsWith('.jpg')?this.src.replace('.jpg','.png'):this.src.replace('.png','.jpg');}else{this.style.display='none';if(this.nextElementSibling)this.nextElementSibling.style.display='flex';}" onload="this.style.display='block';if(this.nextElementSibling)this.nextElementSibling.style.display='none';" style="display:none;" />
           <div class="arcana__svg-card">${getArcanaSVG(a.n, a.card)}</div>
         </div>
         <button class="arcana__btn" type="button">СМОТРЕТЬ ЗНАЧЕНИЕ</button>
