@@ -1163,19 +1163,26 @@ function openBookModal(book) {
       }
     };
 
+    // Главная кнопка — всегда «Читать главы»
     if (actionBtn) {
+      actionBtn.textContent = "📖 Читать главы книги →";
+      actionBtn.onclick = () => {
+        showChapter(0);
+        navBox.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      };
+    }
+
+    // PDF-кнопка — только если есть файл
+    const pdfBtn = $("book-modal-pdf-btn");
+    if (pdfBtn) {
       if (book.pdfUrl && pdfIdx !== -1) {
-        actionBtn.textContent = "📄 Открыть полный PDF в браузере ➔";
-        actionBtn.onclick = () => {
+        pdfBtn.hidden = false;
+        pdfBtn.onclick = () => {
           showChapter(pdfIdx);
           contentBox.scrollIntoView({ behavior: "smooth" });
         };
       } else {
-        actionBtn.textContent = "📜 Читать главы книги ➔";
-        actionBtn.onclick = () => {
-          showChapter(0);
-          contentBox.scrollIntoView({ behavior: "smooth" });
-        };
+        pdfBtn.hidden = true;
       }
     }
   }
