@@ -407,13 +407,13 @@ main {
 }
 
 .bento-card {
-  background: var(--card, #1c1c20);
+  background: linear-gradient(180deg, rgba(201, 169, 110, 0.05) 0%, rgba(28, 28, 33, 0.98) 25%, #18181c 100%);
   border: 1px solid var(--gold-border, rgba(201, 169, 110, 0.2));
   border-radius: 18px;
   padding: 24px;
   position: relative;
   overflow: hidden;
-  box-shadow: var(--shadow, 0 8px 24px rgba(0, 0, 0, 0.4));
+  box-shadow: inset 0 1px 0 rgba(201, 169, 110, 0.18), var(--shadow, 0 8px 24px rgba(0, 0, 0, 0.4));
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
               border-color 0.3s ease,
               box-shadow 0.3s ease;
@@ -425,7 +425,7 @@ main {
 .gold-glow-hover:hover {
   transform: translateY(-6px);
   border-color: var(--gold, #c9a96e);
-  box-shadow: 0 12px 32px rgba(201, 169, 110, 0.25), 0 0 20px rgba(201, 169, 110, 0.2);
+  box-shadow: inset 0 1px 0 rgba(201, 169, 110, 0.4), 0 14px 36px rgba(0, 0, 0, 0.55), 0 0 24px rgba(201, 169, 110, 0.22);
 }
 
 .bento-card--tall {
@@ -731,19 +731,21 @@ main {
   padding: 20px;
   border-radius: 18px;
   cursor: pointer;
-  background: var(--card);
-  border: 1px solid var(--gold-border);
-  box-shadow: var(--shadow);
+  background: linear-gradient(180deg, rgba(201, 169, 110, 0.07) 0%, rgba(28, 28, 33, 0.98) 26%, #17171a 100%);
+  border: 1px solid rgba(201, 169, 110, 0.22);
+  box-shadow: inset 0 1px 0 rgba(201, 169, 110, 0.22), var(--shadow);
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.3s ease;
   display: flex;
   flex-direction: column;
   gap: 8px;
+  position: relative;
+  overflow: hidden;
 }
 
 .arcana__item:hover {
   transform: translateY(-6px);
-  border-color: var(--gold);
-  box-shadow: 0 12px 32px rgba(201, 169, 110, 0.25), 0 0 20px rgba(201, 169, 110, 0.2);
+  border-color: rgba(201, 169, 110, 0.55);
+  box-shadow: inset 0 1px 0 rgba(201, 169, 110, 0.45), 0 16px 36px rgba(0, 0, 0, 0.6), 0 0 28px rgba(201, 169, 110, 0.25);
 }
 
 .arcana__num {
@@ -769,34 +771,82 @@ main {
   color: var(--gold-light);
   padding: 3px 10px;
   border-radius: 6px;
-  background: rgba(201, 169, 110, 0.1);
+  background: rgba(201, 169, 110, 0.12);
   border: 1px solid var(--gold-border);
 }
 
 .arcana__illustration {
-  height: 220px;
+  height: 230px;
   margin: 8px 0;
-  border-radius: 10px;
-  background: #141417;
-  border: 1px solid var(--gold-border);
+  border-radius: 12px;
+  background: radial-gradient(ellipse 70% 75% at 50% 50%, rgba(201, 169, 110, 0.22) 0%, rgba(180, 130, 60, 0.1) 42%, rgba(20, 20, 24, 0.88) 75%, #111114 100%);
+  border: 1px solid rgba(201, 169, 110, 0.28);
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   overflow: hidden;
-  padding: 4px;
+  padding: 6px;
+  box-shadow: inset 0 0 28px rgba(0, 0, 0, 0.8), 0 0 16px rgba(201, 169, 110, 0.08);
+}
+
+/* Сакральная геометрия и зодиакальные круги на фоне подложки карты */
+.arcana__illustration::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(circle at center, transparent 30%, rgba(201, 169, 110, 0.14) 31%, transparent 32%),
+    radial-gradient(circle at center, transparent 50%, rgba(201, 169, 110, 0.11) 51%, transparent 52%),
+    radial-gradient(circle at center, transparent 68%, rgba(201, 169, 110, 0.08) 69%, transparent 70%),
+    conic-gradient(from 0deg at 50% 50%, transparent 0deg, rgba(201, 169, 110, 0.06) 12deg, transparent 24deg, transparent 90deg, rgba(201, 169, 110, 0.06) 102deg, transparent 114deg, transparent 180deg, rgba(201, 169, 110, 0.06) 192deg, transparent 204deg, transparent 270deg, rgba(201, 169, 110, 0.06) 282deg, transparent 294deg);
+  opacity: 0.9;
+  pointer-events: none;
+  z-index: 1;
+  transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease;
+}
+
+.arcana__item:hover .arcana__illustration::before {
+  transform: rotate(12deg) scale(1.03);
+  opacity: 1;
+}
+
+/* Мягкая центральная золотая подсветка */
+.arcana__illustration::after {
+  content: "";
+  position: absolute;
+  inset: 12%;
+  background: radial-gradient(ellipse at center, rgba(244, 208, 132, 0.28) 0%, rgba(201, 169, 110, 0.12) 48%, transparent 75%);
+  filter: blur(10px);
+  pointer-events: none;
+  z-index: 1;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.arcana__item:hover .arcana__illustration::after {
+  opacity: 1;
+  transform: scale(1.08);
 }
 
 .arcana__illustration img {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
+  top: 6px;
+  left: 6px;
+  right: 6px;
+  bottom: 6px;
+  width: calc(100% - 12px);
+  height: calc(100% - 12px);
   object-fit: contain;
-  background: #141417;
-  border-radius: 9px;
+  background: transparent !important;
+  border-radius: 8px;
   z-index: 2;
+  filter: drop-shadow(0 6px 14px rgba(0, 0, 0, 0.8)) drop-shadow(0 0 16px rgba(201, 169, 110, 0.42));
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), filter 0.35s ease;
+}
+
+.arcana__item:hover .arcana__illustration img {
+  transform: scale(1.035) translateY(-2px);
+  filter: drop-shadow(0 10px 22px rgba(0, 0, 0, 0.9)) drop-shadow(0 0 26px rgba(201, 169, 110, 0.65));
 }
 
 .arcana__svg-card {
@@ -805,17 +855,19 @@ main {
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 1;
-  transition: transform 0.3s ease;
+  z-index: 2;
+  transition: transform 0.3s ease, filter 0.3s ease;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.7)) drop-shadow(0 0 14px rgba(201, 169, 110, 0.35));
 }
 
 .arcana__item:hover .arcana__svg-card {
   transform: scale(1.03);
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.85)) drop-shadow(0 0 22px rgba(201, 169, 110, 0.6));
 }
 
 .arcana__symbol {
   font-size: 48px;
-  opacity: 0.7;
+  opacity: 0.75;
   transition: transform 0.3s ease;
 }
 
