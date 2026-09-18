@@ -254,6 +254,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initTheme();
   initPrivacyModal();
   initSyncSystem();
+  initShareSystem();
 });
 
 // Сессия посетителя сайта для синхронизации с БД на сервере
@@ -2650,3 +2651,539 @@ document.querySelectorAll(".forecast__block").forEach((btn) => {
 });
 
 renderHistory();
+
+// ============================================================================
+// === ВИРАЛЬНЫЙ ГЕНЕРАТОР SHARE-КАРТОЧЕК ДЛЯ STORIES (Canvas -> PNG) ===
+// ============================================================================
+
+let __currentShareBlob = null;
+
+function loadShareCardImage(src) {
+  return new Promise((resolve) => {
+    if (!src) return resolve(null);
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => resolve(img);
+    img.onerror = () => {
+      const alt = src.endsWith(".jpg") ? src.replace(".jpg", ".png") : src.replace(".png", ".jpg");
+      const img2 = new Image();
+      img2.crossOrigin = "anonymous";
+      img2.onload = () => resolve(img2);
+      img2.onerror = () => resolve(null);
+      img2.src = alt;
+    };
+    img.src = src;
+    setTimeout(() => resolve(null), 3500);
+  });
+}
+
+function drawCanvasStar(ctx, cx, cy, spikes, outerRadius, innerRadius, color) {
+  let rot = (Math.PI / 2) * 3;
+  let x = cx;
+  let y = cy;
+  const step = Math.PI / spikes;
+
+  ctx.beginPath();
+  ctx.moveTo(cx, cy - outerRadius);
+  for (let i = 0; i < spikes; i++) {
+    x = cx + Math.cos(rot) * outerRadius;
+    y = cy + Math.sin(rot) * outerRadius;
+    ctx.lineTo(x, y);
+    rot += step;
+
+    x = cx + Math.cos(rot) * innerRadius;
+    y = cy + Math.sin(rot) * innerRadius;
+    ctx.lineTo(x, y);
+    rot += step;
+  }
+  ctx.lineTo(cx, cy - outerRadius);
+  ctx.closePath();
+  ctx.fillStyle = color;
+  ctx.fill();
+}
+
+function drawCanvasRoundRect(ctx, x, y, width, height, radius) {
+  ctx.beginPath();
+  ctx.moveTo(x + radius, y);
+  ctx.lineTo(x + width - radius, y);
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+  ctx.lineTo(x + width, y + height - radius);
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+  ctx.lineTo(x + radius, y + height);
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+  ctx.lineTo(x, y + radius);
+  ctx.quadraticCurveTo(x, y, x + radius, y);
+  ctx.closePath();
+}
+
+function wrapCanvasText(ctx, text, x, y, maxWidth, lineHeight, align = "center") {
+  ctx.textAlign = align;
+  const words = text.split(" ");
+  let line = "";
+  let curY = y;
+  for (let n = 0; n < words.length; n++) {
+    const testLine = line + words[n] + " ";
+    const metrics = ctx.measureText(testLine);
+    const testWidth = metrics.width;
+    if (testWidth > maxWidth && n > 0) {
+      ctx.fillText(line.trim(), x, curY);
+      line = words[n] + " ";
+      curY += lineHeight;
+    } else {
+      line = testLine;
+    }
+  }
+  ctx.fillText(line.trim(), x, curY);
+  return curY + lineHeight;
+}
+
+async function renderShareCanvas(canvas, data) {
+  const ctx = canvas.getContext("2d");
+  const W = 1080;
+  const H = 1920;
+  canvas.width = W;
+  canvas.height = H;
+
+  // 1. Глубокий космический фон
+  const bgGrad = ctx.createLinearGradient(0, 0, 0, H);
+  bgGrad.addColorStop(0, "#101014");
+  bgGrad.addColorStop(0.3, "#15151b");
+  bgGrad.addColorStop(0.7, "#171721");
+  bgGrad.addColorStop(1, "#0e0e12");
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, W, H);
+
+  // Золотистые космические туманности
+  const neb1 = ctx.createRadialGradient(540, 320, 60, 540, 320, 560);
+  neb1.addColorStop(0, "rgba(201, 169, 110, 0.16)");
+  neb1.addColorStop(1, "rgba(201, 169, 110, 0)");
+  ctx.fillStyle = neb1;
+  ctx.fillRect(0, 0, W, H);
+
+  const neb2 = ctx.createRadialGradient(260, 850, 40, 260, 850, 480);
+  neb2.addColorStop(0, "rgba(148, 113, 49, 0.12)");
+  neb2.addColorStop(1, "rgba(148, 113, 49, 0)");
+  ctx.fillStyle = neb2;
+  ctx.fillRect(0, 0, W, H);
+
+  const neb3 = ctx.createRadialGradient(820, 1400, 50, 820, 1400, 520);
+  neb3.addColorStop(0, "rgba(201, 169, 110, 0.10)");
+  neb3.addColorStop(1, "rgba(201, 169, 110, 0)");
+  ctx.fillStyle = neb3;
+  ctx.fillRect(0, 0, W, H);
+
+  // Звездное поле
+  for (let i = 0; i < 110; i++) {
+    const sx = ((i * 137.5) % 960) + 60;
+    const sy = ((i * 383.3) % 1760) + 80;
+    const sr = (i % 5 === 0) ? 2.2 : (i % 2 === 0) ? 1.5 : 0.9;
+    const sa = 0.2 + (i % 7) * 0.11;
+    ctx.beginPath();
+    ctx.arc(sx, sy, sr, 0, Math.PI * 2);
+    ctx.fillStyle = (i % 4 === 0) ? `rgba(201, 169, 110, ${sa})` : `rgba(240, 236, 228, ${sa})`;
+    ctx.fill();
+  }
+  // Несколько мерцающих 4-конечных звезд
+  const crossStars = [[200, 220], [880, 260], [140, 1340], [920, 1260], [540, 1500]];
+  crossStars.forEach(([cx, cy]) => {
+    drawCanvasStar(ctx, cx, cy, 4, 14, 3, "rgba(201, 169, 110, 0.75)");
+  });
+
+  // 2. Двойная золотая рамка с винтажными углами
+  ctx.save();
+  ctx.strokeStyle = "rgba(201, 169, 110, 0.35)";
+  ctx.lineWidth = 2.5;
+  drawCanvasRoundRect(ctx, 42, 42, W - 84, H - 84, 28);
+  ctx.stroke();
+
+  ctx.strokeStyle = "rgba(201, 169, 110, 0.75)";
+  ctx.lineWidth = 1.5;
+  drawCanvasRoundRect(ctx, 66, 66, W - 132, H - 132, 18);
+  ctx.stroke();
+
+  // Угловые ромбы
+  const corners = [[66, 66], [W - 66, 66], [66, H - 66], [W - 66, H - 66]];
+  corners.forEach(([cx, cy]) => {
+    drawCanvasStar(ctx, cx, cy, 4, 10, 4, "#c9a96e");
+  });
+  ctx.restore();
+
+  // 3. Шапка бренда
+  ctx.save();
+  ctx.textAlign = "center";
+  ctx.fillStyle = "#c9a96e";
+  ctx.font = '28px "Playfair Display", Georgia, serif';
+  ctx.fillText("☾   ✦   ☽", W / 2, 145);
+
+  ctx.font = '700 36px "Playfair Display", Georgia, serif';
+  ctx.fillStyle = "#c9a96e";
+  ctx.letterSpacing = "6px";
+  ctx.fillText("TARO NAVIGATOR", W / 2, 205);
+
+  ctx.font = '600 20px "Inter", sans-serif';
+  ctx.fillStyle = "#e8dcc8";
+  ctx.letterSpacing = "3px";
+  ctx.fillText("✦  П А С П О Р Т   С У Д Ь Б Ы  ✦", W / 2, 245);
+
+  // Разделитель
+  ctx.strokeStyle = "rgba(201, 169, 110, 0.4)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(280, 275);
+  ctx.lineTo(800, 275);
+  ctx.stroke();
+  drawCanvasStar(ctx, W / 2, 275, 4, 7, 2.5, "#c9a96e");
+  ctx.restore();
+
+  // 4. Идентификация пользователя и Зодиак
+  ctx.save();
+  ctx.textAlign = "center";
+  const displayName = data.name ? data.name.toUpperCase() : "КОСМИЧЕСКИЙ КОД";
+  ctx.font = '700 44px "Playfair Display", Georgia, serif';
+  ctx.fillStyle = "#f0ece4";
+  ctx.fillText(displayName, W / 2, 345);
+
+  const dateStr = `${String(data.day).padStart(2, "0")}.${String(data.month).padStart(2, "0")}.${data.year}`;
+  ctx.font = '600 28px "Inter", sans-serif';
+  ctx.fillStyle = "#c9a96e";
+  ctx.fillText(`${data.zodiac} · ${dateStr}`, W / 2, 395);
+
+  if (data.city || data.time) {
+    const placeStr = (data.city ? `г. ${data.city}` : "") + (data.time ? ` · ${data.time}` : "");
+    ctx.font = '400 22px "Inter", sans-serif';
+    ctx.fillStyle = "#9c978e";
+    ctx.fillText(placeStr, W / 2, 435);
+  }
+  ctx.restore();
+
+  // 5. Три ключевых аркана
+  ctx.save();
+  ctx.textAlign = "center";
+  ctx.font = '600 19px "Inter", sans-serif';
+  ctx.fillStyle = "#8a857c";
+  ctx.letterSpacing = "2px";
+  ctx.fillText("Т Р И   К Л Ю Ч Е В Ы Х   А Р К А Н А", W / 2, 505);
+  ctx.restore();
+
+  const cards = (data.arcana || []).slice(0, 3);
+  const cardW = 270;
+  const cardH = 460;
+  const gap = 35;
+  const startX = Math.round((W - (cardW * 3 + gap * 2)) / 2);
+  const cardY = 535;
+
+  const cardRoles = ["Личность", "Таланты", "Судьба"];
+
+  for (let idx = 0; idx < 3; idx++) {
+    const card = cards[idx] || { n: 0, card: "Шут", pos: cardRoles[idx] };
+    const cx = startX + idx * (cardW + gap);
+    const roleTitle = cardRoles[idx];
+
+    // Отрисовка фона карточки
+    ctx.save();
+    ctx.shadowColor = "rgba(0, 0, 0, 0.6)";
+    ctx.shadowBlur = 24;
+    ctx.shadowOffsetY = 12;
+    ctx.fillStyle = "#181822";
+    drawCanvasRoundRect(ctx, cx, cardY, cardW, cardH, 18);
+    ctx.fill();
+    ctx.restore();
+
+    // Золотая рамка карточки
+    ctx.save();
+    ctx.strokeStyle = "rgba(201, 169, 110, 0.55)";
+    ctx.lineWidth = 2;
+    drawCanvasRoundRect(ctx, cx, cardY, cardW, cardH, 18);
+    ctx.stroke();
+
+    ctx.strokeStyle = "rgba(201, 169, 110, 0.25)";
+    ctx.lineWidth = 1;
+    drawCanvasRoundRect(ctx, cx + 8, cardY + 8, cardW - 16, cardH - 16, 12);
+    ctx.stroke();
+    ctx.restore();
+
+    // Картинка аркана внутри карточки
+    const imgX = cx + 14;
+    const imgY = cardY + 14;
+    const imgW = cardW - 28;
+    const imgH = cardH - 105;
+
+    const imgSrc = ARCANA_IMAGES[card.n];
+    const cardImg = await loadShareCardImage(imgSrc);
+
+    ctx.save();
+    // Клиппинг под скругление изображения
+    drawCanvasRoundRect(ctx, imgX, imgY, imgW, imgH, 10);
+    ctx.clip();
+
+    if (cardImg) {
+      ctx.drawImage(cardImg, imgX, imgY, imgW, imgH);
+    } else {
+      // Фолбэк градиент с мистическим символом
+      const fGrad = ctx.createLinearGradient(imgX, imgY, imgX, imgY + imgH);
+      fGrad.addColorStop(0, "#232330");
+      fGrad.addColorStop(1, "#15151c");
+      ctx.fillStyle = fGrad;
+      ctx.fillRect(imgX, imgY, imgW, imgH);
+
+      drawCanvasStar(ctx, imgX + imgW / 2, imgY + imgH / 2, 8, 48, 20, "rgba(201, 169, 110, 0.4)");
+      ctx.textAlign = "center";
+      ctx.fillStyle = "#c9a96e";
+      ctx.font = '700 36px "Playfair Display", Georgia, serif';
+      ctx.fillText(ROMAN[card.n] || String(card.n), imgX + imgW / 2, imgY + imgH / 2 + 12);
+    }
+    ctx.restore();
+
+    // Римский бейдж поверх
+    const badgeW = 60;
+    const badgeH = 26;
+    const badgeX = cx + (cardW - badgeW) / 2;
+    const badgeY = cardY + 22;
+    ctx.save();
+    ctx.fillStyle = "rgba(20, 20, 26, 0.9)";
+    ctx.strokeStyle = "#c9a96e";
+    ctx.lineWidth = 1.2;
+    drawCanvasRoundRect(ctx, badgeX, badgeY, badgeW, badgeH, 13);
+    ctx.fill();
+    ctx.stroke();
+
+    ctx.textAlign = "center";
+    ctx.font = '700 15px "Inter", sans-serif';
+    ctx.fillStyle = "#c9a96e";
+    ctx.fillText(ROMAN[card.n] || String(card.n), badgeX + badgeW / 2, badgeY + 18);
+    ctx.restore();
+
+    // Название аркана и роль внизу карточки
+    ctx.save();
+    ctx.textAlign = "center";
+    ctx.font = '700 20px "Playfair Display", Georgia, serif';
+    ctx.fillStyle = "#f0ece4";
+    ctx.fillText(card.card, cx + cardW / 2, cardY + cardH - 52);
+
+    ctx.font = '600 15px "Inter", sans-serif';
+    ctx.fillStyle = "#c9a96e";
+    ctx.letterSpacing = "1px";
+    ctx.fillText(roleTitle.toUpperCase(), cx + cardW / 2, cardY + cardH - 24);
+    ctx.restore();
+  }
+
+  // 6. Карточка мудрости и наставления (Цитата судьбы)
+  const quoteBoxX = 90;
+  const quoteBoxY = 1030;
+  const quoteBoxW = W - 180;
+  const quoteBoxH = 240;
+
+  ctx.save();
+  ctx.fillStyle = "rgba(24, 24, 32, 0.85)";
+  drawCanvasRoundRect(ctx, quoteBoxX, quoteBoxY, quoteBoxW, quoteBoxH, 20);
+  ctx.fill();
+
+  ctx.strokeStyle = "rgba(201, 169, 110, 0.35)";
+  ctx.lineWidth = 1.5;
+  drawCanvasRoundRect(ctx, quoteBoxX, quoteBoxY, quoteBoxW, quoteBoxH, 20);
+  ctx.stroke();
+
+  ctx.textAlign = "center";
+  ctx.font = '700 52px "Playfair Display", Georgia, serif';
+  ctx.fillStyle = "rgba(201, 169, 110, 0.5)";
+  ctx.fillText("“", W / 2, quoteBoxY + 54);
+
+  const persArc = cards[0] || {};
+  let quoteText = "Твой код объединяет космический разум и волю арканов. Прими свои сильные стороны и следуй за личным предназначением.";
+  if (typeof ARCANA_BASE !== "undefined" && ARCANA_BASE[persArc.n] && ARCANA_BASE[persArc.n].desc) {
+    quoteText = ARCANA_BASE[persArc.n].desc.slice(0, 150) + "…";
+  }
+
+  ctx.font = 'italic 23px "Playfair Display", Georgia, serif';
+  ctx.fillStyle = "#e8dcc8";
+  wrapCanvasText(ctx, `«${quoteText}»`, W / 2, quoteBoxY + 110, quoteBoxW - 80, 36, "center");
+  ctx.restore();
+
+  // 7. Виральный футер и призыв
+  ctx.save();
+  ctx.textAlign = "center";
+
+  // Разделитель
+  ctx.strokeStyle = "rgba(201, 169, 110, 0.4)";
+  ctx.lineWidth = 1;
+  ctx.beginPath();
+  ctx.moveTo(300, 1340);
+  ctx.lineTo(780, 1340);
+  ctx.stroke();
+  drawCanvasStar(ctx, W / 2, 1340, 4, 7, 2.5, "#c9a96e");
+
+  ctx.font = '700 22px "Inter", sans-serif';
+  ctx.fillStyle = "#f0ece4";
+  ctx.letterSpacing = "1.5px";
+  ctx.fillText("УЗНАЙ СВОЙ АРКАН И НАТАЛЬНУЮ КАРТУ:", W / 2, 1400);
+
+  // Бейдж сайта
+  const siteBoxW = 460;
+  const siteBoxH = 64;
+  const siteBoxX = (W - siteBoxW) / 2;
+  const siteBoxY = 1440;
+
+  ctx.fillStyle = "rgba(201, 169, 110, 0.12)";
+  drawCanvasRoundRect(ctx, siteBoxX, siteBoxY, siteBoxW, siteBoxH, 32);
+  ctx.fill();
+
+  ctx.strokeStyle = "#c9a96e";
+  ctx.lineWidth = 1.8;
+  drawCanvasRoundRect(ctx, siteBoxX, siteBoxY, siteBoxW, siteBoxH, 32);
+  ctx.stroke();
+
+  ctx.font = '700 26px "Inter", sans-serif';
+  ctx.fillStyle = "#c9a96e";
+  ctx.fillText("🌐  shadowlinkapp.online", W / 2, siteBoxY + 41);
+
+  // Telegram ссылка
+  ctx.font = '500 22px "Inter", sans-serif';
+  ctx.fillStyle = "#9c978e";
+  ctx.fillText("🤖 Telegram-бот: @MyGoodTaro_bot", W / 2, 1550);
+
+  // Копирайт
+  ctx.font = '400 17px "Inter", sans-serif';
+  ctx.fillStyle = "#635f58";
+  ctx.fillText("✦ Точные эфемериды VSOP87 · 22 Аркана Таро · Бесплатно ✦", W / 2, 1630);
+  ctx.restore();
+}
+
+function getShareCardData() {
+  const saved = getSavedNatal() || {};
+  let day = saved.day;
+  let month = saved.month;
+  let year = saved.year;
+
+  if (!day && window.__taroCalc) {
+    day = window.__taroCalc.day;
+    month = window.__taroCalc.month;
+    year = window.__taroCalc.year;
+  }
+
+  if (!day) {
+    const dIn = document.getElementById("day");
+    const mIn = document.getElementById("month");
+    const yIn = document.getElementById("year");
+    if (dIn && dIn.value) day = Number(dIn.value);
+    if (mIn && mIn.value) month = Number(mIn.value);
+    if (yIn && yIn.value) year = Number(yIn.value);
+  }
+
+  if (!day) {
+    day = 25; month = 9; year = 1985;
+  }
+
+  const signName = saved.zodiac || (typeof zodiac === "function" ? zodiac(day, month) : "Овен");
+  const arcList = (Array.isArray(saved.arcana) && saved.arcana.length)
+    ? saved.arcana
+    : (typeof arcana === "function" ? arcana(day, month, year) : []);
+
+  return {
+    day,
+    month,
+    year,
+    name: saved.name || "",
+    city: saved.city || "",
+    time: saved.time || "",
+    zodiac: signName,
+    arcana: arcList
+  };
+}
+
+async function openShareModal() {
+  const modal = document.getElementById("share-modal");
+  const canvas = document.getElementById("share-canvas");
+  const previewImg = document.getElementById("share-preview-img");
+  const loading = document.getElementById("share-loading");
+
+  if (!modal || !canvas || !previewImg) return;
+
+  modal.hidden = false;
+  if (loading) loading.style.display = "flex";
+  previewImg.style.display = "none";
+
+  try {
+    const data = getShareCardData();
+    await renderShareCanvas(canvas, data);
+
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      __currentShareBlob = blob;
+      const url = URL.createObjectURL(blob);
+      previewImg.src = url;
+      previewImg.style.display = "block";
+      if (loading) loading.style.display = "none";
+    }, "image/png");
+  } catch (err) {
+    if (loading) {
+      loading.innerHTML = `<p>⚠️ Ошибка генерации: ${err.message}</p>`;
+    }
+  }
+}
+
+function initShareSystem() {
+  document.querySelectorAll("[data-close-share]").forEach((el) => {
+    el.addEventListener("click", () => {
+      const modal = document.getElementById("share-modal");
+      if (modal) modal.hidden = true;
+    });
+  });
+
+  const calcBtn = document.getElementById("calc-share-btn");
+  if (calcBtn) calcBtn.addEventListener("click", openShareModal);
+
+  const natalBtn = document.getElementById("natal-share-btn");
+  if (natalBtn) natalBtn.addEventListener("click", openShareModal);
+
+  const profileBtn = document.getElementById("profile-share-btn");
+  if (profileBtn) profileBtn.addEventListener("click", openShareModal);
+
+  const downloadBtn = document.getElementById("share-btn-download");
+  if (downloadBtn) {
+    downloadBtn.addEventListener("click", () => {
+      if (!__currentShareBlob) return;
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(__currentShareBlob);
+      a.download = "taro-cosmic-code.png";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+
+      const prev = downloadBtn.textContent;
+      downloadBtn.textContent = "✓ Карточка сохранена!";
+      setTimeout(() => { downloadBtn.textContent = prev; }, 2500);
+    });
+  }
+
+  const shareNativeBtn = document.getElementById("share-btn-native");
+  if (shareNativeBtn) {
+    shareNativeBtn.addEventListener("click", async () => {
+      if (!__currentShareBlob) return;
+      const file = new File([__currentShareBlob], "taro-cosmic-code.png", { type: "image/png" });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        try {
+          await navigator.share({
+            title: "Мой космический код · TARO NAVIGATOR",
+            text: "Мой астрологический паспорт и арканы судьбы в TARO NAVIGATOR ✨",
+            files: [file],
+          });
+          return;
+        } catch (err) {
+          /* Отмена шеринга пользователем */
+        }
+      }
+
+      // Fallback: Telegram share URL
+      const shareUrl = "https://shadowlinkapp.online";
+      const text = encodeURIComponent("Мой космический код и арканы судьбы в TARO NAVIGATOR ✨ Рассчитай бесплатно:");
+      const tgUrl = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${text}`;
+
+      if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openTelegramLink) {
+        window.Telegram.WebApp.openTelegramLink(tgUrl);
+      } else {
+        window.open(tgUrl, "_blank");
+      }
+    });
+  }
+}

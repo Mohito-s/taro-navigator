@@ -44,7 +44,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=21" />
+  <link rel="stylesheet" href="css/style.css?v=22" />
 </head>
 <body>
 
@@ -142,8 +142,11 @@
             <p class="result__note">Десять позиций, рассчитанных из цифр даты рождения</p>
           </div>
           <div id="arcana-grid" class="arcana bento-grid"></div>
-          <div id="webapp-actions" class="webapp-actions" hidden>
-            <button class="btn btn--primary" id="wa-save">💾 Сохранить в боте</button>
+          <div class="result__actions-row">
+            <button class="btn btn--primary btn--share-trigger" id="calc-share-btn" type="button">📸 Карточка для Stories</button>
+            <div id="webapp-actions" class="webapp-actions" hidden style="display:inline-block; margin:0;">
+              <button class="btn btn--ghost" id="wa-save" type="button">💾 Сохранить в боте</button>
+            </div>
           </div>
         </div>
       </section>
@@ -320,6 +323,9 @@
         <button class="btn btn--ghost btn--wide natal__forecast-btn reveal d2" id="natal-forecast" type="button">
           ✨ Расширенный прогноз по натальной карте
         </button>
+        <button class="btn btn--primary btn--wide btn--share-trigger reveal d2" id="natal-share-btn" type="button" style="margin-top:10px;">
+          📸 Создать Share-карточку для Stories
+        </button>
         <div class="forecast__result glass reveal" id="natal-extended" hidden></div>
       </div>
     </section>
@@ -448,6 +454,9 @@
               <p id="profile-meta">Введи дату рождения на главной</p>
             </div>
           </div>
+          <button class="btn btn--primary btn--wide btn--share-trigger" id="profile-share-btn" type="button" style="margin-top:14px;">
+            📸 Создать карточку паспорта для Stories
+          </button>
 
           <div class="profile__section">
             <h4>Голос ИИ-интерпретатора
@@ -623,9 +632,35 @@
     </div>
   </div>
 
+  <!-- МОДАЛЬНОЕ ОКНО: Шеринг расклада / Stories Share Card (Canvas -> PNG) -->
+  <div id="share-modal" class="modal" hidden>
+    <div class="modal__backdrop" data-close-share></div>
+    <div class="modal__card modal__card--share glass" role="dialog" aria-modal="true" aria-labelledby="share-modal-title">
+      <button class="modal__close" data-close-share aria-label="Закрыть">✕</button>
+      <p class="modal__num">ЭСТЕТИКА И ВИРАЛЬНОСТЬ</p>
+      <h3 class="modal__card-name" id="share-modal-title">Карточка для Stories</h3>
+      <p class="share-modal__subtitle">Поделись своим космическим кодом в Telegram, соцсетях или сохрани снимок на устройство.</p>
+      
+      <div class="share-modal__preview-wrap">
+        <canvas id="share-canvas" width="1080" height="1920" style="display:none;"></canvas>
+        <img id="share-preview-img" class="share-modal__img" alt="Предпросмотр карточки" style="display:none;" />
+        <div id="share-loading" class="share-modal__loading">
+          <div class="spinner"></div>
+          <p>Сотворяем твой космический снимок…</p>
+        </div>
+      </div>
+
+      <div class="share-modal__actions">
+        <button class="btn btn--primary btn--wide" id="share-btn-native" type="button">📲 Поделиться карточкой</button>
+        <button class="btn btn--ghost btn--wide" id="share-btn-download" type="button">⬇️ Скачать PNG на устройство</button>
+        <button class="btn btn--ghost btn--wide" data-close-share type="button">Закрыть</button>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js"></script>
-  <script src="js/natal.js?v=21"></script>
-  <script src="js/space.js?v=21"></script>
-  <script src="js/app.js?v=21"></script>
+  <script src="js/natal.js?v=22"></script>
+  <script src="js/space.js?v=22"></script>
+  <script src="js/app.js?v=22"></script>
 </body>
 </html>

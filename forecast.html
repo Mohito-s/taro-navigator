@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=21" />
+  <link rel="stylesheet" href="css/style.css?v=22" />
 </head>
 <body>
 
@@ -216,9 +216,35 @@
     </button>
   </nav>
 
+  <!-- МОДАЛЬНОЕ ОКНО: Шеринг расклада / Stories Share Card (Canvas -> PNG) -->
+  <div id="share-modal" class="modal" hidden>
+    <div class="modal__backdrop" data-close-share></div>
+    <div class="modal__card modal__card--share glass" role="dialog" aria-modal="true" aria-labelledby="share-modal-title">
+      <button class="modal__close" data-close-share aria-label="Закрыть">✕</button>
+      <p class="modal__num">ЭСТЕТИКА И ВИРАЛЬНОСТЬ</p>
+      <h3 class="modal__card-name" id="share-modal-title">Карточка для Stories</h3>
+      <p class="share-modal__subtitle">Поделись своим космическим кодом в Telegram, соцсетях или сохрани снимок на устройство.</p>
+      
+      <div class="share-modal__preview-wrap">
+        <canvas id="share-canvas" width="1080" height="1920" style="display:none;"></canvas>
+        <img id="share-preview-img" class="share-modal__img" alt="Предпросмотр карточки" style="display:none;" />
+        <div id="share-loading" class="share-modal__loading">
+          <div class="spinner"></div>
+          <p>Сотворяем твой космический снимок…</p>
+        </div>
+      </div>
+
+      <div class="share-modal__actions">
+        <button class="btn btn--primary btn--wide" id="share-btn-native" type="button">📲 Поделиться карточкой</button>
+        <button class="btn btn--ghost btn--wide" id="share-btn-download" type="button">⬇️ Скачать PNG на устройство</button>
+        <button class="btn btn--ghost btn--wide" data-close-share type="button">Закрыть</button>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js"></script>
-  <script src="js/natal.js?v=21"></script>
-  <script src="js/space.js?v=21"></script>
-  <script src="js/app.js?v=21"></script>
+  <script src="js/natal.js?v=22"></script>
+  <script src="js/space.js?v=22"></script>
+  <script src="js/app.js?v=22"></script>
 </body>
 </html>

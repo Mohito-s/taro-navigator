@@ -2564,3 +2564,100 @@ html[data-theme="light"] .tabbar__btn--active::before {
   background: linear-gradient(90deg, #947131, #c9a96e, #947131);
   box-shadow: 0 0 8px rgba(148, 113, 49, 0.4);
 }
+
+/* ---------- Share Card Modal (Stories Canvas -> PNG) ---------- */
+.modal__card--share {
+  max-width: 480px;
+  text-align: center;
+}
+
+.share-modal__subtitle {
+  font-size: 13px;
+  color: var(--muted);
+  margin-top: 4px;
+  margin-bottom: 16px;
+  line-height: 1.4;
+}
+
+.share-modal__preview-wrap {
+  position: relative;
+  width: 100%;
+  max-width: 270px;
+  aspect-ratio: 9 / 16;
+  margin: 0 auto 20px;
+  border-radius: 16px;
+  overflow: hidden;
+  background: var(--card);
+  border: 1px solid var(--gold-border);
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.share-modal__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.share-modal__loading {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  background: var(--card-elevated);
+  color: var(--gold-light);
+  font-size: 13px;
+  padding: 20px;
+  text-align: center;
+}
+
+.share-modal__loading .spinner {
+  width: 34px;
+  height: 34px;
+  border: 3px solid rgba(201, 169, 110, 0.2);
+  border-top-color: var(--gold);
+  border-radius: 50%;
+  animation: spin 0.9s linear infinite;
+}
+
+.share-modal__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.btn--share-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: linear-gradient(135deg, rgba(201, 169, 110, 0.16), rgba(201, 169, 110, 0.04));
+  border: 1px solid var(--gold);
+  color: var(--gold-light);
+  box-shadow: 0 4px 16px rgba(201, 169, 110, 0.15);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+
+.btn--share-trigger:hover {
+  background: var(--gold);
+  color: #111114;
+  box-shadow: 0 6px 20px rgba(201, 169, 110, 0.35);
+  transform: translateY(-2px);
+}
+
+.result__actions-row {
+  margin-top: 24px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  justify-content: center;
+  align-items: center;
+}
