@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS web_profiles (
     arcana TEXT DEFAULT '[]',
     planets TEXT DEFAULT '{}',
     style TEXT DEFAULT 'cosmo',
-    recovery_code TEXT UNIQUE,
+    recovery_code TEXT,
     history TEXT DEFAULT '[]',
     created_at TEXT DEFAULT (datetime('now')),
     updated_at TEXT DEFAULT (datetime('now'))
@@ -80,9 +80,12 @@ async def init_db() -> None:
         cols_w = [row[1] for row in await cur_w.fetchall()]
         if "recovery_code" not in cols_w:
             await db.execute("ALTER TABLE web_profiles ADD COLUMN recovery_code TEXT")
-            await db.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_web_profiles_recovery_code ON web_profiles(recovery_code)")
         if "history" not in cols_w:
             await db.execute("ALTER TABLE web_profiles ADD COLUMN history TEXT DEFAULT '[]'")
+
+        # Индекс для web_profiles: не уникальный (несколько браузеров/устройств могут иметь один recovery_code)
+        await db.execute("DROP INDEX IF EXISTS idx_web_profiles_recovery_code")
+        await db.execute("CREATE INDEX IF NOT EXISTS idx_web_profiles_recovery_code ON web_profiles(recovery_code)")
 
         await db.commit()
 
@@ -284,8 +287,11 @@ async def get_profile_by_recovery_code(code: str) -> tuple[str, dict] | None:
         if row and (row["birth_date"] or row["arcana"] != "[]"):
             return "telegram", dict(row)
 
-        # 2. Проверяем веб-профили
-        cur_w = await db.execute("SELECT * FROM web_profiles WHERE recovery_code = ?", (norm_code,))
+        # 2. Проверяем веб-профили (берем наиболее свежую запись)
+        cur_w = await db.execute(
+            "SELECT * FROM web_profiles WHERE recovery_code = ? ORDER BY updated_at DESC LIMIT 1",
+            (norm_code,),
+        )
         row_w = await cur_w.fetchone()
         if row_w:
             return "web", dict(row_w)
