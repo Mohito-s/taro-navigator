@@ -130,6 +130,33 @@
           </div>
 
           <div class="profile__section">
+            <div class="profile__sync-head">
+              <h4>Космическая синхронизация
+                <span class="info-tip" tabindex="0" aria-label="Подсказка">ℹ️
+                  <span class="info-bubble">Анонимный код восстановления для переноса твоих данных, натальной карты и истории на любое устройство без почты и паролей.</span>
+                </span>
+              </h4>
+            </div>
+            <p class="profile__sub">Сохрани свой персональный код восстановления:</p>
+            <div class="sync-code-wrap">
+              <div class="sync-code-box">
+                <span class="sync-code-label">Твой код:</span>
+                <span class="sync-code-val" id="sync-code-val">TARO-••••••</span>
+                <button class="btn btn--ghost btn--sm" id="sync-copy-btn" type="button" title="Скопировать код">📋 Копировать</button>
+              </div>
+            </div>
+
+            <div class="sync-restore-box">
+              <p class="sync-restore-title">Перенести данные с другого устройства или из бота:</p>
+              <div class="sync-restore-row">
+                <input type="text" id="sync-input-code" placeholder="Введи код (напр. TARO-7X9K2M)" maxlength="16" autocomplete="off" autocorrect="off" autocapitalize="characters" />
+                <button class="btn btn--primary btn--sm" id="sync-restore-btn" type="button">Синхронизировать</button>
+              </div>
+              <p class="sync-status" id="sync-status" hidden></p>
+            </div>
+          </div>
+
+          <div class="profile__section">
             <div class="profile__history-head">
               <h4>История разборов
                 <span class="info-tip" tabindex="0" aria-label="Подсказка">ℹ️

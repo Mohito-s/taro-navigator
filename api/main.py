@@ -57,6 +57,9 @@ def _client_ip(request: Request) -> str:
     return request.client.host if request.client else "?"
 
 
+RESTORE_REQUESTS: dict[str, list[float]] = {}
+
+
 def _rate_limited(ip: str, limit: int = RATE_LIMIT_PER_MIN, window: float = 60.0) -> bool:
     now = time.time()
     hits = [t for t in REQUESTS.get(ip, []) if now - t < window]
@@ -65,6 +68,18 @@ def _rate_limited(ip: str, limit: int = RATE_LIMIT_PER_MIN, window: float = 60.0
         return True
     hits.append(now)
     REQUESTS[ip] = hits
+    return False
+
+
+def _restore_rate_limited(ip: str, limit: int = 10, window: float = 60.0) -> bool:
+    """Защита от перебора кодов восстановления: не более 10 попыток в минуту."""
+    now = time.time()
+    hits = [t for t in RESTORE_REQUESTS.get(ip, []) if now - t < window]
+    if len(hits) >= limit:
+        RESTORE_REQUESTS[ip] = hits
+        return True
+    hits.append(now)
+    RESTORE_REQUESTS[ip] = hits
     return False
 
 
@@ -154,6 +169,22 @@ class SaveProfileIn(BaseModel):
     name: str = ""
     style: str = ""
     chart: dict | None = None
+    initData: str = ""
+
+
+class SyncSessionIn(BaseModel):
+    session_id: str = ""
+    initData: str = ""
+
+
+class SyncRestoreIn(BaseModel):
+    session_id: str
+    recovery_code: str
+
+
+class SyncHistoryIn(BaseModel):
+    session_id: str
+    history: list[dict] = []
     initData: str = ""
 
 
@@ -261,3 +292,98 @@ async def forecast(request: Request, body: ForecastIn):
     async with SEMAPHORE:
         text = await ai_service.generate_period_forecast(user, body.horizon)
     return {"text": text}
+
+
+@app.post("/api/v1/sync/session")
+async def sync_session(request: Request, body: SyncSessionIn):
+    """Инициализация или получение веб-сессии с кодом восстановления."""
+    await _guard(request, body.initData)
+    session_id = body.session_id.strip() or str(uuid.uuid4())
+
+    tg_user = _extract_telegram_user(body.initData) if body.initData else None
+    if tg_user and "id" in tg_user:
+        code = await db.get_or_create_user_recovery_code(tg_user["id"])
+        user_row = await db.get_user(tg_user["id"])
+        return {
+            "ok": True,
+            "session_id": session_id,
+            "recovery_code": code,
+            "source": "telegram",
+            "profile": user_row,
+        }
+
+    profile = await db.get_or_create_web_profile(session_id)
+    return {
+        "ok": True,
+        "session_id": profile["session_id"],
+        "recovery_code": profile.get("recovery_code", ""),
+        "source": "web",
+        "profile": profile,
+    }
+
+
+@app.post("/api/v1/sync/restore")
+async def sync_restore(request: Request, body: SyncRestoreIn):
+    """Восстановление профиля и истории по коду восстановления (защита от брутфорса)."""
+    ip = _client_ip(request)
+    if _restore_rate_limited(ip):
+        raise HTTPException(
+            status_code=429,
+            detail="Слишком много попыток ввода кода. Подожди 1 минуту перед следующей попыткой.",
+        )
+
+    code = body.recovery_code.strip().upper()
+    if len(code) < 6 or len(code) > 16:
+        raise HTTPException(status_code=400, detail="Неверный формат кода восстановления.")
+
+    session_id = body.session_id.strip() or str(uuid.uuid4())
+    synced = await db.sync_web_profile_with_code(session_id, code)
+    if not synced:
+        raise HTTPException(
+            status_code=404,
+            detail="Код восстановления не найден. Проверь правильность ввода символов.",
+        )
+
+    # Десериализуем JSON-поля для клиента
+    try:
+        history_list = json.loads(synced.get("history", "[]"))
+    except Exception:
+        history_list = []
+
+    try:
+        arcana_list = json.loads(synced.get("arcana", "[]"))
+    except Exception:
+        arcana_list = []
+
+    try:
+        planets_data = json.loads(synced.get("planets", "{}"))
+    except Exception:
+        planets_data = {}
+
+    return {
+        "ok": True,
+        "synced": True,
+        "recovery_code": synced.get("recovery_code", code),
+        "profile": {
+            "name": synced.get("name", ""),
+            "birth_date": synced.get("birth_date", ""),
+            "birth_time": synced.get("birth_time", ""),
+            "birth_place": synced.get("birth_place", ""),
+            "zodiac": synced.get("zodiac", ""),
+            "style": synced.get("style", "cosmo"),
+            "arcana": arcana_list,
+            "planets": planets_data,
+        },
+        "history": history_list,
+    }
+
+
+@app.post("/api/v1/sync/history")
+async def sync_history(request: Request, body: SyncHistoryIn):
+    """Фоновое сохранение истории разборов на сервере."""
+    await _guard(request, body.initData)
+    if not body.session_id:
+        return {"ok": False, "detail": "no_session"}
+
+    await db.save_web_history(body.session_id, body.history)
+    return {"ok": True, "count": len(body.history)}

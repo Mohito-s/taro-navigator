@@ -46,9 +46,214 @@ function initPrivacyModal() {
   });
 }
 
+const TARO_API_BASE = (location.hostname === "localhost" || location.hostname === "127.0.0.1")
+  ? "/api/v1"
+  : "https://shadowlinkapp.online/api/v1";
+
+// === Система анонимной космической синхронизации данных (без email/телефона) ===
+let __taroSyncInited = false;
+
+function getSavedRecoveryCode() {
+  try { return localStorage.getItem("taro_recovery_code") || ""; } catch (e) { return ""; }
+}
+
+function saveRecoveryCode(code) {
+  try { localStorage.setItem("taro_recovery_code", code); } catch (e) {}
+}
+
+function updateSyncCodeDisplay(code) {
+  const codeValEl = document.getElementById("sync-code-val");
+  if (codeValEl) {
+    codeValEl.textContent = code || "TARO-••••••";
+  }
+}
+
+async function syncFetchSession() {
+  const sessionId = getOrCreateSessionId();
+  const initData = (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) || "";
+  try {
+    const res = await fetch(TARO_API_BASE + "/sync/session", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ session_id: sessionId, initData })
+    });
+    if (!res.ok) return null;
+    const data = await res.json();
+    if (data.ok && data.recovery_code) {
+      saveRecoveryCode(data.recovery_code);
+      updateSyncCodeDisplay(data.recovery_code);
+    }
+    return data;
+  } catch (err) {
+    return null;
+  }
+}
+
+async function saveHistoryToBackend(historyList) {
+  const sessionId = getOrCreateSessionId();
+  const initData = (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.initData) || "";
+  try {
+    await fetch(TARO_API_BASE + "/sync/history", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ session_id: sessionId, history: historyList, initData })
+    });
+  } catch (err) {
+    /* Фоновая синхронизация — тихо игнорируем */
+  }
+}
+
+function initSyncSystem() {
+  if (__taroSyncInited) return;
+  __taroSyncInited = true;
+
+  const cachedCode = getSavedRecoveryCode();
+  if (cachedCode) updateSyncCodeDisplay(cachedCode);
+  syncFetchSession();
+
+  const copyBtn = document.getElementById("sync-copy-btn");
+  if (copyBtn) {
+    copyBtn.addEventListener("click", async () => {
+      let actualCode = getSavedRecoveryCode();
+      if (!actualCode || actualCode.includes("•")) {
+        const data = await syncFetchSession();
+        if (data && data.recovery_code) actualCode = data.recovery_code;
+      }
+      if (!actualCode) return;
+      try {
+        await navigator.clipboard.writeText(actualCode);
+        const originalText = copyBtn.textContent;
+        copyBtn.textContent = "✓ Скопировано!";
+        copyBtn.style.color = "var(--gold)";
+        setTimeout(() => {
+          copyBtn.textContent = originalText;
+          copyBtn.style.color = "";
+        }, 2200);
+      } catch (err) {
+        const input = document.createElement("input");
+        input.value = actualCode;
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand("copy");
+        document.body.removeChild(input);
+        copyBtn.textContent = "✓ Скопировано!";
+        setTimeout(() => { copyBtn.textContent = "📋 Копировать"; }, 2200);
+      }
+    });
+  }
+
+  const restoreBtn = document.getElementById("sync-restore-btn");
+  const restoreInput = document.getElementById("sync-input-code");
+  const statusEl = document.getElementById("sync-status");
+
+  if (restoreBtn && restoreInput) {
+    restoreBtn.addEventListener("click", async () => {
+      const code = restoreInput.value.trim().toUpperCase();
+      if (!code || code.length < 6) {
+        if (statusEl) {
+          statusEl.textContent = "⚠️ Введи корректный код (например, TARO-7X9K2M).";
+          statusEl.className = "sync-status sync-status--error";
+          statusEl.hidden = false;
+        }
+        return;
+      }
+
+      restoreBtn.disabled = true;
+      const prevBtnText = restoreBtn.textContent;
+      restoreBtn.textContent = "⏳ Синхронизируем…";
+      if (statusEl) {
+        statusEl.textContent = "🪐 Ищем данные среди созвездий…";
+        statusEl.className = "sync-status";
+        statusEl.hidden = false;
+      }
+
+      try {
+        const sessionId = getOrCreateSessionId();
+        const res = await fetch(TARO_API_BASE + "/sync/restore", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ session_id: sessionId, recovery_code: code })
+        });
+
+        const data = await res.json();
+        if (!res.ok || !data.ok) {
+          throw new Error(data.detail || "Код не найден");
+        }
+
+        saveRecoveryCode(data.recovery_code || code);
+        updateSyncCodeDisplay(data.recovery_code || code);
+
+        const prof = data.profile;
+        if (prof && prof.birth_date) {
+          const parts = prof.birth_date.split(".");
+          const day = Number(parts[0]);
+          const month = Number(parts[1]);
+          const year = Number(parts[2]);
+
+          const natalObj = {
+            day,
+            month,
+            year,
+            time: prof.birth_time || "",
+            city: prof.birth_place || "",
+            name: prof.name || "",
+            zodiac: prof.zodiac || (typeof zodiac === "function" ? zodiac(day, month) : ""),
+            arcana: prof.arcana || (typeof arcana === "function" ? arcana(day, month, year) : []),
+            planets: prof.planets || {},
+            savedAt: Date.now()
+          };
+          saveNatal(natalObj);
+
+          ["day", "n-day"].forEach((id) => { const el = document.getElementById(id); if (el) el.value = day; });
+          ["month", "n-month"].forEach((id) => { const el = document.getElementById(id); if (el) el.value = month; });
+          ["year", "n-year"].forEach((id) => { const el = document.getElementById(id); if (el) el.value = year; });
+          const nt = document.getElementById("n-time"); if (nt && prof.birth_time) nt.value = prof.birth_time;
+          const nc = document.getElementById("n-city"); if (nc && prof.birth_place) nc.value = prof.birth_place;
+          const nn = document.getElementById("n-name"); if (nn && prof.name) nn.value = prof.name;
+
+          if (typeof renderResult === "function") renderResult(day, month, year, { skipScroll: true });
+          if (typeof renderNatalChart === "function") renderNatalChart(natalObj);
+        }
+
+        if (Array.isArray(data.history) && data.history.length) {
+          saveHistory(data.history);
+        }
+
+        if (prof && prof.style) {
+          try { localStorage.setItem(STYLE_STORAGE_KEY, prof.style); } catch (e) {}
+        }
+
+        renderProfile();
+        renderHistory();
+
+        if (statusEl) {
+          statusEl.textContent = "✅ Данные успешно перенесены! Твой профиль, натал и история обновлены.";
+          statusEl.className = "sync-status sync-status--success";
+          statusEl.hidden = false;
+        }
+        restoreInput.value = "";
+      } catch (err) {
+        if (statusEl) {
+          statusEl.textContent = `⚠️ ${err.message || "Ошибка восстановления. Проверь правильность кода."}`;
+          statusEl.className = "sync-status sync-status--error";
+          statusEl.hidden = false;
+        }
+      } finally {
+        restoreBtn.disabled = false;
+        restoreBtn.textContent = prevBtnText;
+      }
+    });
+
+    restoreInput.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") restoreBtn.click();
+    });
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   initTheme();
   initPrivacyModal();
+  initSyncSystem();
 });
 
 // Сессия посетителя сайта для синхронизации с БД на сервере
@@ -78,7 +283,7 @@ async function saveProfileToBackend(natal) {
       chart: natal.chart ? chartBrief(natal.chart) : null,
       initData: initData
     };
-    await fetch("/api/v1/save_profile", {
+    await fetch(TARO_API_BASE + "/save_profile", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(payload)
@@ -413,9 +618,7 @@ const $ = (id) => document.getElementById(id);
 
 // === API полных ИИ-разборов (FastAPI на shadowlinkapp.online/api) ===
 // Каждая вкладка рендерит свой полный разбор прямо здесь, без ухода в бота.
-const TARO_API_BASE = (location.hostname === "localhost" || location.hostname === "127.0.0.1")
-  ? "/api/v1"
-  : "https://shadowlinkapp.online/api/v1";
+// (TARO_API_BASE объявлен в начале файла)
 
 async function taroApi(path, body) {
   const payload = Object.assign({ style: getSavedStyle().name }, body);
@@ -2184,6 +2387,9 @@ function renderProfile() {
   }
   if (starsEl) starsEl.textContent = "0";
   renderStyleGrid();
+  if (typeof updateSyncCodeDisplay === "function") {
+    updateSyncCodeDisplay(getSavedRecoveryCode());
+  }
 }
 
 function renderStyleGrid() {
@@ -2241,12 +2447,18 @@ function addHistory(entry) {
   entry.savedAt = Date.now();
   list.unshift(entry);
   saveHistory(list);
+  if (typeof saveHistoryToBackend === "function") {
+    saveHistoryToBackend(list);
+  }
   renderHistory();
   return entry;
 }
 
 function clearHistory() {
   saveHistory([]);
+  if (typeof saveHistoryToBackend === "function") {
+    saveHistoryToBackend([]);
+  }
   renderHistory();
 }
 

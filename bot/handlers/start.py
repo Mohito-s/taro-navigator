@@ -12,7 +12,7 @@ from aiogram.types import (
 )
 
 from bot.config import MINI_APP_URL
-from bot.db.db import get_user
+from bot.db.db import get_or_create_user_recovery_code, get_user
 from bot.handlers import daily, report, wizard
 
 router = Router()
@@ -21,6 +21,7 @@ _main_menu_rows = [
     [InlineKeyboardButton(text="🌙 Мой разбор", callback_data="my_report")],
     [InlineKeyboardButton(text="🃏 Карта дня", callback_data="daily_card")],
     [InlineKeyboardButton(text="✨ Полный разбор", callback_data="full_report")],
+    [InlineKeyboardButton(text="🔑 Код синхронизации", callback_data="sync_code")],
     [InlineKeyboardButton(text="ℹ️ О боте", callback_data="about")],
 ]
 if MINI_APP_URL:
@@ -117,3 +118,30 @@ async def cb_about(callback: CallbackQuery):
 async def cb_back_menu(callback: CallbackQuery):
     await callback.answer()
     await callback.message.answer("Чем займёмся дальше?", reply_markup=MAIN_MENU)
+
+
+@router.message(Command("sync"))
+async def cmd_sync(message: Message):
+    code = await get_or_create_user_recovery_code(message.from_user.id)
+    await message.answer(
+        f"🔑 **Твой персональный код синхронизации:**\n\n"
+        f"`{code}`\n\n"
+        f"Скопируй этот код и введи его в разделе **«Профиль» → «Космическая синхронизация»** на сайте [shadowlinkapp.online](https://shadowlinkapp.online/) — "
+        f"твоя натальная карта, дата рождения и история мгновенно перенесутся на сайт без почты и паролей!",
+        reply_markup=MAIN_MENU,
+        parse_mode="Markdown",
+    )
+
+
+@router.callback_query(F.data == "sync_code")
+async def cb_sync_code(callback: CallbackQuery):
+    await callback.answer()
+    code = await get_or_create_user_recovery_code(callback.from_user.id)
+    await callback.message.answer(
+        f"🔑 **Твой персональный код синхронизации:**\n\n"
+        f"`{code}`\n\n"
+        f"Скопируй этот код и введи его в разделе **«Профиль» → «Космическая синхронизация»** на сайте [shadowlinkapp.online](https://shadowlinkapp.online/) — "
+        f"твоя натальная карта, дата рождения и история мгновенно перенесутся на сайт без почты и паролей!",
+        reply_markup=MAIN_MENU,
+        parse_mode="Markdown",
+    )
