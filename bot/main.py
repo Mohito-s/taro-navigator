@@ -7,7 +7,7 @@ from aiogram.types import BotCommand, MenuButtonWebApp, WebAppInfo
 
 from bot.config import BOT_TOKEN, MINI_APP_URL
 from bot.db import db as db_module
-from bot.handlers import admin_poster, daily, report, start, webapp, wizard
+from bot.handlers import admin_poster, admin_sos, daily, report, start, webapp, wizard
 from bot.services.channel_poster import channel_poster_cron
 
 
@@ -43,7 +43,7 @@ async def main():
             menu_button=MenuButtonWebApp(text="open", web_app=WebAppInfo(url=MINI_APP_URL))
         )
 
-    dp.include_routers(start.router, wizard.router, daily.router, webapp.router, admin_poster.router)
+    dp.include_routers(start.router, wizard.router, daily.router, webapp.router, admin_poster.router, admin_sos.router)
 
     # Запускаем фоновый планировщик публикации карты дня в канал
     asyncio.create_task(channel_poster_cron(bot))
