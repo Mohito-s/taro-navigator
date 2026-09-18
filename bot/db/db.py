@@ -71,14 +71,16 @@ async def init_db() -> None:
         if "planets" not in cols:
             await db.execute("ALTER TABLE users ADD COLUMN planets TEXT DEFAULT '{}'")
         if "recovery_code" not in cols:
-            await db.execute("ALTER TABLE users ADD COLUMN recovery_code TEXT UNIQUE")
+            await db.execute("ALTER TABLE users ADD COLUMN recovery_code TEXT")
+            await db.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_users_recovery_code ON users(recovery_code)")
         if "history" not in cols:
             await db.execute("ALTER TABLE users ADD COLUMN history TEXT DEFAULT '[]'")
 
         cur_w = await db.execute("PRAGMA table_info(web_profiles)")
         cols_w = [row[1] for row in await cur_w.fetchall()]
         if "recovery_code" not in cols_w:
-            await db.execute("ALTER TABLE web_profiles ADD COLUMN recovery_code TEXT UNIQUE")
+            await db.execute("ALTER TABLE web_profiles ADD COLUMN recovery_code TEXT")
+            await db.execute("CREATE UNIQUE INDEX IF NOT EXISTS idx_web_profiles_recovery_code ON web_profiles(recovery_code)")
         if "history" not in cols_w:
             await db.execute("ALTER TABLE web_profiles ADD COLUMN history TEXT DEFAULT '[]'")
 
