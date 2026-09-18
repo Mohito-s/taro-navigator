@@ -40,13 +40,37 @@
   window.addEventListener('resize', resize, { passive: true });
   resize();
 
-  // 3. Color Palette Constants (Dark Luxury Gold)
+  // 3. Color Palette Constants (Dark Luxury Gold & Light Royal Parchment)
   const GOLD_COLORS = [
     { r: 201, g: 169, b: 110, name: 'warmGold' },    // Warm Gold #c9a96e
     { r: 244, g: 208, b: 132, name: 'brightGold' },  // Bright Radiant Gold #f4d084
     { r: 232, g: 220, b: 200, name: 'cream' },       // Starlight Cream #e8dcc8
     { r: 255, g: 248, b: 232, name: 'whiteGold' },   // Luminous Core #fff8e8
     { r: 220, g: 175, b: 95,  name: 'amberGold' }    // Deep Amber #dcaf5f
+  ];
+
+  const LIGHT_STAR_COLORS = [
+    { r: 140, g: 105, b: 35 },   // Antique Bronze #8c6923
+    { r: 166, g: 125, b: 48 },   // Rich Gold #a67d30
+    { r: 184, g: 134, b: 11 },   // Dark Goldenrod #b8860b
+    { r: 120, g: 85,  b: 25 },   // Deep Ochre #785519
+    { r: 155, g: 110, b: 40 }    // Warm Amber #9b6e28
+  ];
+
+  const nebulaeDark = [
+    { xRatio: 0.18, yRatio: 0.25, radiusRatio: 0.52, color: 'rgba(201, 169, 110, 0.11)', speedX: 0.00005, speedY: 0.00003 },
+    { xRatio: 0.82, yRatio: 0.68, radiusRatio: 0.58, color: 'rgba(180, 130, 60, 0.09)',   speedX: -0.00004, speedY: 0.00004 },
+    { xRatio: 0.50, yRatio: 0.45, radiusRatio: 0.65, color: 'rgba(230, 185, 115, 0.08)', speedX: 0.00003, speedY: -0.00003 },
+    { xRatio: 0.75, yRatio: 0.20, radiusRatio: 0.45, color: 'rgba(42, 26, 62, 0.14)',    speedX: -0.00003, speedY: 0.00002 },
+    { xRatio: 0.30, yRatio: 0.80, radiusRatio: 0.50, color: 'rgba(160, 105, 40, 0.07)',  speedX: 0.00004, speedY: -0.00002 }
+  ];
+
+  const nebulaeLight = [
+    { xRatio: 0.18, yRatio: 0.25, radiusRatio: 0.52, color: 'rgba(201, 169, 110, 0.08)', speedX: 0.00005, speedY: 0.00003 },
+    { xRatio: 0.82, yRatio: 0.68, radiusRatio: 0.58, color: 'rgba(180, 130, 60, 0.06)',   speedX: -0.00004, speedY: 0.00004 },
+    { xRatio: 0.50, yRatio: 0.45, radiusRatio: 0.65, color: 'rgba(215, 175, 105, 0.06)', speedX: 0.00003, speedY: -0.00003 },
+    { xRatio: 0.75, yRatio: 0.20, radiusRatio: 0.45, color: 'rgba(170, 140, 90, 0.05)',  speedX: -0.00003, speedY: 0.00002 },
+    { xRatio: 0.30, yRatio: 0.80, radiusRatio: 0.50, color: 'rgba(160, 115, 50, 0.05)',  speedX: 0.00004, speedY: -0.00002 }
   ];
 
   // 4. Generate Procedural Stars (3 Tiers: Hero, Mid, Dust)
@@ -92,14 +116,8 @@
     });
   }
 
-  // 5. Nebula Cloud Nodes (Warm Gold, Amber & Night Velvet Indigo)
-  const nebulae = [
-    { xRatio: 0.18, yRatio: 0.25, radiusRatio: 0.52, color: 'rgba(201, 169, 110, 0.11)', speedX: 0.00005, speedY: 0.00003 },
-    { xRatio: 0.82, yRatio: 0.68, radiusRatio: 0.58, color: 'rgba(180, 130, 60, 0.09)',   speedX: -0.00004, speedY: 0.00004 },
-    { xRatio: 0.50, yRatio: 0.45, radiusRatio: 0.65, color: 'rgba(230, 185, 115, 0.08)', speedX: 0.00003, speedY: -0.00003 },
-    { xRatio: 0.75, yRatio: 0.20, radiusRatio: 0.45, color: 'rgba(42, 26, 62, 0.14)',    speedX: -0.00003, speedY: 0.00002 },
-    { xRatio: 0.30, yRatio: 0.80, radiusRatio: 0.50, color: 'rgba(160, 105, 40, 0.07)',  speedX: 0.00004, speedY: -0.00002 }
-  ];
+  // 5. Active Nebulae Reference
+  const nebulae = nebulaeDark;
 
   // 6. Draw Multi-Point Golden Diamond Lens Flare
   function drawDiamondSparkle(ctx, cx, cy, radius, rgbStr, opacity, rotation, is8Points) {
@@ -179,17 +197,23 @@
     lastTime = currentTime;
     const t = currentTime * 0.001;
 
-    // Clear with dark charcoal background base
-    ctx.fillStyle = '#0e0e11';
+    const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+
+    // Clear with theme-adaptive base
+    // Dark: Soft refined charcoal (#151519) instead of pitch-black
+    // Light: Warm royal parchment (#f6f4ee)
+    ctx.fillStyle = isLight ? '#f6f4ee' : '#151519';
     ctx.fillRect(0, 0, width, height);
 
     const centerX = width * 0.5;
     const centerY = height * 0.5;
     const maxDimension = Math.max(width, height);
 
+    const currentNebulae = isLight ? nebulaeLight : nebulaeDark;
+
     // A. Render Drifting Golden Nebulae
-    for (let i = 0; i < nebulae.length; i++) {
-      const neb = nebulae[i];
+    for (let i = 0; i < currentNebulae.length; i++) {
+      const neb = currentNebulae[i];
       neb.xRatio += neb.speedX;
       neb.yRatio += neb.speedY;
 
@@ -205,7 +229,7 @@
       const grad = ctx.createRadialGradient(nx, ny, 0, nx, ny, nr);
       grad.addColorStop(0, neb.color);
       grad.addColorStop(0.55, neb.color.replace(/[\d\.]+\)$/, '0.02)'));
-      grad.addColorStop(1, 'rgba(14, 14, 17, 0)');
+      grad.addColorStop(1, isLight ? 'rgba(246, 244, 238, 0)' : 'rgba(21, 21, 25, 0)');
 
       ctx.fillStyle = grad;
       ctx.beginPath();
@@ -219,6 +243,7 @@
 
     // C. Project & Draw Stars
     const visibleHeroes = [];
+    const activePalette = isLight ? LIGHT_STAR_COLORS : GOLD_COLORS;
 
     for (let i = 0; i < stars.length; i++) {
       const star = stars[i];
@@ -243,10 +268,15 @@
 
       // Base radius calculation
       const renderRadius = Math.max(0.6, (star.baseSize / currentZ) * globalZoom);
-      const { r, g, b } = star.color;
+      const col = activePalette[i % activePalette.length];
+      const { r, g, b } = col;
       const rgbStr = `rgba(${r}, ${g}, ${b}, ${alpha.toFixed(3)})`;
-      const haloStr = `rgba(${r}, ${g}, ${b}, ${(alpha * 0.28).toFixed(3)})`;
-      const coreStr = `rgba(255, 252, 240, ${(alpha * 0.95).toFixed(3)})`;
+      const haloStr = isLight
+        ? `rgba(${r}, ${g}, ${b}, ${(alpha * 0.2).toFixed(3)})`
+        : `rgba(${r}, ${g}, ${b}, ${(alpha * 0.28).toFixed(3)})`;
+      const coreStr = isLight
+        ? `rgba(100, 70, 20, ${(alpha * 0.95).toFixed(3)})`
+        : `rgba(255, 252, 240, ${(alpha * 0.95).toFixed(3)})`;
 
       // 1. Soft Warm Halo Glow (mid and hero tiers)
       if (star.tier === 'hero' || star.tier === 'mid') {
@@ -262,7 +292,7 @@
       ctx.arc(sx, sy, renderRadius, 0, Math.PI * 2);
       ctx.fill();
 
-      // 3. Bright White-Gold Core Center for hero stars
+      // 3. Center Core for hero stars
       if (star.tier === 'hero') {
         ctx.fillStyle = coreStr;
         ctx.beginPath();
@@ -300,14 +330,16 @@
           const lineAlpha = proximityFade * Math.min(s1.alpha, s2.alpha) * 0.22 * (0.6 + 0.4 * Math.sin(t * 0.8 + i + j));
 
           if (lineAlpha > 0.02) {
-            ctx.strokeStyle = `rgba(201, 169, 110, ${lineAlpha.toFixed(3)})`;
+            ctx.strokeStyle = isLight
+              ? `rgba(140, 105, 35, ${(lineAlpha * 0.85).toFixed(3)})`
+              : `rgba(201, 169, 110, ${lineAlpha.toFixed(3)})`;
             ctx.beginPath();
             ctx.moveTo(s1.sx, s1.sy);
             ctx.lineTo(s2.sx, s2.sy);
             ctx.stroke();
 
             linksCount++;
-            if (linksCount >= 2) break; // Limit 2 links per star to avoid cluttered spiderweb
+            if (linksCount >= 2) break; // Limit 2 links per star
           }
         }
       }
@@ -339,9 +371,17 @@
       const tailY = m.y - (m.vy / Math.hypot(m.vx, m.vy)) * m.length;
 
       const grad = ctx.createLinearGradient(tailX, tailY, m.x, m.y);
-      grad.addColorStop(0, 'rgba(201, 169, 110, 0)');
-      grad.addColorStop(0.65, `rgba(201, 169, 110, ${(meteorAlpha * 0.35).toFixed(3)})`);
-      grad.addColorStop(1, `rgba(255, 248, 220, ${(meteorAlpha * 0.85).toFixed(3)})`);
+      if (isLight) {
+        grad.addColorStop(0, 'rgba(166, 125, 48, 0)');
+        grad.addColorStop(0.65, `rgba(166, 125, 48, ${(meteorAlpha * 0.4).toFixed(3)})`);
+        grad.addColorStop(1, `rgba(120, 85, 25, ${(meteorAlpha * 0.85).toFixed(3)})`);
+        ctx.fillStyle = `rgba(120, 85, 25, ${(meteorAlpha * 0.9).toFixed(3)})`;
+      } else {
+        grad.addColorStop(0, 'rgba(201, 169, 110, 0)');
+        grad.addColorStop(0.65, `rgba(201, 169, 110, ${(meteorAlpha * 0.35).toFixed(3)})`);
+        grad.addColorStop(1, `rgba(255, 248, 220, ${(meteorAlpha * 0.85).toFixed(3)})`);
+        ctx.fillStyle = `rgba(255, 248, 225, ${(meteorAlpha * 0.9).toFixed(3)})`;
+      }
 
       ctx.strokeStyle = grad;
       ctx.lineWidth = 1.8;
@@ -351,7 +391,6 @@
       ctx.stroke();
 
       // Glowing meteor head
-      ctx.fillStyle = `rgba(255, 248, 225, ${(meteorAlpha * 0.9).toFixed(3)})`;
       ctx.beginPath();
       ctx.arc(m.x, m.y, 2.2, 0, Math.PI * 2);
       ctx.fill();

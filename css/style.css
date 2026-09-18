@@ -14,55 +14,61 @@ html[data-theme="dark"] {
   --font-size-xl: clamp(1.6rem, 1.4rem + 1.2vw, 2.2rem);
   --font-size-hero: clamp(2.2rem, 1.8rem + 2.5vw, 3.4rem);
 
-  /* WCAG AA contrast tokens */
-  --contrast-bg: #111114;
-  --contrast-card: #1c1c20;
-  --contrast-card-elevated: #232328;
-  --contrast-gold: #c9a96e;
+  /* WCAG AA contrast tokens (softened dark luxury) */
+  --contrast-bg: #151519;
+  --contrast-card: #1f1f26;
+  --contrast-card-elevated: #272730;
+  --contrast-gold: #d4b478;
   --contrast-text: #f0ece4;
-  --contrast-text-cream: #e8dcc8;
-  --contrast-text-muted: #a39e93;
-  --contrast-gold-border: rgba(201, 169, 110, 0.2);
+  --contrast-text-cream: #ece2d0;
+  --contrast-text-muted: #aba599;
+  --contrast-gold-border: rgba(212, 180, 120, 0.22);
 
-  --bg: #111114;
-  --card: #1c1c20;
-  --card-elevated: #232328;
-  --gold: #c9a96e;
-  --gold-light: #e8dcc8;
-  --gold-glow: rgba(201, 169, 110, 0.2);
-  --gold-border: rgba(201, 169, 110, 0.18);
+  --bg: #151519;
+  --card: #1f1f26;
+  --card-elevated: #272730;
+  --gold: #d4b478;
+  --gold-light: #ece2d0;
+  --gold-glow: rgba(212, 180, 120, 0.22);
+  --gold-border: rgba(212, 180, 120, 0.2);
   --text: #f0ece4;
-  --muted: #8a857c;
-  --border-subtle: rgba(255, 255, 255, 0.06);
-  --input-bg: rgba(28, 28, 32, 0.9);
-  --shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-  --overlay: rgba(0, 0, 0, 0.7);
+  --muted: #9c978e;
+  --border-subtle: rgba(255, 255, 255, 0.07);
+  --input-bg: rgba(33, 33, 40, 0.92);
+  --shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  --overlay: rgba(0, 0, 0, 0.72);
+
+  --illustration-bg: radial-gradient(ellipse 70% 75% at 50% 50%, rgba(212, 180, 120, 0.22) 0%, rgba(180, 130, 60, 0.1) 42%, rgba(26, 26, 32, 0.9) 75%, #151519 100%);
+  --illustration-border: rgba(212, 180, 120, 0.28);
 }
 
 html[data-theme="light"] {
-  /* WCAG AA contrast tokens (light theme) */
-  --contrast-bg: #f5f3ef;
+  /* WCAG AA contrast tokens (light royal parchment) */
+  --contrast-bg: #f6f4ee;
   --contrast-card: #ffffff;
-  --contrast-card-elevated: #faf8f5;
-  --contrast-gold: #8b6b23;
-  --contrast-text: #1a1a1e;
+  --contrast-card-elevated: #fcfbf8;
+  --contrast-gold: #8f6c26;
+  --contrast-text: #1d1a16;
   --contrast-text-cream: #4a3e2a;
-  --contrast-text-muted: #544e47;
-  --contrast-gold-border: rgba(166, 133, 64, 0.25);
+  --contrast-text-muted: #5c554a;
+  --contrast-gold-border: rgba(143, 108, 38, 0.25);
 
-  --bg: #f5f3ef;
+  --bg: #f6f4ee;
   --card: #ffffff;
-  --card-elevated: #faf8f5;
-  --gold: #a68540;
-  --gold-light: #8b7355;
-  --gold-glow: rgba(166, 133, 64, 0.15);
-  --gold-border: rgba(166, 133, 64, 0.25);
-  --text: #1a1a1e;
-  --muted: #6b6560;
+  --card-elevated: #fcfbf8;
+  --gold: #947131;
+  --gold-light: #73541c;
+  --gold-glow: rgba(148, 113, 49, 0.16);
+  --gold-border: rgba(148, 113, 49, 0.22);
+  --text: #1d1a16;
+  --muted: #665f54;
   --border-subtle: rgba(0, 0, 0, 0.08);
-  --input-bg: rgba(245, 243, 239, 0.95);
-  --shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  --overlay: rgba(0, 0, 0, 0.4);
+  --input-bg: rgba(246, 243, 236, 0.95);
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
+  --overlay: rgba(20, 16, 10, 0.45);
+
+  --illustration-bg: radial-gradient(ellipse 70% 75% at 50% 50%, rgba(212, 180, 120, 0.22) 0%, rgba(235, 222, 200, 0.55) 45%, #f4efe4 80%, #ebe4d5 100%);
+  --illustration-border: rgba(148, 113, 49, 0.25);
 }
 
 /* ---------- сброс и база ---------- */
@@ -260,7 +266,7 @@ main {
 
 .btn--primary:hover {
   background: var(--gold);
-  color: #111114;
+  color: var(--bg);
   transform: translateY(-2px);
 }
 
@@ -407,16 +413,17 @@ main {
 }
 
 .bento-card {
-  background: linear-gradient(180deg, rgba(201, 169, 110, 0.05) 0%, rgba(28, 28, 33, 0.98) 25%, #18181c 100%);
-  border: 1px solid var(--gold-border, rgba(201, 169, 110, 0.2));
+  background: linear-gradient(180deg, rgba(212, 180, 120, 0.06) 0%, var(--card) 28%, var(--card-elevated) 100%);
+  border: 1px solid var(--gold-border);
   border-radius: 18px;
   padding: 24px;
   position: relative;
   overflow: hidden;
-  box-shadow: inset 0 1px 0 rgba(201, 169, 110, 0.18), var(--shadow, 0 8px 24px rgba(0, 0, 0, 0.4));
+  box-shadow: inset 0 1px 0 rgba(212, 180, 120, 0.16), var(--shadow);
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1),
               border-color 0.3s ease,
-              box-shadow 0.3s ease;
+              box-shadow 0.3s ease,
+              background 0.3s ease;
   display: flex;
   flex-direction: column;
 }
@@ -424,8 +431,8 @@ main {
 .bento-card:hover,
 .gold-glow-hover:hover {
   transform: translateY(-6px);
-  border-color: var(--gold, #c9a96e);
-  box-shadow: inset 0 1px 0 rgba(201, 169, 110, 0.4), 0 14px 36px rgba(0, 0, 0, 0.55), 0 0 24px rgba(201, 169, 110, 0.22);
+  border-color: var(--gold);
+  box-shadow: inset 0 1px 0 rgba(212, 180, 120, 0.35), 0 14px 36px rgba(0, 0, 0, 0.45), 0 0 24px var(--gold-glow);
 }
 
 .bento-card--tall {
@@ -731,10 +738,10 @@ main {
   padding: 20px;
   border-radius: 18px;
   cursor: pointer;
-  background: linear-gradient(180deg, rgba(201, 169, 110, 0.07) 0%, rgba(28, 28, 33, 0.98) 26%, #17171a 100%);
-  border: 1px solid rgba(201, 169, 110, 0.22);
-  box-shadow: inset 0 1px 0 rgba(201, 169, 110, 0.22), var(--shadow);
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.3s ease;
+  background: linear-gradient(180deg, rgba(212, 180, 120, 0.07) 0%, var(--card) 26%, var(--card-elevated) 100%);
+  border: 1px solid var(--gold-border);
+  box-shadow: inset 0 1px 0 rgba(212, 180, 120, 0.18), var(--shadow);
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -744,8 +751,8 @@ main {
 
 .arcana__item:hover {
   transform: translateY(-6px);
-  border-color: rgba(201, 169, 110, 0.55);
-  box-shadow: inset 0 1px 0 rgba(201, 169, 110, 0.45), 0 16px 36px rgba(0, 0, 0, 0.6), 0 0 28px rgba(201, 169, 110, 0.25);
+  border-color: var(--gold);
+  box-shadow: inset 0 1px 0 rgba(212, 180, 120, 0.4), 0 16px 36px rgba(0, 0, 0, 0.45), 0 0 28px var(--gold-glow);
 }
 
 .arcana__num {
@@ -779,15 +786,16 @@ main {
   height: 230px;
   margin: 8px 0;
   border-radius: 12px;
-  background: radial-gradient(ellipse 70% 75% at 50% 50%, rgba(201, 169, 110, 0.22) 0%, rgba(180, 130, 60, 0.1) 42%, rgba(20, 20, 24, 0.88) 75%, #111114 100%);
-  border: 1px solid rgba(201, 169, 110, 0.28);
+  background: var(--illustration-bg);
+  border: 1px solid var(--illustration-border);
   display: flex;
   align-items: center;
   justify-content: center;
   position: relative;
   overflow: hidden;
   padding: 6px;
-  box-shadow: inset 0 0 28px rgba(0, 0, 0, 0.8), 0 0 16px rgba(201, 169, 110, 0.08);
+  box-shadow: inset 0 0 22px rgba(0, 0, 0, 0.35), 0 0 16px var(--gold-glow);
+  transition: background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 /* Сакральная геометрия и зодиакальные круги на фоне подложки карты */
@@ -893,7 +901,7 @@ main {
 
 .arcana__item:hover .arcana__btn {
   background: var(--gold);
-  color: #111114;
+  color: var(--bg);
 }
 
 .arcana__author {
@@ -1610,7 +1618,7 @@ main {
 
 .profile__style .style-desc {
   font-size: 12px;
-  color: #c0b8ad;
+  color: var(--muted);
   line-height: 1.5;
   display: block;
 }
@@ -1938,7 +1946,7 @@ main {
 
 .school-card__desc {
   font-size: 13.5px;
-  color: #e3ded5;
+  color: var(--text);
   line-height: 1.6;
 }
 
@@ -2087,7 +2095,7 @@ main {
 
 .book-reader__content p {
   margin-bottom: 12px;
-  color: #e0d8cd;
+  color: var(--text);
   font-size: 13.5px;
   line-height: 1.65;
 }
@@ -2095,7 +2103,7 @@ main {
 .book-reader__content ul {
   padding-left: 20px;
   margin-bottom: 14px;
-  color: #d8cfc2;
+  color: var(--text);
 }
 
 .book-reader__content li {
@@ -2226,7 +2234,7 @@ main {
   display: flex;
   justify-content: center;
   align-items: center;
-  background: #141417;
+  background: var(--card);
   border-radius: 14px;
   border: 1px solid var(--gold-border);
   padding: 8px;
@@ -2365,4 +2373,105 @@ main {
     width: 100%;
     height: 1px;
   }
+}
+
+/* ==========================================================================
+   LIGHT THEME REFINEMENTS & WCAG AA POLISH
+   ========================================================================== */
+
+html[data-theme="light"] .bento-card,
+html[data-theme="light"] .arcana__item,
+html[data-theme="light"] .card,
+html[data-theme="light"] .glass {
+  background: linear-gradient(180deg, rgba(148, 113, 49, 0.04) 0%, #ffffff 28%, #fcfbf8 100%);
+  border-color: var(--gold-border);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05), 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+html[data-theme="light"] .bento-card:hover,
+html[data-theme="light"] .arcana__item:hover,
+html[data-theme="light"] .card:hover,
+html[data-theme="light"] .glass:hover {
+  border-color: var(--gold);
+  box-shadow: 0 12px 32px rgba(148, 113, 49, 0.12), 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+html[data-theme="light"] .bento-card--hero {
+  border-color: rgba(148, 113, 49, 0.4);
+  box-shadow: 0 8px 30px rgba(148, 113, 49, 0.12);
+}
+
+html[data-theme="light"] .arcana__svg-card svg rect:first-child {
+  fill: #faf8f2 !important;
+  stroke: #947131 !important;
+}
+
+html[data-theme="light"] .arcana__svg-card svg rect:nth-child(2) {
+  stroke: rgba(148, 113, 49, 0.35) !important;
+}
+
+html[data-theme="light"] .arcana__svg-card svg text {
+  fill: #73541c !important;
+}
+
+html[data-theme="light"] .arcana__svg-card svg line {
+  stroke: rgba(148, 113, 49, 0.35) !important;
+}
+
+html[data-theme="light"] .arcana__svg-card svg path,
+html[data-theme="light"] .arcana__svg-card svg circle,
+html[data-theme="light"] .arcana__svg-card svg polygon,
+html[data-theme="light"] .arcana__svg-card svg ellipse {
+  stroke: #8a6723 !important;
+}
+
+html[data-theme="light"] .arcana__illustration::before {
+  opacity: 0.45;
+}
+
+html[data-theme="light"] .arcana__illustration img {
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.22)) drop-shadow(0 0 12px rgba(148, 113, 49, 0.25));
+}
+
+html[data-theme="light"] .arcana__item:hover .arcana__illustration img {
+  filter: drop-shadow(0 8px 18px rgba(0, 0, 0, 0.28)) drop-shadow(0 0 20px rgba(148, 113, 49, 0.4));
+}
+
+html[data-theme="light"] .btn--primary:hover,
+html[data-theme="light"] .arcana__item:hover .arcana__btn {
+  background: var(--gold);
+  color: #ffffff;
+}
+
+html[data-theme="light"] .book-card__cover {
+  background: linear-gradient(135deg, #f4efe4 0%, #eae3d2 100%);
+}
+
+html[data-theme="light"] .book-card__img,
+html[data-theme="light"] .book-modal__cover-img {
+  background: #fdfbf7;
+}
+
+html[data-theme="light"] .book-modal__cover-wrap {
+  background: #f4efe4;
+}
+
+html[data-theme="light"] .book-card__badge {
+  background: rgba(255, 255, 255, 0.94);
+  color: #73541c;
+  border-color: rgba(148, 113, 49, 0.3);
+}
+
+html[data-theme="light"] .book-reader__pdf-iframe {
+  background: #ffffff;
+}
+
+html[data-theme="light"] .tabbar {
+  background: #ffffff;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.07);
+}
+
+html[data-theme="light"] .tabbar__btn--active::before {
+  background: linear-gradient(90deg, #947131, #c9a96e, #947131);
+  box-shadow: 0 0 8px rgba(148, 113, 49, 0.4);
 }
