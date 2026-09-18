@@ -50,6 +50,51 @@ const TARO_API_BASE = (location.hostname === "localhost" || location.hostname ==
   ? "/api/v1"
   : "https://shadowlinkapp.online/api/v1";
 
+// === Профиль: стили интерпретации ИИ (глобальные константы) ===
+const STYLE_STORAGE_KEY = "taro_style";
+
+const TARO_STYLES = [
+  {
+    id: "cosmo",
+    emoji: "🪐",
+    name: "Космо",
+    desc: "Нейтральный голос навигатора: спокойно, по делу.",
+  },
+  {
+    id: "gandalf",
+    emoji: "🧙",
+    name: "Гендальф Серый",
+    desc: "Мудрец Севера: торжественно, притчами и метафорами света.",
+  },
+  {
+    id: "strange",
+    emoji: "🌀",
+    name: "Доктор Стрэндж",
+    desc: "Хранитель Санктума: точно, о времени и тайных течениях.",
+  },
+  {
+    id: "yoda",
+    emoji: "🌿",
+    name: "Мастер Йода",
+    desc: "Джедай: кротко и загадочно, инверсиями и мудростью Силы.",
+  },
+  {
+    id: "dumbledore",
+    emoji: "⚡",
+    name: "Дамблдор",
+    desc: "Директор Хогвартса: тепло, иронично и всегда с намёком.",
+  },
+];
+
+function getSavedStyle() {
+  try {
+    const s = localStorage.getItem(STYLE_STORAGE_KEY);
+    return TARO_STYLES.find((x) => x.id === s) || TARO_STYLES[0];
+  } catch (err) {
+    return TARO_STYLES[0];
+  }
+}
+
 // === Система анонимной космической синхронизации данных (без email/телефона) ===
 let __taroSyncInited = false;
 
@@ -2318,58 +2363,20 @@ document.addEventListener("click", (e) => {
 // Открываем с сохранённой натальной картой (фундамент), иначе — демо-дата
 const initialNatal = getSavedNatal();
 if (initialNatal && initialNatal.day) {
-  $("day").value = initialNatal.day;
-  $("month").value = initialNatal.month;
-  $("year").value = initialNatal.year;
-  renderResult(initialNatal.day, initialNatal.month, initialNatal.year);
+  const dEl = $("day"); if (dEl) dEl.value = initialNatal.day;
+  const mEl = $("month"); if (mEl) mEl.value = initialNatal.month;
+  const yEl = $("year"); if (yEl) yEl.value = initialNatal.year;
+  if ($("zodiac-card") && $("arcana-grid")) {
+    renderResult(initialNatal.day, initialNatal.month, initialNatal.year, { skipScroll: true });
+  }
 } else {
-  renderResult(12, 5, 1998);
-}
-
-// === Профиль: стили интерпретации ===
-const TARO_STYLES = [
-  {
-    id: "cosmo",
-    emoji: "🪐",
-    name: "Космо",
-    desc: "Нейтральный голос навигатора: спокойно, по делу.",
-  },
-  {
-    id: "gandalf",
-    emoji: "🧙",
-    name: "Гендальф Серый",
-    desc: "Мудрец Севера: торжественно, притчами и метафорами света.",
-  },
-  {
-    id: "strange",
-    emoji: "🌀",
-    name: "Доктор Стрэндж",
-    desc: "Хранитель Санктума: точно, о времени и тайных течениях.",
-  },
-  {
-    id: "yoda",
-    emoji: "🌿",
-    name: "Мастер Йода",
-    desc: "Джедай: кротко и загадочно, инверсиями и мудростью Силы.",
-  },
-  {
-    id: "dumbledore",
-    emoji: "⚡",
-    name: "Дамблдор",
-    desc: "Директор Хогвартса: тепло, иронично и всегда с намёком.",
-  },
-];
-
-const STYLE_STORAGE_KEY = "taro_style";
-
-function getSavedStyle() {
-  try {
-    const s = localStorage.getItem(STYLE_STORAGE_KEY);
-    return TARO_STYLES.find((x) => x.id === s) || TARO_STYLES[0];
-  } catch (err) {
-    return TARO_STYLES[0];
+  if ($("zodiac-card") && $("arcana-grid")) {
+    renderResult(12, 5, 1998, { skipScroll: true });
   }
 }
+
+// === Профиль: стили интерпретации (реализация рендера) ===
+// (TARO_STYLES, STYLE_STORAGE_KEY и getSavedStyle объявлены в начале файла)
 
 function renderProfile() {
   const signEl = document.getElementById("profile-sign");
