@@ -3168,11 +3168,16 @@ function initShareSystem() {
       if (!__currentShareBlob) return;
       const file = new File([__currentShareBlob], "taro-cosmic-code.png", { type: "image/png" });
 
+      const captionText = "Мой космический код и арканы судьбы в TARO NAVIGATOR ✨\n\n" +
+        "Рассчитай свой аркан и натальную карту бесплатно:\n" +
+        "👉 https://shadowlinkapp.online\n" +
+        "🤖 Telegram-бот: @MyGoodTaro_bot";
+
       if (navigator.canShare && navigator.canShare({ files: [file] })) {
         try {
           await navigator.share({
             title: "Мой космический код · TARO NAVIGATOR",
-            text: "Мой астрологический паспорт и арканы судьбы в TARO NAVIGATOR ✨",
+            text: captionText,
             files: [file],
           });
           return;
@@ -3183,8 +3188,7 @@ function initShareSystem() {
 
       // Fallback: Telegram share URL
       const shareUrl = "https://shadowlinkapp.online";
-      const text = encodeURIComponent("Мой космический код и арканы судьбы в TARO NAVIGATOR ✨ Рассчитай бесплатно:");
-      const tgUrl = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${text}`;
+      const tgUrl = `https://t.me/share/url?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(captionText)}`;
 
       if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.openTelegramLink) {
         window.Telegram.WebApp.openTelegramLink(tgUrl);
