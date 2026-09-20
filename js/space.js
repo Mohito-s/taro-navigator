@@ -58,11 +58,11 @@
   ];
 
   const nebulaeDark = [
-    { xRatio: 0.18, yRatio: 0.25, radiusRatio: 0.52, color: 'rgba(201, 169, 110, 0.11)', speedX: 0.00005, speedY: 0.00003 },
-    { xRatio: 0.82, yRatio: 0.68, radiusRatio: 0.58, color: 'rgba(180, 130, 60, 0.09)',   speedX: -0.00004, speedY: 0.00004 },
-    { xRatio: 0.50, yRatio: 0.45, radiusRatio: 0.65, color: 'rgba(230, 185, 115, 0.08)', speedX: 0.00003, speedY: -0.00003 },
-    { xRatio: 0.75, yRatio: 0.20, radiusRatio: 0.45, color: 'rgba(42, 26, 62, 0.14)',    speedX: -0.00003, speedY: 0.00002 },
-    { xRatio: 0.30, yRatio: 0.80, radiusRatio: 0.50, color: 'rgba(160, 105, 40, 0.07)',  speedX: 0.00004, speedY: -0.00002 }
+    { xRatio: 0.18, yRatio: 0.25, radiusRatio: 0.52, color: 'rgba(226, 190, 121, 0.15)', speedX: 0.00005, speedY: 0.00003 },
+    { xRatio: 0.82, yRatio: 0.68, radiusRatio: 0.58, color: 'rgba(200, 145, 65, 0.12)',   speedX: -0.00004, speedY: 0.00004 },
+    { xRatio: 0.50, yRatio: 0.45, radiusRatio: 0.65, color: 'rgba(242, 198, 125, 0.11)', speedX: 0.00003, speedY: -0.00003 },
+    { xRatio: 0.75, yRatio: 0.20, radiusRatio: 0.45, color: 'rgba(52, 32, 75, 0.16)',    speedX: -0.00003, speedY: 0.00002 },
+    { xRatio: 0.30, yRatio: 0.80, radiusRatio: 0.50, color: 'rgba(180, 120, 45, 0.10)',  speedX: 0.00004, speedY: -0.00002 }
   ];
 
   const nebulaeLight = [
@@ -200,9 +200,9 @@
     const isLight = document.documentElement.getAttribute('data-theme') === 'light';
 
     // Clear with theme-adaptive base
-    // Dark: Soft refined charcoal (#151519) instead of pitch-black
+    // Dark: Soft refined obsidian (#1a1a21) instead of pitch-black
     // Light: Warm royal parchment (#f6f4ee)
-    ctx.fillStyle = isLight ? '#f6f4ee' : '#151519';
+    ctx.fillStyle = isLight ? '#f6f4ee' : '#1a1a21';
     ctx.fillRect(0, 0, width, height);
 
     const centerX = width * 0.5;
@@ -229,7 +229,7 @@
       const grad = ctx.createRadialGradient(nx, ny, 0, nx, ny, nr);
       grad.addColorStop(0, neb.color);
       grad.addColorStop(0.55, neb.color.replace(/[\d\.]+\)$/, '0.02)'));
-      grad.addColorStop(1, isLight ? 'rgba(246, 244, 238, 0)' : 'rgba(21, 21, 25, 0)');
+      grad.addColorStop(1, isLight ? 'rgba(246, 244, 238, 0)' : 'rgba(26, 26, 33, 0)');
 
       ctx.fillStyle = grad;
       ctx.beginPath();
