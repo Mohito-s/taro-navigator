@@ -3227,3 +3227,137 @@ html[data-theme="light"] .tabbar__btn--active::before {
   border-radius: 4px;
   margin-bottom: 8px;
 }
+
+/* ---------- 4.3 Социальные доказательства и отзывы ---------- */
+.social-proof-section {
+  padding: 40px 0 20px;
+}
+
+.social-proof__stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 14px;
+  margin-bottom: 28px;
+}
+
+.stat-card {
+  background: var(--card);
+  border: 1px solid var(--gold-border);
+  border-radius: 16px;
+  padding: 18px 14px;
+  text-align: center;
+  transition: transform 0.25s ease, border-color 0.25s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-3px);
+  border-color: rgba(201, 169, 110, 0.45);
+}
+
+.stat-card__num {
+  font-family: "Playfair Display", Georgia, serif;
+  font-size: clamp(1.4rem, 1.2rem + 1vw, 2rem);
+  font-weight: 700;
+  color: var(--gold);
+  line-height: 1.2;
+  margin-bottom: 4px;
+}
+
+.stat-card__label {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.35;
+}
+
+.reviews-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.review-card {
+  background: var(--card);
+  border: 1px solid var(--gold-border);
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 14px;
+  transition: transform 0.25s ease, border-color 0.25s ease;
+}
+
+.review-card:hover {
+  transform: translateY(-2px);
+  border-color: rgba(201, 169, 110, 0.45);
+}
+
+.review-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.review-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1px solid var(--gold-border);
+  background: var(--card-elevated);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: var(--gold);
+  flex-shrink: 0;
+}
+
+.review-author {
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.review-meta {
+  font-size: 11px;
+  color: var(--muted);
+  margin-top: 2px;
+}
+
+.review-stars {
+  color: var(--gold);
+  font-size: 12px;
+  letter-spacing: 1px;
+  margin-left: auto;
+}
+
+.review-text {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--text);
+  margin: 0;
+}
+
+.trust-badge-banner {
+  background: var(--card-elevated);
+  border: 1px solid var(--gold-border);
+  border-radius: 12px;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+
+.trust-badge-banner__icon {
+  font-size: 22px;
+  color: var(--gold);
+  flex-shrink: 0;
+}
+
+.trust-badge-banner strong {
+  color: var(--gold-light);
+}
