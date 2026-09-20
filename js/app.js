@@ -66,9 +66,9 @@ function initPrivacyModal() {
   });
 }
 
-const TARO_API_BASE = (location.hostname === "localhost" || location.hostname === "127.0.0.1")
-  ? "/api/v1"
-  : "https://shadowlinkapp.online/api/v1";
+const TARO_API_BASE = (location.hostname.endsWith("github.io"))
+  ? "https://shadowlinkapp.online/api/v1"
+  : "/api/v1";
 
 // === Профиль: стили интерпретации ИИ (глобальные константы) ===
 const STYLE_STORAGE_KEY = "taro_style";

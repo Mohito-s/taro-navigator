@@ -13,13 +13,16 @@ import json
 import logging
 import time
 import uuid
+from pathlib import Path
 from urllib.parse import unquote
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from bot.config import BOT_TOKEN
+from bot.config import BOT_TOKEN, MINI_APP_URL
 from bot.db import db
 from bot.services import ai as ai_service
 from bot.services import numerology
@@ -37,9 +40,13 @@ ALLOWED_ORIGINS = [
     "null",
     "http://localhost:8000",
 ]
+if MINI_APP_URL and MINI_APP_URL not in ALLOWED_ORIGINS:
+    ALLOWED_ORIGINS.append(MINI_APP_URL)
+
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
+    allow_origin_regex=r"https://.*\.herokuapp\.com",
     allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
@@ -387,3 +394,74 @@ async def sync_history(request: Request, body: SyncHistoryIn):
 
     await db.save_web_history(body.session_id, body.history)
     return {"ok": True, "count": len(body.history)}
+
+
+# ==============================================================================
+# Статические файлы для standalone / Heroku хостинга
+# ==============================================================================
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+if (BASE_DIR / "css").is_dir():
+    app.mount("/css", StaticFiles(directory=str(BASE_DIR / "css")), name="css")
+if (BASE_DIR / "js").is_dir():
+    app.mount("/js", StaticFiles(directory=str(BASE_DIR / "js")), name="js")
+if (BASE_DIR / "img").is_dir():
+    app.mount("/img", StaticFiles(directory=str(BASE_DIR / "img")), name="img")
+if (BASE_DIR / "books").is_dir():
+    app.mount("/books", StaticFiles(directory=str(BASE_DIR / "books")), name="books")
+
+
+@app.get("/")
+async def serve_index():
+    index_path = BASE_DIR / "index.html"
+    if index_path.is_file():
+        return FileResponse(str(index_path))
+    return {"ok": True, "service": "taro-api"}
+
+
+@app.get("/{page}.html")
+async def serve_html_page(page: str):
+    page_file = BASE_DIR / f"{page}.html"
+    if page_file.is_file():
+        return FileResponse(str(page_file))
+    raise HTTPException(status_code=404, detail="Page not found")
+
+
+@app.get("/favicon.jpg")
+async def serve_favicon():
+    f = BASE_DIR / "favicon.jpg"
+    if f.is_file():
+        return FileResponse(str(f))
+    raise HTTPException(status_code=404, detail="Favicon not found")
+
+
+@app.get("/favicon.ico")
+async def serve_favicon_ico():
+    f = BASE_DIR / "favicon.jpg"
+    if f.is_file():
+        return FileResponse(str(f))
+    raise HTTPException(status_code=404, detail="Favicon not found")
+
+
+@app.get("/robots.txt")
+async def serve_robots():
+    f = BASE_DIR / "robots.txt"
+    if f.is_file():
+        return FileResponse(str(f))
+    raise HTTPException(status_code=404, detail="Robots.txt not found")
+
+
+@app.get("/sitemap.xml")
+async def serve_sitemap():
+    f = BASE_DIR / "sitemap.xml"
+    if f.is_file():
+        return FileResponse(str(f), media_type="application/xml")
+    raise HTTPException(status_code=404, detail="Sitemap not found")
+
+
+@app.get("/mobile_main.png")
+async def serve_mobile_main():
+    f = BASE_DIR / "mobile_main.png"
+    if f.is_file():
+        return FileResponse(str(f))
+    raise HTTPException(status_code=404, detail="Image not found")

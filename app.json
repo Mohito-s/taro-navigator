@@ -1,0 +1,81 @@
+{
+  "name": "Taro Navigator",
+  "description": "Персональный космический гид по миру Таро, астрологии и нумерологии с ИИ-разборами.",
+  "repository": "https://github.com/Mohito-s/taro-navigator",
+  "logo": "https://raw.githubusercontent.com/Mohito-s/taro-navigator/main/favicon.jpg",
+  "keywords": [
+    "telegram-bot",
+    "aiogram",
+    "fastapi",
+    "tarot",
+    "astrology",
+    "numerology",
+    "deepseek",
+    "openrouter"
+  ],
+  "website": "https://shadowlinkapp.online",
+  "success_url": "/api/health",
+  "env": {
+    "BOT_TOKEN": {
+      "description": "Telegram Bot Token от @BotFather (обязательно).",
+      "required": true
+    },
+    "AI_PROVIDER": {
+      "description": "Провайдер ИИ: deepseek, openrouter, gemini, together или groq.",
+      "value": "deepseek",
+      "required": false
+    },
+    "DEEPSEEK_API_KEY": {
+      "description": "API-ключ DeepSeek (если AI_PROVIDER=deepseek).",
+      "required": false
+    },
+    "AI_API_KEY": {
+      "description": "API-ключ альтернативного провайдера (OpenRouter, Gemini, Together, Groq).",
+      "required": false
+    },
+    "AI_MODEL": {
+      "description": "Имя модели нейросети (по умолчанию: deepseek-chat).",
+      "value": "deepseek-chat",
+      "required": false
+    },
+    "AI_BASE_URL": {
+      "description": "Кастомный базовый URL для API нейросети (опционально).",
+      "required": false
+    },
+    "MINI_APP_URL": {
+      "description": "URL вашего веб-приложения / Mini App (например, https://<имя-вашего-приложения>.herokuapp.com).",
+      "required": false
+    },
+    "ADMIN_ID": {
+      "description": "Ваш числовой Telegram ID для администрирования бота.",
+      "value": "830960097",
+      "required": false
+    },
+    "CHANNEL_ID": {
+      "description": "ID публичного или приватного канала для публикации карты дня (например, -1004437866558).",
+      "value": "-1004437866558",
+      "required": false
+    },
+    "TEST_MODE": {
+      "description": "Режим тестирования (true/false) — отключает обязательную оплату Telegram Stars.",
+      "value": "false",
+      "required": false
+    },
+    "RUN_BOT": {
+      "description": "Запускать фоновый процесс Telegram-бота в одном dyno с веб-сервером (true/false).",
+      "value": "true",
+      "required": false
+    }
+  },
+  "formation": {
+    "web": {
+      "quantity": 1,
+      "size": "eco"
+    }
+  },
+  "buildpacks": [
+    {
+      "url": "heroku/python"
+    }
+  ]
+}

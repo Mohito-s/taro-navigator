@@ -5,3 +5,4 @@ python-dotenv>=1.0
 pydantic>=2.8
 fastapi>=0.111
 uvicorn>=0.30
+aiofiles>=23.0
