@@ -11,7 +11,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="css/style.css?v=24" />
+  <link rel="stylesheet" href="css/style.css?v=26" />
 </head>
 <body>
 
@@ -181,6 +181,46 @@
           <div class="natal__planet-info glass" id="natal-planet-info">🪐 Наведи или нажми на планету на диске для деталей.</div>
         </div>
 
+        <!-- Лунная фаза при рождении -->
+        <div class="natal__moon-card glass reveal d2" id="natal-moon-card" hidden>
+          <div class="natal__moon-head">
+            <span class="natal__moon-icon" id="natal-moon-icon">🌙</span>
+            <div>
+              <div class="natal__moon-phase-badge">ЛУННАЯ ФАЗА РОЖДЕНИЯ</div>
+              <h3 class="natal__moon-phase-title" id="natal-moon-title">Фаза Луны</h3>
+              <p class="natal__moon-phase-illum" id="natal-moon-illum">Освещенность 0%</p>
+            </div>
+          </div>
+          <div class="natal__moon-archetype" id="natal-moon-archetype"></div>
+          <p class="natal__moon-desc" id="natal-moon-desc"></p>
+        </div>
+
+        <!-- Баланс 4-х Стихий -->
+        <div class="natal__elements-card glass reveal d2" id="natal-elements-card" hidden>
+          <div class="natal__elements-head">
+            <span>⚖️ БАЛАНС 4-Х СТИХИЙ (ЭЛЕМЕНТЫ)</span>
+          </div>
+          <div class="natal__elements-bars" id="natal-elements-bars"></div>
+          <div class="natal__elements-summary" id="natal-elements-summary"></div>
+        </div>
+
+        <!-- Тематические Сферы Жизни -->
+        <div class="natal__spheres-card glass reveal d2" id="natal-spheres-card" hidden>
+          <div class="natal__elements-head">
+            <span>🪐 ТЕМАТИЧЕСКИЕ СФЕРЫ ЖИЗНИ</span>
+          </div>
+          <div class="natal__spheres-tabs">
+            <button class="natal__sphere-tab natal__sphere-tab--active" type="button" data-sphere="love">💖 Любовь</button>
+            <button class="natal__sphere-tab" type="button" data-sphere="career">💼 Карьера & Деньги</button>
+            <button class="natal__sphere-tab" type="button" data-sphere="destiny">🧭 Предназначение</button>
+            <button class="natal__sphere-tab" type="button" data-sphere="health">⚡ Энергия & Здоровье</button>
+          </div>
+          <div class="natal__sphere-content" id="natal-sphere-content"></div>
+          <button class="btn btn--primary btn--wide" id="natal-sphere-ai-btn" type="button" style="margin-top:14px;">
+            ✨ Запросить ИИ-разбор выбранной сферы
+          </button>
+        </div>
+
         <p class="natal__note reveal">Полный расчёт домов и аспектов — в расширенном ИИ-прогнозе.</p>
         <button class="btn btn--ghost btn--wide natal__forecast-btn reveal d2" id="natal-forecast" type="button">
           ✨ Расширенный прогноз по натальной карте
@@ -320,8 +360,8 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/astronomy-engine@2.1.19/astronomy.browser.min.js"></script>
-  <script src="js/natal.js?v=25"></script>
+  <script src="js/natal.js?v=26"></script>
   <script src="js/space.js?v=25"></script>
-  <script src="js/app.js?v=25"></script>
+  <script src="js/app.js?v=26"></script>
 </body>
 </html>

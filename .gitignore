@@ -14,3 +14,8 @@ Thumbs.db
 *.swo
 *~
 .playwright-mcp/
+*.exe
+*.apk
+*.zip
+books/raw/
+*modernlib*

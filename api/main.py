@@ -166,6 +166,17 @@ class ForecastIn(BaseModel):
     initData: str = ""
 
 
+class TarotReadingIn(BaseModel):
+    spread_type: str
+    cards: list[dict]
+    question: str = ""
+    style: str = ""
+    day: int | None = None
+    month: int | None = None
+    year: int | None = None
+    initData: str = ""
+
+
 class SaveProfileIn(BaseModel):
     session_id: str = ""
     day: int
@@ -298,6 +309,24 @@ async def forecast(request: Request, body: ForecastIn):
     }
     async with SEMAPHORE:
         text = await ai_service.generate_period_forecast(user, body.horizon)
+    return {"text": text}
+
+
+@app.post("/api/v1/tarot_reading")
+async def tarot_reading(request: Request, body: TarotReadingIn):
+    await _guard(request, body.initData)
+    user = {}
+    if body.day and body.month:
+        user["zodiac"] = numerology.get_zodiac(body.day, body.month)
+    if body.style:
+        user["style"] = body.style
+    async with SEMAPHORE:
+        text = await ai_service.generate_tarot_reading(
+            spread_type=body.spread_type,
+            cards=body.cards,
+            question=body.question,
+            user=user,
+        )
     return {"text": text}
 
 

@@ -521,3 +521,75 @@ async def generate_arcana_forecast(user: dict, arcana_number: int, variation: in
     if text:
         return text
     return _arcana_forecast_fallback(user, arcana_number)
+
+
+def build_tarot_reading_prompt(spread_type: str, cards: list[dict], question: str = "", user: dict | None = None) -> str:
+    user = user or {}
+    zodiac = user.get("zodiac", "")
+    lines = [f"Тип расклада Таро: {spread_type}"]
+    if question:
+        lines.append(f"Вопрос кверента: «{question}»")
+    if zodiac:
+        lines.append(f"Знак зодиака кверента: {zodiac}")
+
+    lines.append("\nВыпавшие карты в раскладе:")
+    for c in cards:
+        pos = c.get("position", "Позиция")
+        num = c.get("number", 0)
+        name = c.get("name", "")
+        card_info = ARCANA.get(num, {})
+        card_name = name or card_info.get("name", f"Аркан {num}")
+        keyword = card_info.get("keyword", "")
+        meaning = card_info.get("text", "")
+        lines.append(f"• {pos}: Аркан {num} «{card_name}» ({keyword}) — базовая энергия: {meaning}")
+
+    lines.append(
+        "\nИнструкция для толкования:\n"
+        "1. Раскрой каждую позицию глубоко, психологично и образно, без штампов.\n"
+        "2. Объясни связь и синергию выпавших арканов: как они взаимодействуют.\n"
+        "3. Дай точный практический совет и предостережение.\n"
+        "Обращайся к человеку на «ты», строго соблюдая характер выбранного стиля интерпретатора."
+    )
+    return "\n".join(lines)
+
+
+def _tarot_reading_fallback(spread_type: str, cards: list[dict], question: str = "") -> str:
+    parts = [f"🔮 **Расклад Таро: {spread_type}**"]
+    if question:
+        parts.append(f"_Запрос: «{question}»_\n")
+    for c in cards:
+        pos = c.get("position", "Позиция")
+        num = c.get("number", 0)
+        card_info = ARCANA.get(num, {})
+        name = c.get("name") or card_info.get("name", f"Аркан {num}")
+        kw = card_info.get("keyword", "Трансформация")
+        txt = card_info.get("text", "Энергия перемен и внутреннего роста.")
+        parts.append(f"✦ **{pos} — {name} ({kw})**\n{txt}")
+
+    parts.append(
+        "✨ **Синтез расклада и совет карт:**\n"
+        "Карты показывают, что внешние события сейчас служат зеркалом твоего внутреннего выбора. "
+        "Не пытайся давить на ситуацию силой: обрати внимание на центральный аркан, "
+        "сохраняй осознанность и сделай шаг навстречу переменам с доверием к собственному пути."
+    )
+    return "\n\n".join(parts)
+
+
+async def generate_tarot_reading(
+    spread_type: str, cards: list[dict], question: str = "", user: dict | None = None
+) -> str:
+    user = user or {}
+    text = await _chat(
+        {
+            "model": AI_MODEL,
+            "messages": [
+                {"role": "system", "content": system_prompt(user.get("style", ""))},
+                {"role": "user", "content": build_tarot_reading_prompt(spread_type, cards, question, user)},
+            ],
+            "temperature": 0.9,
+            "max_tokens": 1600,
+        }
+    )
+    if text:
+        return text
+    return _tarot_reading_fallback(spread_type, cards, question)

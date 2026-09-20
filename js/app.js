@@ -320,6 +320,7 @@ document.addEventListener("DOMContentLoaded", () => {
   initPrivacyModal();
   initSyncSystem();
   initShareSystem();
+  initInteractiveTarot();
 });
 
 // Сессия посетителя сайта для синхронизации с БД на сервере
@@ -422,11 +423,11 @@ const ARCANA_IMAGES = [
   'img/cards/10-wheel.jpg',
   'img/cards/11-justice.jpg',
   'img/cards/12-hanged.jpg',
-  'img/cards/13-death.png',
-  'img/cards/14-temperance.png',
-  'img/cards/15-devil.png',
+  'img/cards/13-death.jpg',
+  'img/cards/14-temperance.jpg',
+  'img/cards/15-devil.jpg',
   'img/cards/16-tower.jpg',
-  'img/cards/17-star.png',
+  'img/cards/17-star.jpg',
   'img/cards/18-moon.jpg',
   'img/cards/19-sun.jpg',
   'img/cards/20-judgement.jpg',
@@ -1870,7 +1871,188 @@ function renderNatalChart(natal) {
       disc.style.transform = "";
     });
   }
+  renderNatalExpansions(natal);
 }
+
+// === Расширения натальной карты: Лунная фаза рождения, Стихии и Сферы Жизни ===
+function renderNatalExpansions(natal) {
+  const moonCard = document.getElementById("natal-moon-card");
+  const elemCard = document.getElementById("natal-elements-card");
+  const spheresCard = document.getElementById("natal-spheres-card");
+  if (!moonCard && !elemCard && !spheresCard) return;
+
+  if (!natal || !natal.day) {
+    if (moonCard) moonCard.hidden = true;
+    if (elemCard) elemCard.hidden = true;
+    if (spheresCard) spheresCard.hidden = true;
+    return;
+  }
+
+  // Если в объекте натала ещё нет moonPhase или elements — пересчитываем на лету
+  if (natal.chart && (!natal.chart.moonPhase || !natal.chart.elements) && window.TaroNatal && window.TaroNatal.calcNatalMoonPhase) {
+    if (window.Astronomy) {
+      try {
+        const place = natal.chart.place || null;
+        const tz = place ? Math.round(place.lon / 15) : 3;
+        const tm = /^(\d{1,2}):(\d{2})/.exec(natal.time || "");
+        const hr = tm ? Number(tm[1]) : 12;
+        const min = tm ? Number(tm[2]) : 0;
+        const ut = Date.UTC(natal.year, natal.month - 1, natal.day, hr - tz, min, 0, 0);
+        const astro = Astronomy.MakeTime(new Date(ut));
+        natal.chart.moonPhase = window.TaroNatal.calcNatalMoonPhase(astro);
+        natal.chart.elements = window.TaroNatal.calcElements(natal.chart.planets, natal.chart.asc);
+        natal.chart.spheres = window.TaroNatal.calcLifeSpheres(natal.chart.planets, natal.chart.asc, natal.chart.mc, natal.chart.houses, natal.chart.moonPhase, natal.chart.elements);
+      } catch (e) {}
+    }
+  }
+
+  const chart = natal.chart;
+  if (!chart) return;
+
+  // 1. Лунная фаза рождения
+  if (chart.moonPhase && moonCard) {
+    moonCard.hidden = false;
+    const mp = chart.moonPhase;
+    const iconEl = document.getElementById("natal-moon-icon");
+    const titleEl = document.getElementById("natal-moon-title");
+    const illumEl = document.getElementById("natal-moon-illum");
+    const archEl = document.getElementById("natal-moon-archetype");
+    const descEl = document.getElementById("natal-moon-desc");
+
+    if (iconEl) iconEl.textContent = mp.icon || "🌙";
+    if (titleEl) titleEl.textContent = mp.name || "Фаза Луны";
+    if (illumEl) illumEl.textContent = `Освещенность: ${mp.illumination}% · Фазовый угол: ${mp.phaseDeg}°`;
+    if (archEl) archEl.textContent = `✦ Архетип: ${mp.archetype}`;
+    if (descEl) descEl.textContent = mp.desc || "";
+  }
+
+  // 2. Баланс 4-х Стихий
+  if (chart.elements && elemCard) {
+    elemCard.hidden = false;
+    const el = chart.elements;
+    const barsWrap = document.getElementById("natal-elements-bars");
+    const summWrap = document.getElementById("natal-elements-summary");
+
+    if (barsWrap) {
+      barsWrap.innerHTML = el.list.map((item) => `
+        <div class="natal__element-row">
+          <span class="natal__element-name">${item.icon} ${item.name}</span>
+          <div class="natal__element-bar-bg">
+            <div class="natal__element-bar-fill natal__element-bar-fill--${item.key}" style="width: ${item.pct}%"></div>
+          </div>
+          <span class="natal__element-val">${item.pct}%</span>
+        </div>
+      `).join("");
+    }
+
+    if (summWrap) {
+      summWrap.innerHTML = `
+        <div><b>Доминирующая энергия:</b> ${el.dominant.icon} ${el.dominant.name} (${el.dominant.pct}%) — ${el.dominant.desc}</div>
+        <div style="margin-top:6px;"><b>Дефицитная стихия:</b> ${el.deficient.icon} ${el.deficient.name} (${el.deficient.pct}%) — обрати внимание на осознанную компенсацию этой сферы.</div>
+      `;
+    }
+  }
+
+  // 3. Тематические Сферы Жизни
+  if (chart.spheres && spheresCard) {
+    spheresCard.hidden = false;
+    const spheres = chart.spheres;
+    const contentEl = document.getElementById("natal-sphere-content");
+    const tabs = spheresCard.querySelectorAll(".natal__sphere-tab");
+
+    const renderSphereTab = (key) => {
+      tabs.forEach((t) => t.classList.toggle("natal__sphere-tab--active", t.getAttribute("data-sphere") === key));
+      const s = spheres[key];
+      if (!s || !contentEl) return;
+
+      let inner = "";
+      if (key === "love") {
+        inner = `
+          <h4>${s.icon} ${s.title}</h4>
+          <span class="natal__sphere-placement">${s.venusPlacement} · ${s.moonPlacement}</span>
+          <p>${s.style}</p>
+          <div style="margin-top:8px;"><b>Идеальный партнёр:</b> ${s.partnerPortrait}</div>
+          <div style="margin-top:6px; color:var(--gold-light);">✦ <i>${s.advice}</i></div>
+        `;
+      } else if (key === "career") {
+        inner = `
+          <h4>${s.icon} ${s.title}</h4>
+          <span class="natal__sphere-placement">${s.marsPlacement} · ${s.mcPlacement}</span>
+          <p>${s.drive}</p>
+          <div style="margin-top:8px;"><b>Ключи к изобилию:</b> ${s.wealthKeys}</div>
+          <div style="margin-top:6px; color:var(--gold-light);">✦ <i>${s.advice}</i></div>
+        `;
+      } else if (key === "destiny") {
+        inner = `
+          <h4>${s.icon} ${s.title}</h4>
+          <span class="natal__sphere-placement">${s.sunPlacement} · ${s.jupiterPlacement}</span>
+          <p>${s.mission}</p>
+          <div style="margin-top:8px;"><b>Зона роста и удачи:</b> ${s.expansionZone}</div>
+          <div style="margin-top:6px; color:var(--gold-light);">✦ <i>${s.advice}</i></div>
+        `;
+      } else if (key === "health") {
+        inner = `
+          <h4>${s.icon} ${s.title}</h4>
+          <span class="natal__sphere-placement">${s.balance}</span>
+          <p><b>Как восполнять ресурс:</b> ${s.recharge}</p>
+          <div style="margin-top:8px; color:var(--gold-light);">⚠️ <b>Предостережение:</b> ${s.warning}</div>
+        `;
+      }
+      contentEl.innerHTML = inner;
+    };
+
+    tabs.forEach((t) => {
+      t.onclick = () => renderSphereTab(t.getAttribute("data-sphere"));
+    });
+
+    const activeTab = spheresCard.querySelector(".natal__sphere-tab--active");
+    renderSphereTab(activeTab ? activeTab.getAttribute("data-sphere") : "love");
+
+    const aiBtn = document.getElementById("natal-sphere-ai-btn");
+    if (aiBtn) {
+      aiBtn.onclick = async () => {
+        const curTab = spheresCard.querySelector(".natal__sphere-tab--active");
+        const sphereKey = curTab ? curTab.getAttribute("data-sphere") : "love";
+        const sphereTitle = curTab ? curTab.textContent.trim() : "Сфера";
+        const resultWrap = document.getElementById("natal-extended");
+        if (!resultWrap) return;
+
+        resultWrap.hidden = false;
+        resultWrap.innerHTML = `<p class="forecast__loading">🪐 ИИ-оракул составляет глубокий натальный разбор сферы «${sphereTitle}»…</p>`;
+        resultWrap.scrollIntoView({ behavior: "smooth", block: "nearest" });
+
+        const d = natal.day, m = natal.month, y = natal.year;
+        const payload = {
+          day: d,
+          month: m,
+          year: y,
+          time: natal.time || "",
+          city: natal.city || "",
+          name: natal.name || "",
+          chart: chartBrief(natal.chart)
+        };
+
+        try {
+          const text = await taroApi("natal", payload);
+          if (text) {
+            showInlineResult(resultWrap, `Глубокий разбор: ${sphereTitle}`, text);
+            addHistory({
+              type: "natal",
+              icon: "🌌",
+              title: `Натал: ${sphereTitle}`,
+              subtitle: `${natal.zodiac || "Натальная карта"} · ${fmtDate(Date.now(), true)}`,
+              text: text
+            });
+            return;
+          }
+        } catch (err) {}
+
+        showInlineResult(resultWrap, `Разбор сферы: ${sphereTitle}`, buildExtendedNatalText());
+      };
+    }
+  }
+}
+
 
 // Интерактивное обновление натального диска прямо во время ввода данных (живой расчет)
 function initNatalLiveInput() {
@@ -3196,6 +3378,9 @@ function initShareSystem() {
   const profileBtn = document.getElementById("profile-share-btn");
   if (profileBtn) profileBtn.addEventListener("click", openShareModal);
 
+  const tarotShareBtn = document.getElementById("tarot-share-btn");
+  if (tarotShareBtn) tarotShareBtn.addEventListener("click", openShareModal);
+
   const downloadBtn = document.getElementById("share-btn-download");
   if (downloadBtn) {
     downloadBtn.addEventListener("click", () => {
@@ -3248,4 +3433,282 @@ function initShareSystem() {
       }
     });
   }
+}
+
+// ==============================================================================
+// ИНТЕРАКТИВНЫЙ СТОЛ ТАРО: ОРАКУЛ
+// ==============================================================================
+const SPREAD_CONFIGS = {
+  love: {
+    title: "Любовь и Отношения",
+    count: 3,
+    positions: [
+      "Ты и твои чувства",
+      "Партнёр / Точки контакта",
+      "Перспектива союза и совет"
+    ]
+  },
+  career: {
+    title: "Работа и Деньги",
+    count: 3,
+    positions: [
+      "Твоя текущая позиция",
+      "Скрытый вызов или шанс",
+      "Финансовый вектор и итог"
+    ]
+  },
+  choice: {
+    title: "Выбор пути",
+    count: 3,
+    positions: [
+      "Суть дилеммы",
+      "Если выбрать путь А",
+      "Если выбрать путь Б"
+    ]
+  },
+  daily: {
+    title: "Карта дня",
+    count: 1,
+    positions: [
+      "Фокус внимания и энергия дня"
+    ]
+  },
+  cross: {
+    title: "Кельтский срез",
+    count: 4,
+    positions: [
+      "Основа ситуации",
+      "Главный вызов",
+      "Подсказка подсознания",
+      "Истинный исход"
+    ]
+  }
+};
+
+let currentSpreadType = "love";
+let currentSpreadCards = [];
+
+function initInteractiveTarot() {
+  const table = document.getElementById("interactive-tarot");
+  if (!table) return;
+
+  const themeBtns = table.querySelectorAll(".oracle__theme-btn");
+  const dealBtn = document.getElementById("tarot-deal-btn");
+  const deck = document.getElementById("tarot-deck");
+  const deckWrap = document.getElementById("tarot-deck-wrap");
+  const slotsWrap = document.getElementById("tarot-slots");
+  const flipHint = document.getElementById("tarot-flip-hint");
+  const synthesis = document.getElementById("tarot-synthesis");
+  const resetBtn = document.getElementById("tarot-reset-btn");
+  const aiBtn = document.getElementById("tarot-ai-btn");
+  const shareBtn = document.getElementById("tarot-share-btn");
+
+  const triggerHaptic = (type = "medium") => {
+    try {
+      if (window.Telegram && Telegram.WebApp && Telegram.WebApp.HapticFeedback) {
+        Telegram.WebApp.HapticFeedback.impactOccurred(type);
+      } else if (navigator.vibrate) {
+        navigator.vibrate(25);
+      }
+    } catch (e) {}
+  };
+
+  themeBtns.forEach((btn) => {
+    btn.addEventListener("click", () => {
+      themeBtns.forEach((b) => b.classList.remove("oracle__theme-btn--active"));
+      btn.classList.add("oracle__theme-btn--active");
+      currentSpreadType = btn.getAttribute("data-spread");
+      resetTarotTable();
+    });
+  });
+
+  function resetTarotTable() {
+    currentSpreadCards = [];
+    if (deckWrap) deckWrap.hidden = false;
+    if (slotsWrap) {
+      slotsWrap.hidden = true;
+      slotsWrap.innerHTML = "";
+    }
+    if (flipHint) flipHint.hidden = true;
+    if (synthesis) {
+      synthesis.hidden = true;
+      const sBody = document.getElementById("tarot-synthesis-body");
+      if (sBody) sBody.innerHTML = "";
+    }
+  }
+
+  function dealCards() {
+    triggerHaptic("heavy");
+    const cfg = SPREAD_CONFIGS[currentSpreadType] || SPREAD_CONFIGS.love;
+    const pool = Array.from({ length: 22 }, (_, i) => i);
+    for (let i = pool.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [pool[i], pool[j]] = [pool[j], pool[i]];
+    }
+
+    currentSpreadCards = [];
+    for (let i = 0; i < cfg.count; i++) {
+      const cardNum = pool[i];
+      const cardMeta = ARCADES[cardNum] || { card: `Аркан ${cardNum}`, kw: "Трансформация" };
+      currentSpreadCards.push({
+        position: cfg.positions[i],
+        number: cardNum,
+        name: cardMeta.card,
+        keyword: cardMeta.kw,
+        img: ARCANA_IMAGES[cardNum] || `img/cards/${cardNum < 10 ? '0' + cardNum : cardNum}-fool.jpg`,
+        flipped: false
+      });
+    }
+
+    if (deckWrap) deckWrap.hidden = true;
+    if (slotsWrap) {
+      slotsWrap.hidden = false;
+      slotsWrap.innerHTML = currentSpreadCards.map((card, idx) => `
+        <div class="tarot-slot" data-index="${idx}">
+          <div class="tarot-slot__position">${card.position}</div>
+          <div class="tarot-card-flip" data-index="${idx}" role="button" tabindex="0" aria-label="${card.position}">
+            <div class="tarot-card-flip__back tarot-card-back"></div>
+            <div class="tarot-card-flip__front">
+              <img src="${card.img}" alt="${card.name}" loading="lazy" />
+            </div>
+          </div>
+          <div class="tarot-slot__info" id="slot-info-${idx}">
+            <div class="tarot-slot__card-name">${card.name}</div>
+            <div class="tarot-slot__keyword">✦ ${card.keyword}</div>
+          </div>
+        </div>
+      `).join("");
+
+      slotsWrap.querySelectorAll(".tarot-card-flip").forEach((flipEl) => {
+        const idx = Number(flipEl.getAttribute("data-index"));
+        const handleFlip = () => {
+          if (currentSpreadCards[idx].flipped) return;
+          currentSpreadCards[idx].flipped = true;
+          flipEl.classList.add("flipped");
+          triggerHaptic("medium");
+
+          const infoEl = document.getElementById(`slot-info-${idx}`);
+          if (infoEl) infoEl.classList.add("revealed");
+
+          const allFlipped = currentSpreadCards.every((c) => c.flipped);
+          if (allFlipped) {
+            if (flipHint) flipHint.hidden = true;
+            revealSynthesis();
+          }
+        };
+        flipEl.addEventListener("click", handleFlip);
+        flipEl.addEventListener("keydown", (e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleFlip();
+          }
+        });
+      });
+    }
+
+    if (flipHint) flipHint.hidden = false;
+  }
+
+  function revealSynthesis() {
+    triggerHaptic("heavy");
+    if (!synthesis) return;
+    synthesis.hidden = false;
+    const titleEl = document.getElementById("tarot-synthesis-title");
+    const bodyEl = document.getElementById("tarot-synthesis-body");
+    const cfg = SPREAD_CONFIGS[currentSpreadType] || SPREAD_CONFIGS.love;
+    const qVal = document.getElementById("oracle-question")?.value.trim();
+
+    if (titleEl) titleEl.textContent = `Толкование: ${cfg.title}`;
+
+    let synthHtml = "";
+    if (qVal) {
+      synthHtml += `<p><i>Вопрос кверента: «${renderAIText(qVal)}»</i></p>`;
+    }
+
+    currentSpreadCards.forEach((c) => {
+      const meaning = ARCANA_TEXT[c.number] || "Энергия перемен и осознанности.";
+      synthHtml += `
+        <div style="margin-bottom:14px;">
+          <b>✦ ${c.position} — ${c.name} (${c.keyword})</b><br>
+          <span style="color:var(--text);">${meaning}</span>
+        </div>`;
+    });
+
+    synthHtml += `
+      <div style="margin-top:16px; border-top:1px solid var(--border-subtle); padding-top:12px;">
+        <b>✨ Совет оракула:</b><br>
+        Расклад показывает, что внешние события сейчас служат зеркалом твоего внутреннего состояния.
+        Не форсируй события силой: прислушайся к ключевому аркану, сохраняй осознанность и сделай шаг навстречу переменам с доверием к своему пути.
+      </div>`;
+
+    if (bodyEl) bodyEl.innerHTML = synthHtml;
+    synthesis.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }
+
+  if (dealBtn) dealBtn.addEventListener("click", dealCards);
+  if (deck) deck.addEventListener("click", dealCards);
+  if (resetBtn) resetBtn.addEventListener("click", resetTarotTable);
+
+  if (aiBtn) {
+    aiBtn.addEventListener("click", async () => {
+      triggerHaptic("medium");
+      const bodyEl = document.getElementById("tarot-synthesis-body");
+      if (!bodyEl) return;
+      const prev = aiBtn.textContent;
+      aiBtn.disabled = true;
+      aiBtn.textContent = "🔮 Оракул запрашивает ИИ…";
+      bodyEl.innerHTML = `<p class="forecast__loading">🪐 Мастер Таро входит в резонанс со стилем «${getSavedStyle().name}»…</p>`;
+
+      const qVal = document.getElementById("oracle-question")?.value.trim() || "";
+      const savedNatal = getSavedNatal() || {};
+      const cfg = SPREAD_CONFIGS[currentSpreadType] || SPREAD_CONFIGS.love;
+
+      const payload = {
+        spread_type: cfg.title,
+        cards: currentSpreadCards.map((c) => ({
+          position: c.position,
+          number: c.number,
+          name: c.name,
+          keyword: c.keyword
+        })),
+        question: qVal,
+        day: savedNatal.day || null,
+        month: savedNatal.month || null,
+        year: savedNatal.year || null,
+      };
+
+      try {
+        const text = await taroApi("tarot_reading", payload);
+        if (text) {
+          bodyEl.innerHTML = renderAIText(text);
+          addHistory({
+            type: "tarot",
+            icon: "🃏",
+            title: `Расклад: ${cfg.title}`,
+            subtitle: `${currentSpreadCards.map((c) => c.name).join(" · ")} · ${fmtDate(Date.now(), true)}`,
+            text: text
+          });
+          return;
+        }
+      } catch (err) {
+      } finally {
+        aiBtn.disabled = false;
+        aiBtn.textContent = prev;
+      }
+      revealSynthesis();
+    });
+  }
+
+  if (shareBtn) {
+    shareBtn.addEventListener("click", () => {
+      if (typeof openShareModal === "function") {
+        openShareModal();
+      }
+    });
+  }
+}
+
+// Запуск при прямой подгрузке
+if (document.readyState === "complete" || document.readyState === "interactive") {
+  initInteractiveTarot();
 }
