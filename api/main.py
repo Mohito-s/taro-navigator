@@ -448,6 +448,22 @@ async def serve_index():
     return {"ok": True, "service": "taro-api"}
 
 
+@app.get("/arcana")
+async def serve_arcana_catalog_clean():
+    f = BASE_DIR / "arcana.html"
+    if f.is_file():
+        return FileResponse(str(f))
+    raise HTTPException(status_code=404, detail="Page not found")
+
+
+@app.get("/arcan-{num}")
+async def serve_arcan_page_clean(num: int):
+    f = BASE_DIR / f"arcan-{num}.html"
+    if f.is_file():
+        return FileResponse(str(f))
+    raise HTTPException(status_code=404, detail="Page not found")
+
+
 @app.get("/{page}.html")
 async def serve_html_page(page: str):
     page_file = BASE_DIR / f"{page}.html"

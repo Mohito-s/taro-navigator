@@ -3,16 +3,83 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>TARO NAVIGATOR — Натальная Карта Онлайн</title>
-  <meta name="description" content="Рассчитай свою натальную карту и точное положение планет в момент рождения по эфемеридам VSOP87 онлайн бесплатно." />
-  <meta name="robots" content="index, follow" />
+  <title>Натальная Карта Онлайн Бесплатно с Расшифровкой — Расчет Гороскопа по Дате Рождения</title>
+  <meta name="description" content="Рассчитай натальную карту онлайн бесплатно с расшифровкой по дате, времени и городу рождения. Точные астрономические эфемериды VSOP87, планеты в знаках, Асцендент, лунные фазы и ИИ-анализ." />
+  <meta name="keywords" content="натальная карта онлайн бесплатно, натальная карта с расшифровкой, рассчитать натальную карту, гороскоп по дате рождения, космограмма онлайн, асцендент рассчитать" />
+  <meta name="robots" content="index, follow, max-image-preview:large" />
   <link rel="canonical" href="https://shadowlinkapp.online/natal.html" />
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://shadowlinkapp.online/natal.html" />
+  <meta property="og:title" content="Натальная Карта Онлайн Бесплатно с Расшифровкой — TARO NAVIGATOR" />
+  <meta property="og:description" content="Точные координаты планет по эфемеридам VSOP87, дома гороскопа, 4 стихии и лунные фазы в твоей натальной карте." />
+  <meta property="og:image" content="https://shadowlinkapp.online/favicon.jpg" />
+
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="Натальная Карта Онлайн с Расшифровкой — TARO NAVIGATOR" />
+  <meta name="twitter:description" content="Бесплатный расчет точной натальной карты по дате рождения с визуализацией планет и домов." />
+  <meta name="twitter:image" content="https://shadowlinkapp.online/favicon.jpg" />
+
+  <!-- Schema.org JSON-LD -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebApplication",
+        "name": "Натальная Карта Онлайн — TARO NAVIGATOR",
+        "url": "https://shadowlinkapp.online/natal.html",
+        "description": "Бесплатный расчет натальной карты по швейцарским эфемеридам VSOP87 с расшифровкой планет, аспектов и лунных фаз.",
+        "applicationCategory": "LifestyleApplication",
+        "operatingSystem": "All",
+        "offers": {
+          "@type": "Offer",
+          "price": "0",
+          "priceCurrency": "RUB"
+        }
+      },
+      {
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Что такое натальная карта и зачем ее рассчитывать?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Натальная карта — это персональный астрономический снимок звездного неба в точную секунду твоего рождения. Она показывает положение Солнца, Луны, планет и домов гороскопа, определяя черты характера, таланты, уязвимости и кармические задачи."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Обязательно ли указывать точное время и город рождения?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Для расчета положения планет в знаках Зодиака достаточно даты. Однако точное время и город критически важны для вычисления Асцендента (восходящего знака) и сетки астрологических домов, которые меняются каждые 4 минуты."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "Чем натальная карта отличается от обычного знака Зодиака?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "Обычный знак Зодиака учитывает только положение Солнца. Натальная карта анализирует 10 небесных тел (Луну, Меркурий, Венеру, Марс, Юпитер и др.), их градусы, взаимные аспекты и баланс 4-х стихий."
+            }
+          }
+        ]
+      }
+    ]
+  }
+  </script>
+
   <link rel="icon" type="image/jpeg" href="favicon.jpg" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css?v=28" />
 </head>
+
 <body>
 
   <header class="nav reveal">
@@ -22,6 +89,8 @@
         <span class="logo__text">TARO<span>&nbsp;NAVIGATOR</span></span>
       </a>
       <div class="nav__actions">
+        <a href="arcana.html" class="nav__link-seo">Каталог 22 Арканов</a>
+        <a href="index.html#calculator" class="nav__link-seo">Калькулятор Арканов</a>
         <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Переключить тему">
           <span class="theme-toggle__icon" id="theme-toggle-icon">🌙</span>
         </button>
@@ -226,6 +295,54 @@
           ✨ Расширенный прогноз по натальной карте
         </button>
         <div class="forecast__result glass reveal" id="natal-extended" hidden></div>
+
+        <!-- SEO-блок: Экспертное руководство по натальной карте -->
+        <div class="seo-guide-section bento-card glass reveal d2" style="margin-top:40px;">
+          <div class="section-badge">ГИД ПО АСТРОЛОГИИ</div>
+          <h2 style="font-family:'Playfair Display',Georgia,serif; font-size:24px; color:var(--gold-light); margin:10px 0 14px;">
+            Как читать натальную карту: полное руководство по расшифровке
+          </h2>
+          <p style="font-size:14.5px; line-height:1.6; color:var(--text); margin-bottom:20px;">
+            Натальная карта (космограмма) — это персональный космический паспорт, фиксирующий точные координаты небесных тел в момент твоего первого вдоха. Наш калькулятор рассчитывает положение планет по высокоточным эфемеридам VSOP87 и строит наглядный интерактивный диск.
+          </p>
+
+          <div class="seo-positions-list">
+            <div class="seo-pos-item">
+              <strong>☉ Солнце, ☽ Луна и Асцендент (ASC):</strong> «Большая тройка» гороскопа. Солнце отражает истинное эго и жизненную цель, Луна — эмоциональный мир, подсознание и зону комфорта, а Асцендент (восходящий знак) — внешнюю маску и первое впечатление, которое ты производишь на мир.
+            </div>
+            <div class="seo-pos-item">
+              <strong>🏛️ 12 Астрологических Домов:</strong> Сетка домов проецирует космические энергии на конкретные сферы земной жизни: от личных финансов (2 дом) и карьеры (10 дом) до брака и партнерства (7 дом).
+            </div>
+            <div class="seo-pos-item">
+              <strong>⚖️ Баланс 4-х Стихий:</strong> Пропорция Огня, Земли, Воздуха и Воды показывает психотип личности. Преобладание Огня дает импульсивность и лидерство, Земли — практичность и устойчивость, Воздуха — интеллект и общительность, Воды — глубокую эмпатию и интуицию.
+            </div>
+            <div class="seo-pos-item">
+              <strong>🌙 Лунные фазы рождения:</strong> Фаза Луны в момент рождения раскрывает базовый биоритм души и энергетический ресурс для воплощения планов.
+            </div>
+          </div>
+
+          <!-- FAQ по натальной карте -->
+          <div class="arcan-faq-sec" style="margin-top:28px; margin-bottom:20px;">
+            <h3 style="font-family:'Playfair Display',Georgia,serif; font-size:20px; color:var(--gold-light); margin-bottom:14px;">
+              Частые вопросы о натальной карте
+            </h3>
+            <div class="faq-grid">
+              <div class="faq-item glass">
+                <h4 class="faq-item__q">Зачем указывать точное время и город рождения?</h4>
+                <p class="faq-item__a">Время и координаты города необходимы для вычисления Асцендента (ASC) и куспидов домов гороскопа. Сетка домов смещается на один градус каждые 4 минуты, поэтому даже небольшая неточность во времени меняет картину домов.</p>
+              </div>
+              <div class="faq-item glass">
+                <h4 class="faq-item__q">Что делать, если точное время рождения неизвестно?</h4>
+                <p class="faq-item__a">Если время неизвестно, поставь 12:00. Вы получите точную космограмму (планеты в знаках Зодиака и их взаимные аспекты), которая уже дает более 80% информации о характере и талантах.</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="seo-guide-cta" style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+            <a href="arcana.html" class="btn btn--primary">📖 Узнать свои 22 Аркана Судьбы</a>
+            <a href="index.html#calculator" class="btn btn--ghost">🔮 Рассчитать код личности</a>
+          </div>
+        </div>
       </div>
     </section>
 
