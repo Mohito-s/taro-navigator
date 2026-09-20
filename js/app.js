@@ -27,6 +27,19 @@ function initTheme() {
   });
 }
 
+// === Универсальное закрытие всех модальных окон (карты, наталка, книги, шеринг) ===
+function closeAllModals() {
+  document.querySelectorAll(".modal").forEach((m) => {
+    m.hidden = true;
+  });
+  document.body.style.overflow = "";
+  if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.BackButton) {
+    try {
+      window.Telegram.WebApp.BackButton.hide();
+    } catch (_) {}
+  }
+}
+
 // Модальное окно Политики Конфиденциальности (152-ФЗ)
 function initPrivacyModal() {
   const modal = document.getElementById("privacy-modal");
@@ -36,12 +49,19 @@ function initPrivacyModal() {
     el.addEventListener("click", (e) => {
       e.preventDefault();
       modal.hidden = false;
+      document.body.style.overflow = "hidden";
+      if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.BackButton) {
+        try {
+          window.Telegram.WebApp.BackButton.show();
+          window.Telegram.WebApp.BackButton.onClick(closeAllModals);
+        } catch (_) {}
+      }
     });
   });
   
   document.querySelectorAll("[data-close-privacy]").forEach((el) => {
     el.addEventListener("click", () => {
-      modal.hidden = true;
+      closeAllModals();
     });
   });
 }
@@ -822,8 +842,7 @@ let lastModalArcana = null;
 const modal = $("arcana-modal");
 
 function closeModal() {
-  modal.hidden = true;
-  document.body.style.overflow = "";
+  closeAllModals();
 }
 
 function openModal(item) {
@@ -864,6 +883,12 @@ function openModal(item) {
   resetModalCta();
   modal.hidden = false;
   document.body.style.overflow = "hidden";
+  if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.BackButton) {
+    try {
+      window.Telegram.WebApp.BackButton.show();
+      window.Telegram.WebApp.BackButton.onClick(closeAllModals);
+    } catch (_) {}
+  }
 }
 
 // Восстанавливаем CTA модалки как кнопку (после сайта он мог стать ссылкой в бота)
@@ -1575,14 +1600,18 @@ function openBookModal(book) {
 
   modal.hidden = false;
   document.body.style.overflow = "hidden";
+  if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.BackButton) {
+    try {
+      window.Telegram.WebApp.BackButton.show();
+      window.Telegram.WebApp.BackButton.onClick(closeAllModals);
+    } catch (_) {}
+  }
 }
 
 // Закрытие модального окна книги
 document.addEventListener("click", (e) => {
   if (e.target.closest("[data-close-book]")) {
-    const modal = $("book-modal");
-    if (modal) modal.hidden = true;
-    document.body.style.overflow = "";
+    closeAllModals();
   }
 });
 
@@ -1638,10 +1667,10 @@ document.addEventListener("click", (e) => {
     }
     return;
   }
-  if (e.target.closest("[data-close]")) closeModal();
+  if (e.target.closest("[data-close]")) closeAllModals();
 });
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") closeModal();
+  if (e.key === "Escape") closeAllModals();
   if (e.key === "Enter" && e.target.classList && e.target.classList.contains("arcana__item")) {
     const cardEl = e.target;
     if (cardEl.dataset.idx !== undefined && lastArc[Number(cardEl.dataset.idx)]) {
@@ -2148,6 +2177,9 @@ function renderAstroWeather() {
   const validTabs = ["reads", "explore", "natal", "forecast", "profile", "history"];
 
   function activate(name, updateHash = true) {
+    // Закрываем любые открытые модальные окна (карты, наталка, книги, шеринг)
+    closeAllModals();
+
     if (!validTabs.includes(name)) name = "reads";
 
     const currentTab = tabs.find((t) => t.classList.contains("tabbar__btn--active"));
@@ -2192,6 +2224,10 @@ function renderAstroWeather() {
         const r = el.getBoundingClientRect();
         if (r.top < window.innerHeight + 120) el.classList.add("visible");
       });
+    } else {
+      // Если на текущей странице нет этого экрана (например, из наталки кликнули "Расклады"):
+      window.location.href = "index.html#" + name;
+      return;
     }
 
     if (name === "explore") renderExploreGrid();
@@ -2203,12 +2239,21 @@ function renderAstroWeather() {
   tabs.forEach((t) => {
     t.addEventListener("click", (e) => {
       e.preventDefault();
+      closeAllModals();
       activate(t.dataset.tab, true);
+    });
+  });
+
+  // Закрываем модалки при клике на логотип, шапку и якорные ссылки
+  document.querySelectorAll(".nav a, .logo, [href^='#']").forEach((el) => {
+    el.addEventListener("click", () => {
+      closeAllModals();
     });
   });
 
   // Реагируем на подгрузку страницы по хэшу и навигацию Назад / Вперёд в браузере
   function activateFromHash() {
+    closeAllModals();
     const hash = window.location.hash.replace("#", "").trim();
     if (hash && validTabs.includes(hash)) {
       activate(hash, false);
@@ -3106,6 +3151,13 @@ async function openShareModal() {
   if (!modal || !canvas || !previewImg) return;
 
   modal.hidden = false;
+  document.body.style.overflow = "hidden";
+  if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.BackButton) {
+    try {
+      window.Telegram.WebApp.BackButton.show();
+      window.Telegram.WebApp.BackButton.onClick(closeAllModals);
+    } catch (_) {}
+  }
   if (loading) loading.style.display = "flex";
   previewImg.style.display = "none";
 
@@ -3131,8 +3183,7 @@ async function openShareModal() {
 function initShareSystem() {
   document.querySelectorAll("[data-close-share]").forEach((el) => {
     el.addEventListener("click", () => {
-      const modal = document.getElementById("share-modal");
-      if (modal) modal.hidden = true;
+      closeAllModals();
     });
   });
 
