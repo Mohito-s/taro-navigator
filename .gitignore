@@ -19,3 +19,4 @@ Thumbs.db
 *.zip
 books/raw/
 *modernlib*
+SERVER_KEYS_AND_CONFIGS.md

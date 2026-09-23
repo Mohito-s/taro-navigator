@@ -197,6 +197,16 @@
 
 ## ЛОГ ИСПРАВЛЕНИЙ (последние изменения сверху)
 
+- 2026-09-24 — **Бесшовная миграция на новый VPS Хельсинки (`193.168.198.57`), восстановление RemnaWave, OlcRTC, AmneziaWG, запуск Taro-ботов и автоматизация бэкапов (`SERVER_KEYS_AND_CONFIGS.md`, `MIGRATION_STATUS_AND_TODO.md`, `C:\Users\Furianec\Scripts\weekly_server_backup.py`).**
+  1) **Перенос инфраструктуры:** Развернут новый чистый VPS в Хельсинки (Финляндия, AS41745) без блокировок РКН. Создан пользователь `roman` с правами sudo, 2 ГБ Swap, Docker, Nginx, Certbot, Fail2ban, Node.js, PM2.
+  2) **Cloudflare DNS:** Перенесены все A-записи доменов `shadowlinkapp.online`, `panel`, `sub`, `proxy`, `stroikakras.ru`, `shadowlinkray.ru` на IP `193.168.198.57` с Cloudflare Proxy.
+  3) **RemnaWave & БД:** Восстановлена база данных PostgreSQL, сохранены все 5 пользователей (`Roman`, `For_you_1`, `For_you_2` со всеми подписками до 2027 года), поднят узел RemnaNode, перевыпущены сертификаты. Панель `panel.shadowlinkapp.online` и страница подписок `sub.shadowlinkapp.online` работают на 100%.
+  4) **Taro WebApp и Telegram-бот:** Под управлением PM2 запущены FastAPI бэкенд на порту 3000 (`taro-api`) и aiogram Telegram-бот (`taro-bot`). Все страницы сайта (`shadowlinkapp.online`, `natal.html`, `arcana.html`) и строительный сайт `stroikakras.ru` отвечают `200 OK`.
+  5) **OlcRTC & AmneziaWG:** Восстановлены все 3 службы WebRTC обхода (Jitsi, Telemost, Wbstream), перенесён и запущен Docker-контейнер `amnezia-awg2` на порту `46817/udp`, обновлен готовый конфигурационный файл `amnezia_helsinki.conf` на Рабочем столе.
+  6) **Безопасность и DevOps:** Настроены мгновенные алерты в Telegram при каждом входе по SSH (`/etc/ssh/sshrc`), активирован Fail2ban, настроен Ed25519 ключ для беспарольного доступа `root` и `roman`.
+  7) **Автоматизированное резервное копирование:** Настроены ежедневные бэкапы в Telegram в 03:30 UTC (`/usr/local/bin/daily_backup.sh`) и еженедельные локальные бэкапы на ПК каждое воскресенье в 04:00 через Планировщик Windows (`weekly_server_backup.py`).
+  8) **Документация:** Создана база ключей и доступов `SERVER_KEYS_AND_CONFIGS.md` и дорожная карта `MIGRATION_STATUS_AND_TODO.md`.
+
 - 2026-09-21 — **Органический трафик: 22 SEO-лендинга арканов судьбы, каталог `arcana.html` и SEO-оптимизация натальной карты (`arcan-1.html` .. `arcan-22.html`, `arcana.html`, `natal.html`, `sitemap.xml`, `css/style.css`, `api/main.py`, `tests/test_seo_pages.py`).**
   1) **22 статических SEO-лендинга:** созданы отдельные посадочные страницы под длинный хвост поисковых запросов (`arcan-1.html` .. `arcan-22.html`) со строгим соблюдением семантики, уникальными `<title>` (до 60-70 знаков), `<meta name="description">` и Open Graph тегами.
   2) **Структурированный контент каждого аркана:** архетип, планета и стихия, ключевые плюсы (светлая сторона и таланты), ключевые минусы (тень и кармические уроки), подробный разбор в сфере любви и отношений, влияние на деньги и карьеру, высший духовный совет дня, интерактивный FAQ-блок и CTA перехода в калькулятор кода личности.
