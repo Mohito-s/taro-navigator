@@ -1,13 +1,28 @@
 import json
 import logging
+import re
 
 import httpx
 
-from bot.config import AI_API_KEY, AI_BASE, AI_MODEL, AI_PROVIDER
+from bot.config import (
+    AI_API_KEY,
+    AI_BASE,
+    AI_MODEL,
+    AI_PROVIDER,
+    CF_ACCOUNT_ID,
+    CF_AI_TOKEN,
+)
 from bot.texts.arcana_base import ARCANA
 from bot.texts.zodiac_base import ZODIAC
 
 logger = logging.getLogger(__name__)
+
+# Каскад бесплатных моделей Cloudflare Workers AI с авто-переключением при исчерпании лимита
+CLOUDFLARE_MODELS_CASCADE = [
+    "@cf/meta/llama-3.3-70b-instruct-fp8-fast",    # 1. Флагман: глубокий психологический и мистический разбор
+    "@cf/meta/llama-3.1-8b-instruct-fp8",          # 2. Быстрый резерв: мгновенный отклик
+    "@cf/deepseek-ai/deepseek-r1-distill-qwen-32b", # 3. Аналитический резерв: логика и детали
+]
 
 SYSTEM_PROMPT = (
     "Ты — мастер астрологии, таро и числовой экспертизы. Пиши живые, тёплые, "
@@ -443,7 +458,52 @@ async def generate_period_forecast(user: dict, horizon: str) -> str:
     return _period_forecast_fallback(user, horizon)
 
 
+async def _call_cloudflare_ai(system_text: str, user_text: str) -> str | None:
+    token = CF_AI_TOKEN or AI_API_KEY
+    if not token or not CF_ACCOUNT_ID:
+        return None
+
+    headers = {
+        "Authorization": f"Bearer {token}",
+        "Content-Type": "application/json",
+    }
+    prompt = f"Инструкция: {system_text}\n\nЗапрос пользователя: {user_text}\n\nОтвет в указанном стиле:"
+
+    async with httpx.AsyncClient(timeout=35.0) as client:
+        for model in CLOUDFLARE_MODELS_CASCADE:
+            url = f"https://api.cloudflare.com/client/v4/accounts/{CF_ACCOUNT_ID}/ai/run/{model}"
+            try:
+                resp = await client.post(url, headers=headers, json={"prompt": prompt})
+                if resp.status_code == 200:
+                    data = resp.json()
+                    raw_text = data.get("result", {}).get("response", "").strip()
+                    if raw_text:
+                        # Удаляем блок размышлений DeepSeek R1 <think>...</think>
+                        clean_text = re.sub(r"<think>[\s\S]*?</think>", "", raw_text).strip()
+                        # Очищаем системные приписки в скобках в конце текста
+                        clean_text = re.sub(r"\s*\(Примечание:[^)]*\)", "", clean_text, flags=re.IGNORECASE).strip()
+                        if clean_text:
+                            logger.info("Cloudflare AI generation successful via model %s", model)
+                            return clean_text
+                else:
+                    logger.warning("Cloudflare AI model %s returned status %d, falling back to next model", model, resp.status_code)
+            except Exception as e:
+                logger.warning("Cloudflare AI model %s failed (%s), falling back to next model", model, e)
+    return None
+
+
 async def _chat(payload: dict) -> str | None:
+    # 1. Если выбран Cloudflare или доступен CF токен — запускаем каскад бесплатных моделей
+    if AI_PROVIDER == "cloudflare":
+        messages = payload.get("messages", [])
+        system_text = next((m["content"] for m in messages if m["role"] == "system"), "")
+        user_text = next((m["content"] for m in messages if m["role"] == "user"), "")
+        cf_result = await _call_cloudflare_ai(system_text, user_text)
+        if cf_result:
+            return cf_result
+        logger.warning("All Cloudflare AI cascade models exhausted, falling back to OpenRouter/secondary")
+
+    # 2. Основной / резервный OpenAI-совместимый провайдер (OpenRouter / DeepSeek)
     if not AI_API_KEY:
         return None
 
