@@ -332,6 +332,19 @@
      - Автосинхронизация истории: добавление и очистка раскладов фоново сохраняются на сервере.
   5) **Проверка:** Полный аудит синтаксиса `node --check`, `py_compile`, строгая проверка UTF-8 без BOM (`False 0`).
 
+- 2026-09-24 — **Запуск Telegram MTProto Proxy (Fake TLS) на `proxy.shadowlinkapp.online` и ускорение статики Nginx (фикс стилей).**
+  1) **Telegram MTProto Proxy:**
+     - Поднят Docker-контейнер `tg-proxy` на базе `nineseconds/mtg:2` (порт `8444/tcp`).
+     - Сгенерирован защищенный Fake TLS секрет `ee671a094e1a88bbaab8607d8cac67cc3270726f78792e736861646f776c696e6b6170702e6f6e6c696e65` с маскировкой под домен `proxy.shadowlinkapp.online`.
+     - Через Cloudflare API переведена A-запись `proxy.shadowlinkapp.online` в режим **DNS-only (Grey Cloud)** для прямого TCP-коннекта в Telegram без помех прокси.
+     - Проверено сквозное подключение из Windows к порту 8444 (TCP Established).
+     - Ссылки в 1 клик добавлены в `SERVER_KEYS_AND_CONFIGS.md`.
+  2) **Ускорение раздачи статики и фикс отображения стилей:**
+     - В Nginx добавлен прямой alias для каталогов `/css/`, `/js/`, `/img/`, `/books/` напрямую из директории `/var/www/taro` в обход Python Uvicorn.
+     - В `nginx.conf` включена gzip-компрессия для `text/css` и `application/javascript` (размер `style.css` снизился с 78 КБ до 12 КБ, загрузка мгновенная).
+     - Во всех 27 HTML-страницах обновлены пути к таблице стилей на абсолютный `/css/style.css?v=29`.
+  3) **Проверка:** Валидация UTF-8 без BOM (`False 0`), коммит и пуш на GitHub, деплой на VPS.
+
 - 2026-09-24 — **Диагностика и запуск подписок RemnaWave, аудит OlcRTC WebRTC, синхронизация Xray и аудит доступности сайтов из РФ.**
   1) **Синхронизация пользователей RemnaWave в Xray:**
      - Устранена причина сбоя подключения в Happ/v2raytun: при старте ноды в памяти Xray было 0 пользователей (`length: 0`) из-за отсутствия связи сквада с инбаундом REALITY.
