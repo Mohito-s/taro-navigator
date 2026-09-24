@@ -332,6 +332,25 @@
      - Автосинхронизация истории: добавление и очистка раскладов фоново сохраняются на сервере.
   5) **Проверка:** Полный аудит синтаксиса `node --check`, `py_compile`, строгая проверка UTF-8 без BOM (`False 0`).
 
+- 2026-09-24 — **Диагностика и запуск подписок RemnaWave, аудит OlcRTC WebRTC, синхронизация Xray и аудит доступности сайтов из РФ.**
+  1) **Синхронизация пользователей RemnaWave в Xray:**
+     - Устранена причина сбоя подключения в Happ/v2raytun: при старте ноды в памяти Xray было 0 пользователей (`length: 0`) из-за отсутствия связи сквада с инбаундом REALITY.
+     - Связаны инбаунды и нода в БД Postgres, нода перезапущена: Xray загрузил всех 4 активных пользователей (`User extraction completed: length: 4`), XTLS на порту `8443` успешно поднят.
+     - Проведен проверочный TLS 1.3 handshake: рукопожатие с маскировкой под `www.google.com` проходит чисто.
+  2) **Починка отдачи подписок (`sub.shadowlinkapp.online`):**
+     - Выявлено требование RemnaWave `ProxyCheckMiddleware` к обязательным заголовкам `X-Forwarded-For` и `X-Forwarded-Proto: https` (без них сокет сбрасывался).
+     - Отключен неработающий хост CDN (`/sl-rw`), подписка теперь отдает исключительно рабочий, проверенный конфиг `Helsinki REALITY Direct`.
+     - Обновлен `/opt/remnawave/.env`: прописаны боевые домены `PANEL_DOMAIN=panel.shadowlinkapp.online` и `SUB_PUBLIC_DOMAIN=sub.shadowlinkapp.online`.
+     - Проверена отдача: `https://sub.shadowlinkapp.online/sMtET-VfUXYEdRTF` и `https://sub.shadowlinkapp.online/api/sub/sMtET-VfUXYEdRTF` отдают HTTP 200 OK и валидный Base64.
+  3) **Аудит OlcRTC WebRTC:**
+     - Выявлена причина таймаута `meet.egovm.ru` (`213.59.255.176`): региональный государственный узел РФ гео-блокирует входящие TCP/TLS подключения с зарубежных хостингов (Финляндия).
+     - Подтверждена стабильная работа `telemost.yandex.ru` (Яндекс.Телемост): сессия и WebRTC-видеоканал успешно устанавливаются (`Link connected`).
+     - В `SERVER_KEYS_AND_CONFIGS.md` внесены точные ссылки для клиентов в формате `olcrtc://...` для Jitsi и Телемоста.
+  4) **Аудит доступности сайтов из РФ и Cloudflare:**
+     - Taro WebApp (`shadowlinkapp.online`): FastAPI uvicorn (порт 3000) и Nginx SSL работают штатно. Проблема недоступности из РФ связана с оранжевым облаком (Proxy) Cloudflare, чьи IP-адреса и ECH блокируются/замедляются ТСПУ провайдеров (Ростелеком, сотовые операторы). Решение — перевод в серый режим (DNS Only) для прямого соединения с Let's Encrypt Wildcard сертификатом VPS.
+     - Строительный сайт (`stroikakras.ru`): на VPS сервис запущен (PM2 на 8088), но DNS A-запись в Sprinthost указывает на старый мертвый IP `213.21.240.231`.
+  5) **Проверка:** Валидация UTF-8 без BOM (`False 0`), обновление `SERVER_KEYS_AND_CONFIGS.md`.
+
 - 2026-09-19 — **Усиление безопасности VPS, фикс SSL RemnaWave и аварийные SOS-команды спасения (`bot/handlers/admin_sos.py`).**
   1) **Безопасность VPS:** Закрыт открытый порт 22 в UFW, включен rate-limiting для SSH порта 1993 (`ufw limit 1993/tcp`), отключена парольная аутентификация в SSH (`PasswordAuthentication no`, вход строго по ключам), скрыта версия Nginx (`server_tokens off;`), подключены джейлы Fail2ban (`nginx-botsearch`, `nginx-bad-request`, `sshd`).
   2) **Фикс SSL RemnaWave:** Восстановлен и обновлен просроченный сертификат для `shadowlink-panel.duckdns.org` и зеркал `sl-site.duckdns.org`, `sl-sub.duckdns.org` (действителен до 17.12.2026), автопродление certbot переведено на режим `--nginx` без прерывания работы веб-сервера.
