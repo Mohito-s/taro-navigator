@@ -197,6 +197,11 @@
 
 ## ЛОГ ИСПРАВЛЕНИЙ (последние изменения сверху)
 
+- 2026-09-24 — **Развёртывание VLESS-REALITY (порт 8443), Nginx URL-Rewrite для подписок, интеграция OlcRTC URI и запуск Stroikakras (`SERVER_KEYS_AND_CONFIGS.md`, `/etc/nginx/sites-available/shadowlinkapp.online`, RemnaWave DB, PM2):**
+  1) **VLESS-REALITY против ТСПУ / DPI:** в Xray-core на сервере запущен прямой VLESS-REALITY транспорт на порту `8443` (маскировка `www.google.com`, PBK `4cmjrzhLAVvPC5s7PcXfBSEF5PR4sEi00fR38OBjSyQ`, ShortId `6ba85179e30d4fc2`). Протокол устойчив к блокировкам ТСПУ на мобильных операторах (МТС, Мегафон, Билайн, Tele2) и добавлен в подписку пользователя.
+  2) **Универсальные ссылки на подписки в Nginx:** настроен rewrite-роутинг в Nginx, благодаря которому подписка отдаёт `200 OK` и через стандартный путь `/api/sub/{slug}`, и напрямую по короткому слагу `/{slug}` (`https://sub.shadowlinkapp.online/sMtET-VfUXYEdRTF`). Настроен автоматический 301-редирект с `sub.shadowlinkapp.online/auth/login` на панель управления `panel.shadowlinkapp.online/auth/login`.
+  3) **Формат ссылок OlcRTC для мобильного клиента:** сформированы прямые схемы `olcrtc://` для импорта в приложение в 1 клик (`olcrtc://jitsi?...` для Jitsi Meet и `olcrtc://telemost?...` для Яндекс.Телемост).
+  4) **Запуск stroikakras.ru:** серверный Node.js бэкенд запущен в PM2 на порту `8088` (`stroikakras` - online). Локальные тесты Nginx отдают `200 OK`.
 - 2026-09-24 — **Поддержка HTTP HEAD-запросов в FastAPI и аудит целостности VPS (`api/main.py`, `tests/test_seo_pages.py`, Nginx, PM2).**
   1) **HEAD-запросы без 405 Method Not Allowed:** Заменены `@app.get` на `@app.api_route(..., methods=["GET", "HEAD"])` для корневого пути `/`, страниц `/arcana`, `/arcan-{num}`, `/{page}.html`, `sitemap.xml`, `robots.txt` и фавиконок. Теперь curl -I и поисковые боты получают валидный `200 OK`.
   2) **Автотесты:** В `tests/test_seo_pages.py` добавлен тест `test_fastapi_head_requests` на проверку статуса 200 при вызове метода HEAD. Все 19 модульных тестов и сквозной раннер `run_tests.py` успешно пройдены.
