@@ -96,3 +96,22 @@ def test_fastapi_head_requests():
     res_health = client.head("/api/health")
     assert res_health.status_code == 200, f"HEAD /api/health должен возвращать 200, получено {res_health.status_code}"
 
+
+def test_404_page_routing():
+    """Проверяет наличие 404.html и корректную отдачу стилизованной страницы ошибок."""
+    f = BASE_DIR / "404.html"
+    assert f.is_file(), "404.html должен существовать"
+    content = f.read_text(encoding="utf-8")
+    assert "404" in content
+    assert "Шут" in content
+    assert 'href="/"' in content or "href=\"/\"" in content
+    assert "/#reads" in content
+
+    client = TestClient(app)
+    # Запрос на неизвестный путь должен отдавать статус 404 и HTML-контент страницы 404
+    res_404 = client.get("/random-astral-lost-page")
+    assert res_404.status_code == 404
+    assert "Астральная ошибка 404" in res_404.text
+    assert "Шут" in res_404.text
+
+

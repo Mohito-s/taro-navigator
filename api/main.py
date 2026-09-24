@@ -18,7 +18,7 @@ from urllib.parse import unquote
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -510,3 +510,29 @@ async def serve_mobile_main():
     if f.is_file():
         return FileResponse(str(f))
     raise HTTPException(status_code=404, detail="Image not found")
+
+
+@app.api_route("/404", methods=["GET", "HEAD"])
+@app.api_route("/404.html", methods=["GET", "HEAD"])
+async def serve_404_page():
+    f = BASE_DIR / "404.html"
+    if f.is_file():
+        return FileResponse(str(f), status_code=404)
+    raise HTTPException(status_code=404, detail="Page not found")
+
+
+@app.exception_handler(HTTPException)
+async def custom_http_exception_handler(request: Request, exc: HTTPException):
+    if exc.status_code == 404 and not request.url.path.startswith("/api/"):
+        f = BASE_DIR / "404.html"
+        if f.is_file():
+            return FileResponse(str(f), status_code=404)
+    return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+
+
+@app.api_route("/{full_path:path}", methods=["GET", "HEAD"])
+async def catch_all_fallback(full_path: str):
+    f = BASE_DIR / "404.html"
+    if f.is_file():
+        return FileResponse(str(f), status_code=404)
+    raise HTTPException(status_code=404, detail="Page not found")

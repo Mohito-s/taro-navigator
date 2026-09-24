@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>404 — Астральная червоточина | TARO NAVIGATOR</title>
+  <meta name="description" content="Страница не найдена. Похоже, Аркан Шут увёл тебя за пределы известной Вселенной. Возвращайся на главную." />
+  <meta name="robots" content="noindex, follow" />
+
+  <link rel="icon" type="image/jpeg" href="/favicon.jpg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/css/style.css?v=29" />
+
+  <style>
+    .error-page {
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background-color: #111114;
+      color: #f0ece4;
+      font-family: 'Inter', -apple-system, sans-serif;
+      position: relative;
+      overflow-x: hidden;
+    }
+    .error-container {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+      z-index: 2;
+    }
+    .error-card {
+      background: #1c1c20;
+      border: 1px solid rgba(201, 169, 110, 0.25);
+      border-radius: 20px;
+      padding: 40px 32px;
+      max-width: 580px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6), 0 0 30px rgba(201, 169, 110, 0.08);
+      position: relative;
+    }
+    .error-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(201, 169, 110, 0.12);
+      border: 1px solid rgba(201, 169, 110, 0.3);
+      color: #c9a96e;
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      padding: 6px 16px;
+      border-radius: 999px;
+      margin-bottom: 24px;
+    }
+    .error-card-visual {
+      position: relative;
+      width: 130px;
+      height: 190px;
+      margin: 0 auto 24px;
+      border-radius: 12px;
+      overflow: hidden;
+      border: 1px solid rgba(201, 169, 110, 0.4);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 15px rgba(201, 169, 110, 0.2);
+      transition: transform 0.3s ease;
+    }
+    .error-card-visual:hover {
+      transform: translateY(-4px) scale(1.03);
+    }
+    .error-card-visual img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+    .error-title {
+      font-family: 'Playfair Display', serif;
+      font-size: 2.2rem;
+      font-weight: 700;
+      color: #f0ece4;
+      margin-bottom: 12px;
+      line-height: 1.2;
+    }
+    .error-title span {
+      color: #c9a96e;
+    }
+    .error-desc {
+      color: #8a857c;
+      font-size: 1rem;
+      line-height: 1.6;
+      margin-bottom: 28px;
+    }
+    .error-joke-box {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px dashed rgba(201, 169, 110, 0.2);
+      border-radius: 12px;
+      padding: 16px;
+      margin-bottom: 28px;
+      text-align: left;
+    }
+    .error-joke-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-size: 0.85rem;
+      color: #c9a96e;
+      font-weight: 600;
+    }
+    .error-joke-text {
+      color: #e8dcc8;
+      font-size: 0.92rem;
+      font-style: italic;
+      line-height: 1.5;
+    }
+    .btn-shuffle {
+      background: none;
+      border: none;
+      color: #c9a96e;
+      cursor: pointer;
+      font-size: 0.8rem;
+      text-decoration: underline;
+      padding: 0;
+      transition: opacity 0.2s;
+    }
+    .btn-shuffle:hover {
+      opacity: 0.8;
+    }
+    .error-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .btn-gold {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      background: linear-gradient(135deg, #c9a96e 0%, #a8894e 100%);
+      color: #111114;
+      font-weight: 600;
+      font-size: 1rem;
+      padding: 14px 24px;
+      border-radius: 12px;
+      text-decoration: none;
+      transition: all 0.25s ease;
+      border: none;
+      cursor: pointer;
+    }
+    .btn-gold:hover {
+      background: linear-gradient(135deg, #dfc288 0%, #b89859 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(201, 169, 110, 0.3);
+    }
+    .nav-shortcuts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin-top: 4px;
+    }
+    .btn-secondary {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      background: #232328;
+      border: 1px solid rgba(201, 169, 110, 0.18);
+      color: #f0ece4;
+      font-size: 0.88rem;
+      font-weight: 500;
+      padding: 11px 16px;
+      border-radius: 10px;
+      text-decoration: none;
+      transition: all 0.2s ease;
+    }
+    .btn-secondary:hover {
+      border-color: #c9a96e;
+      color: #c9a96e;
+      background: #2a2a30;
+      transform: translateY(-1px);
+    }
+    .countdown-text {
+      margin-top: 20px;
+      font-size: 0.8rem;
+      color: #8a857c;
+    }
+    .countdown-text strong {
+      color: #c9a96e;
+    }
+    @media (max-width: 480px) {
+      .error-card {
+        padding: 30px 20px;
+      }
+      .error-title {
+        font-size: 1.8rem;
+      }
+      .nav-shortcuts {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body class="error-page">
+  <!-- Верхняя полоса навигации -->
+  <header style="padding: 20px 24px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid rgba(201, 169, 110, 0.12); z-index: 10;">
+    <a href="/" style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: #f0ece4;">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c9a96e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+      </svg>
+      <span style="font-family: 'Playfair Display', serif; font-size: 1.15rem; font-weight: 700; letter-spacing: 0.05em; color: #f0ece4;">TARO <span style="color: #c9a96e;">NAVIGATOR</span></span>
+    </a>
+    <a href="/" style="font-size: 0.88rem; color: #c9a96e; text-decoration: none; font-weight: 500;">
+      Главная ➔
+    </a>
+  </header>
+
+  <!-- Центральный контент -->
+  <main class="error-container">
+    <div class="error-card">
+      <div class="error-badge">
+        ✦ Астральная ошибка 404 ✦
+      </div>
+
+      <!-- Иллюстрация Аркана Шут -->
+      <div class="error-card-visual" title="Аркан 0 — Шут (The Fool)">
+        <img src="/img/cards/00-fool.jpg" alt="Аркан 0 — Шут" onerror="this.onerror=null; this.src='/favicon.jpg';" />
+      </div>
+
+      <h1 class="error-title">Ты шагнул в <span>пустоту</span></h1>
+      
+      <p class="error-desc">
+        Карты Таро внимательно изучили космический свод и заявляют: 
+        <strong>этой страницы нет в твоей натальной карте!</strong><br />
+        Похоже, Аркан 0 (Шут) решил сыграть шутку и увёл тебя за пределы видимой Вселенной, 
+        либо Меркурий снова затеял свой ретроградный танец.
+      </p>
+
+      <!-- Интерактивный совет Шута -->
+      <div class="error-joke-box">
+        <div class="error-joke-header">
+          <span>🃏 Совет Аркана Шут на дорогу:</span>
+          <button class="btn-shuffle" onclick="shuffleAdvice()" type="button">Другой совет ↺</button>
+        </div>
+        <div class="error-joke-text" id="advice-text">
+          «Тот, кто ни разу не сбился с пути, никогда не откроет тайную тропу к звездам. Но сейчас вернись на главную!»
+        </div>
+      </div>
+
+      <!-- Кнопки роутинга -->
+      <div class="error-actions">
+        <a href="/" class="btn-gold" id="home-link">
+          ✨ Вернуться на главную дорогу
+        </a>
+
+        <div class="nav-shortcuts">
+          <a href="/#reads" class="btn-secondary">
+            🔮 Расклады Таро
+          </a>
+          <a href="/natal.html" class="btn-secondary">
+            🪐 Натальная карта
+          </a>
+          <a href="/forecast.html" class="btn-secondary">
+            ✨ Гороскоп и прогноз
+          </a>
+          <a href="/arcana" class="btn-secondary">
+            📖 22 Аркана судьбы
+          </a>
+        </div>
+      </div>
+
+      <div class="countdown-text">
+        Автоматический переход на главную через <strong id="timer">15</strong> сек... 
+        (<a href="#" onclick="cancelTimer(event)" style="color: #c9a96e; text-decoration: underline;">остановить</a>)
+      </div>
+    </div>
+  </main>
+
+  <script>
+    // Коллекция остроумных космических советов Шута
+    const ADVICES = [
+      "«Тот, кто ни разу не сбился с пути, никогда не откроет тайную тропу к звездам. Но сейчас вернись на главную!»",
+      "«Карты шепчут: закрой лишние вкладки, выпей горячего чая — твоя истинная судьба ждет на Главной странице.»",
+      "«Вселенная проверяла твою интуицию... Тест пройден, теперь жми кнопку и возвращайся к расчетам!»",
+      "«Не переживай, даже Плутон потерял статус планеты, но не потерял достоинства. Возвращаемся домой.»",
+      "«Если ссылка не открылась — возможно, это знак свыше не совать нос в закрытые астральные архивы!»",
+      "«Звёзды сошлись так, что этой ссылки больше не существует. Но твой персональный код судьбы всё ещё на месте.»",
+      "«Шут улыбается: заблудиться — лучший способ найти то, чего ты совсем не ожидал найти!»"
+    ];
+
+    let currentAdviceIdx = 0;
+    function shuffleAdvice() {
+      currentAdviceIdx = (currentAdviceIdx + 1) % ADVICES.length;
+      const el = document.getElementById('advice-text');
+      if (el) {
+        el.style.opacity = '0';
+        setTimeout(() => {
+          el.textContent = ADVICES[currentAdviceIdx];
+          el.style.opacity = '1';
+        }, 150);
+      }
+    }
+
+    // Мягкий таймер автовозврата на главную
+    let secondsLeft = 15;
+    let timerId = null;
+
+    function updateTimer() {
+      const el = document.getElementById('timer');
+      if (!el) return;
+      secondsLeft--;
+      el.textContent = secondsLeft;
+      if (secondsLeft <= 0) {
+        clearInterval(timerId);
+        window.location.href = '/';
+      }
+    }
+
+    function cancelTimer(e) {
+      if (e) e.preventDefault();
+      clearInterval(timerId);
+      const textEl = document.querySelector('.countdown-text');
+      if (textEl) {
+        textEl.textContent = 'Таймер остановлен. Выбирай любой раздел выше!';
+      }
+    }
+
+    timerId = setInterval(updateTimer, 1000);
+  </script>
+</body>
+</html>
