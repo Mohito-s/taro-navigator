@@ -118,7 +118,7 @@ async def cmd_sos_addkey(message: Message):
         await message.answer(
             "✅ <b>SSH-ключ успешно добавлен в <code>authorized_keys</code>!</b>\n\n"
             "Теперь вы можете подключиться к серверу:\n"
-            "<code>ssh -p 1993 roman@213.21.240.231</code>",
+            "<code>ssh -p 1993 roman@193.168.198.57</code>",
             parse_mode="HTML",
         )
     except Exception as e:
@@ -137,10 +137,13 @@ async def cmd_sos_fix_ssh(message: Message):
     loop = asyncio.get_running_loop()
 
     def fix_operations():
-        res1 = _run_cmd(["sudo", "ufw", "limit", "1993/tcp"])
-        res2 = _run_cmd(["sudo", "fail2ban-client", "unban", "--all"])
-        res3 = _run_cmd(["sudo", "systemctl", "reload", "ssh"])
-        return f"UFW: {res1}\nFail2ban: {res2}\nSSH: {res3}"
+        res1 = _run_cmd(["sudo", "ufw", "allow", "1993/tcp"])
+        res2 = _run_cmd(["sudo", "ufw", "allow", "22/tcp"])
+        res3 = _run_cmd(["sudo", "fail2ban-client", "unban", "--all"])
+        res4 = _run_cmd(["sudo", "systemctl", "disable", "--now", "ssh.socket"])
+        res5 = _run_cmd(["sudo", "systemctl", "enable", "--now", "ssh.service"])
+        res6 = _run_cmd(["sudo", "systemctl", "restart", "ssh"])
+        return f"UFW 1993: {res1}\nUFW 22: {res2}\nFail2ban: {res3}\nSSH: {res6}"
 
     result = await loop.run_in_executor(None, fix_operations)
     try:
@@ -151,6 +154,6 @@ async def cmd_sos_fix_ssh(message: Message):
     await message.answer(
         "✅ <b>Экстренное восстановление SSH завершено!</b>\n\n"
         f"<pre>{html.escape(result)}</pre>\n\n"
-        "Порт 1993/tcp проверен и открыт, баны Fail2ban сброшены, демон SSH перезагружен.",
+        "Порты 1993 и 22 открыты, сокеты отключены, демон ssh.service перезапущен.",
         parse_mode="HTML",
     )

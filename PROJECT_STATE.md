@@ -197,6 +197,14 @@
 
 ## ЛОГ ИСПРАВЛЕНИЙ (последние изменения сверху)
 
+- 2026-09-24 — **Окончательное решение SSH на Ubuntu 24.04, аварийный SSH-ключ, инструмент восстановления в 1 клик с ПК и починка VLESS-подписок (`SERVER_KEYS_AND_CONFIGS.md`, `C:\Users\Furianec\Scripts\emergency_ssh_recovery.py`, `C:\Users\Furianec\Desktop\ВОССТАНОВИТЬ_ДОСТУП_К_СЕРВЕРУ.bat`, `bot/handlers/admin_sos.py`, Nginx).**
+  1) **Служба SSH на сервере:** Устранен конфликт сокетов systemd в Ubuntu 24.04 (`ssh.socket` отключен, `ssh.service` включен и запущен на портах 1993 и 22). Вход по SSH гарантирован при любых перезагрузках.
+  2) **Запасной SSH-ключ (Emergency Key):** Сгенерирован независимый Ed25519 ключ `id_ed25519_backup`, публичная часть прописана в `authorized_keys` для пользователей `roman` и `root`, проверен вход с обоих аккаунтов. Приватный ключ сохранен в `SERVER_KEYS_AND_CONFIGS.md`.
+  3) **Локальный инструмент восстановления в 1 клик:** Создан скрипт `C:\Users\Furianec\Scripts\emergency_ssh_recovery.py` и ярлык на Рабочем столе `ВОССТАНОВИТЬ_ДОСТУП_К_СЕРВЕРУ.bat`. Скрипт пробует все 4 связки ключей и пароль root, при подключении автоматически открывает порты UFW, сбрасывает баны Fail2ban и перезапускает SSH.
+  4) **Обновление экстренной команды в Telegram:** В `bot/handlers/admin_sos.py` команда `/sos_fix_ssh` обновлена (заменен `reload` на полный `restart` сервиса и открытие портов), изменения развернуты на проде и применены в PM2 `taro-bot`.
+  5) **Исправление подписок RemnaWave:** В конфиг Nginx `shadowlinkapp.online` добавлен отсутствовавший блок `location /sl-rw` с проксированием WebSocket на порт 10110 ядра Xray (`rw-core`). Теперь клиенты (v2rayNG, Hiddify, Streisand) успешно обновляют подписки и подключаются к скрытому узлу Helsinki CDN.
+  6) **Расписание бэкапов:** Задача Windows Task Scheduler `WeeklyServerBackup` переведена на каждое воскресенье в 21:00 (9 вечера).
+
 - 2026-09-24 — **Бесшовная миграция на новый VPS Хельсинки (`193.168.198.57`), восстановление RemnaWave, OlcRTC, AmneziaWG, запуск Taro-ботов и автоматизация бэкапов (`SERVER_KEYS_AND_CONFIGS.md`, `MIGRATION_STATUS_AND_TODO.md`, `C:\Users\Furianec\Scripts\weekly_server_backup.py`).**
   1) **Перенос инфраструктуры:** Развернут новый чистый VPS в Хельсинки (Финляндия, AS41745) без блокировок РКН. Создан пользователь `roman` с правами sudo, 2 ГБ Swap, Docker, Nginx, Certbot, Fail2ban, Node.js, PM2.
   2) **Cloudflare DNS:** Перенесены все A-записи доменов `shadowlinkapp.online`, `panel`, `sub`, `proxy`, `stroikakras.ru`, `shadowlinkray.ru` на IP `193.168.198.57` с Cloudflare Proxy.
