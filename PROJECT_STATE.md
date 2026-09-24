@@ -195,8 +195,21 @@
       `https://mohito-s.github.io` работает, фоллбэк на бота/локальный текст жив.
       (`api/`, nginx, pm2, `PROJECT_STATE.md`)
 
-## ЛОГ ИСПРАВЛЕНИЙ (последние изменения сверху)
-
+- 2026-09-24 — **Генерация QR-кодов для подписок, настройка почтового сервера Postfix + OpenDKIM и DNS-записей для stroikakras.ru (`SUBSCRIPTIONS_QR_CODES.md`, `SERVER_KEYS_AND_CONFIGS.md`, Cloudflare DNS, Postfix, OpenDKIM):**
+  1) **QR-коды для мгновенного подключения:** Сгенерированы высококачественные PNG QR-коды для моментального подключения в 1 клик через камеру смартфона или импорт в приложения (Happ, v2raytun, Sing-box, FlClash, Telegram):
+     - `qr_subscription_url.png` — общая авто-подписка RemnaWave (`https://sub.shadowlinkapp.online/api/sub/sMtET-VfUXYEdRTF`).
+     - `qr_vless_reality.png` — прямой ключ VLESS Reality Direct на порт 8443 с маскировкой под Google TLS 1.3.
+     - `qr_olcrtc_jitsi.png` — обход ТСПУ через WebRTC видеопоток Jitsi (`olcrtc://jitsi?...`).
+     - `qr_tg_proxy.png` — Telegram MTProto Proxy (`proxy.shadowlinkapp.online:8444`).
+     - `qr_sub_webpage.png` — личный веб-кабинет пользователя.
+     Все QR-коды и инструкции собраны в интерактивном артефакте `SUBSCRIPTIONS_QR_CODES.md`.
+  2) **Почтовый сервер для stroikakras.ru (Mail.ru защита):** На сервере развернуты и сконфигурированы службы Postfix и OpenDKIM. Сгенерирован 2048-битный RSA ключ DKIM (`mail._domainkey.stroikakras.ru`), настроена интеграция сокетов Milter в Postfix (`myhostname = mail.stroikakras.ru`).
+  3) **Обновление DNS Cloudflare:** Через Cloudflare API обновлены записи домена `stroikakras.ru`:
+     - SPF (TXT): `v=spf1 ip4:193.168.198.57 ~all` (заменен старый шведский IP).
+     - DKIM (TXT): публичный ключ OpenDKIM `mail._domainkey.stroikakras.ru` (проверено утилитой `opendkim-testkey: key OK`).
+     - DMARC (TXT): `v=DMARC1; p=none; sp=none; rua=mailto:Pisbmaestb@mail.ru`.
+     - A-запись `mail.stroikakras.ru`: направлена на `193.168.198.57`.
+  4) **Верификация отправки заявок:** Исправлены права доступа к каталогу `data` в `stroikakras.ru`, протестирована отправка заявки в API (`POST /api/lead`), зафиксировано добавление валидной DKIM-подписи в системном журнале Postfix/OpenDKIM (`DKIM-Signature field added`).
 - 2026-09-24 — **Развёртывание VLESS-REALITY (порт 8443), Nginx URL-Rewrite для подписок, интеграция OlcRTC URI и запуск Stroikakras (`SERVER_KEYS_AND_CONFIGS.md`, `/etc/nginx/sites-available/shadowlinkapp.online`, RemnaWave DB, PM2):**
   1) **VLESS-REALITY против ТСПУ / DPI:** в Xray-core на сервере запущен прямой VLESS-REALITY транспорт на порту `8443` (маскировка `www.google.com`, PBK `4cmjrzhLAVvPC5s7PcXfBSEF5PR4sEi00fR38OBjSyQ`, ShortId `6ba85179e30d4fc2`). Протокол устойчив к блокировкам ТСПУ на мобильных операторах (МТС, Мегафон, Билайн, Tele2) и добавлен в подписку пользователя.
   2) **Универсальные ссылки на подписки в Nginx:** настроен rewrite-роутинг в Nginx, благодаря которому подписка отдаёт `200 OK` и через стандартный путь `/api/sub/{slug}`, и напрямую по короткому слагу `/{slug}` (`https://sub.shadowlinkapp.online/sMtET-VfUXYEdRTF`). Настроен автоматический 301-редирект с `sub.shadowlinkapp.online/auth/login` на панель управления `panel.shadowlinkapp.online/auth/login`.
