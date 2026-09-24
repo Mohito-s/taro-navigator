@@ -440,7 +440,7 @@ if (BASE_DIR / "books").is_dir():
     app.mount("/books", StaticFiles(directory=str(BASE_DIR / "books")), name="books")
 
 
-@app.get("/")
+@app.api_route("/", methods=["GET", "HEAD"])
 async def serve_index():
     index_path = BASE_DIR / "index.html"
     if index_path.is_file():
@@ -448,7 +448,7 @@ async def serve_index():
     return {"ok": True, "service": "taro-api"}
 
 
-@app.get("/arcana")
+@app.api_route("/arcana", methods=["GET", "HEAD"])
 async def serve_arcana_catalog_clean():
     f = BASE_DIR / "arcana.html"
     if f.is_file():
@@ -456,7 +456,7 @@ async def serve_arcana_catalog_clean():
     raise HTTPException(status_code=404, detail="Page not found")
 
 
-@app.get("/arcan-{num}")
+@app.api_route("/arcan-{num}", methods=["GET", "HEAD"])
 async def serve_arcan_page_clean(num: int):
     f = BASE_DIR / f"arcan-{num}.html"
     if f.is_file():
@@ -464,7 +464,7 @@ async def serve_arcan_page_clean(num: int):
     raise HTTPException(status_code=404, detail="Page not found")
 
 
-@app.get("/{page}.html")
+@app.api_route("/{page}.html", methods=["GET", "HEAD"])
 async def serve_html_page(page: str):
     page_file = BASE_DIR / f"{page}.html"
     if page_file.is_file():
@@ -472,7 +472,7 @@ async def serve_html_page(page: str):
     raise HTTPException(status_code=404, detail="Page not found")
 
 
-@app.get("/favicon.jpg")
+@app.api_route("/favicon.jpg", methods=["GET", "HEAD"])
 async def serve_favicon():
     f = BASE_DIR / "favicon.jpg"
     if f.is_file():
@@ -480,7 +480,7 @@ async def serve_favicon():
     raise HTTPException(status_code=404, detail="Favicon not found")
 
 
-@app.get("/favicon.ico")
+@app.api_route("/favicon.ico", methods=["GET", "HEAD"])
 async def serve_favicon_ico():
     f = BASE_DIR / "favicon.jpg"
     if f.is_file():
@@ -488,7 +488,7 @@ async def serve_favicon_ico():
     raise HTTPException(status_code=404, detail="Favicon not found")
 
 
-@app.get("/robots.txt")
+@app.api_route("/robots.txt", methods=["GET", "HEAD"])
 async def serve_robots():
     f = BASE_DIR / "robots.txt"
     if f.is_file():
@@ -496,7 +496,7 @@ async def serve_robots():
     raise HTTPException(status_code=404, detail="Robots.txt not found")
 
 
-@app.get("/sitemap.xml")
+@app.api_route("/sitemap.xml", methods=["GET", "HEAD"])
 async def serve_sitemap():
     f = BASE_DIR / "sitemap.xml"
     if f.is_file():
@@ -504,7 +504,7 @@ async def serve_sitemap():
     raise HTTPException(status_code=404, detail="Sitemap not found")
 
 
-@app.get("/mobile_main.png")
+@app.api_route("/mobile_main.png", methods=["GET", "HEAD"])
 async def serve_mobile_main():
     f = BASE_DIR / "mobile_main.png"
     if f.is_file():

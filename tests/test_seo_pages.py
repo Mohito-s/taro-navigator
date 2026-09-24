@@ -78,3 +78,18 @@ def test_fastapi_clean_seo_endpoints():
     # Проверка несуществующего аркана
     res_not_found = client.get("/arcan-99")
     assert res_not_found.status_code == 404
+
+
+def test_fastapi_head_requests():
+    """Проверяет корректность обработки HEAD-запросов (200 OK без 405 Method Not Allowed)."""
+    client = TestClient(app)
+
+    res_root = client.head("/")
+    assert res_root.status_code == 200, f"HEAD / должен возвращать 200, получено {res_root.status_code}"
+
+    res_arcana = client.head("/arcana")
+    assert res_arcana.status_code == 200, f"HEAD /arcana должен возвращать 200, получено {res_arcana.status_code}"
+
+    res_arcan_1 = client.head("/arcan-1")
+    assert res_arcan_1.status_code == 200, f"HEAD /arcan-1 должен возвращать 200, получено {res_arcan_1.status_code}"
+

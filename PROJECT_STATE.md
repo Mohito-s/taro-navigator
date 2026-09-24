@@ -197,6 +197,12 @@
 
 ## ЛОГ ИСПРАВЛЕНИЙ (последние изменения сверху)
 
+- 2026-09-24 — **Поддержка HTTP HEAD-запросов в FastAPI и аудит целостности VPS (`api/main.py`, `tests/test_seo_pages.py`, Nginx, PM2).**
+  1) **HEAD-запросы без 405 Method Not Allowed:** Заменены `@app.get` на `@app.api_route(..., methods=["GET", "HEAD"])` для корневого пути `/`, страниц `/arcana`, `/arcan-{num}`, `/{page}.html`, `sitemap.xml`, `robots.txt` и фавиконок. Теперь curl -I и поисковые боты получают валидный `200 OK`.
+  2) **Автотесты:** В `tests/test_seo_pages.py` добавлен тест `test_fastapi_head_requests` на проверку статуса 200 при вызове метода HEAD. Все 19 модульных тестов и сквозной раннер `run_tests.py` успешно пройдены.
+  3) **Аудит и настройка stroikakras.ru:** Добавлен хелсчек эндпоинт `/api/` (GET/HEAD 200 OK) в `server.js`, запущен процесс `stroikakras` в PM2 на порту 8088 под пользователем `roman`, сохранен список PM2 процессов (`dump.pm2`).
+
+
 - 2026-09-24 — **Окончательное решение SSH на Ubuntu 24.04, аварийный SSH-ключ, инструмент восстановления в 1 клик с ПК и починка VLESS-подписок (`SERVER_KEYS_AND_CONFIGS.md`, `C:\Users\Furianec\Scripts\emergency_ssh_recovery.py`, `C:\Users\Furianec\Desktop\ВОССТАНОВИТЬ_ДОСТУП_К_СЕРВЕРУ.bat`, `bot/handlers/admin_sos.py`, Nginx).**
   1) **Служба SSH на сервере:** Устранен конфликт сокетов systemd в Ubuntu 24.04 (`ssh.socket` отключен, `ssh.service` включен и запущен на портах 1993 и 22). Вход по SSH гарантирован при любых перезагрузках.
   2) **Запасной SSH-ключ (Emergency Key):** Сгенерирован независимый Ed25519 ключ `id_ed25519_backup`, публичная часть прописана в `authorized_keys` для пользователей `roman` и `root`, проверен вход с обоих аккаунтов. Приватный ключ сохранен в `SERVER_KEYS_AND_CONFIGS.md`.
