@@ -93,3 +93,6 @@ def test_fastapi_head_requests():
     res_arcan_1 = client.head("/arcan-1")
     assert res_arcan_1.status_code == 200, f"HEAD /arcan-1 должен возвращать 200, получено {res_arcan_1.status_code}"
 
+    res_health = client.head("/api/health")
+    assert res_health.status_code == 200, f"HEAD /api/health должен возвращать 200, получено {res_health.status_code}"
+

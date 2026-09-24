@@ -230,7 +230,7 @@ async def _guard(request: Request, init_data: str) -> None:
         raise HTTPException(status_code=401, detail="Неверная подпись Telegram.")
 
 
-@app.get("/api/health")
+@app.api_route("/api/health", methods=["GET", "HEAD"])
 async def health():
     return {"ok": True, "service": "taro-api"}
 
