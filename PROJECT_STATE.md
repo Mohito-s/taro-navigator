@@ -61,10 +61,12 @@
 - [x] Раздельные профили и компактные QR-коды для AmneziaWG (`SERVER_KEYS_AND_CONFIGS.md`, `SUBSCRIPTIONS_QR_CODES.md`, `img/qr/`):
       1) **Конфликт IP устранен:** создана выделенная конфигурация для Android (`10.8.1.2/32`, `amnezia_helsinki.conf`) и iPhone жены (`10.8.1.3/32`, `amnezia_helsinki_iphone.conf`), зарегистрирован публичный ключ в `/opt/amnezia/awg/awg0.conf` на VPS.
       2) **Компактные QR-коды:** сгенерированы `img/qr/qr_awg_android.png` и `img/qr/qr_awg_iphone.png` с коррекцией L и малым border для быстрого сканирования в приложении Amnezia VPN прямо с экрана.
-- [x] Защищенный VLESS-WS на порту 443 и автономный CLI-тестер подписок (`scripts/test_subscription_cli.py`, `SERVER_KEYS_AND_CONFIGS.md`, `SUBSCRIPTIONS_QR_CODES.md`, `img/qr/`):
-      1) **Dual-Inbound в RemnaWave:** поднят `VLESS_WS_MAIN` (порт `10110`, path `/sl-rw`), проксируемый Nginx с порта 443 с валидным Let's Encrypt TLS. ТСПУ не может отличить трафик от HTTPS-посещения `shadowlinkapp.online`.
-      2) **Автономный тестер с ПК:** скрипт `scripts/test_subscription_cli.py` использует локальный `nekobox_core.exe` (sing-box) на порту 20808 для автоматической проверки подписок/ключей без вмешательства в системные сетевые настройки. Проверено: выходной IP `193.168.198.57`, задержка ~700 мс.
-      3) **QR-код и подписка:** автоподписка `https://sub.shadowlinkapp.online/sMtET-VfUXYEdRTF` дополнена рабочим узлом `🇫🇮 Helsinki CDN`, сгенерирован QR-код `img/qr/qr_vless_ws.png`.
+- [x] Защищенный VLESS Cloudflare Shield (100% сокрытие реального IP за CDN 🟧) и автономный CLI-тестер (`scripts/test_subscription_cli.py`, `SERVER_KEYS_AND_CONFIGS.md`, `SUBSCRIPTIONS_QR_CODES.md`, `img/qr/`):
+      1) **Выделенный поддомен Cloudflare CDN:** создан `cdn.shadowlinkapp.online` с оранжевым облаком (Proxied: true). Основные домены проекта (`shadowlinkapp.online` и `stroikakras.ru`) не затронуты.
+      2) **Полная маскировка IP сервера:** клиент подключается к Anycast IP Cloudflare (`188.114.97.0`). Финский IP `193.168.198.57` нигде не фигурирует в трафике и скрыт от РКН/ТСПУ.
+      3) **Настройка RemnaWave и Nginx:** подключен Let's Encrypt Wildcard-сертификат, инбаунд настроен с отпечатком `fp=chrome`. Уязвимый/сканируемый порт REALITY 8443 скрыт из публичной подписки.
+      4) **Верификация:** скрипт `scripts/test_subscription_cli.py` на базе `sing-box` подтвердил работу в проде (пинг ~700 мс, выходной IP `193.168.198.57`). Сгенерирован QR-код `img/qr/qr_vless_cf_shield.png`.
+
 
 
 - [x] Органический трафик и SEO-лендинги 22 Арканов Судьбы, каталог `arcana.html` и SEO-оптимизация натальной карты (`arcan-1.html` .. `arcan-22.html`, `arcana.html`, `natal.html`, `sitemap.xml`, `css/style.css`, `api/main.py`, `tests/test_seo_pages.py`):
@@ -220,6 +222,12 @@
       `https://mohito-s.github.io` работает, фоллбэк на бота/локальный текст жив.
       (`api/`, nginx, pm2, `PROJECT_STATE.md`)
 
+- 2026-09-25 — **Реализация Стратегии 1 (Cloudflare Shield CDN) и изоляция уязвимых портов (`Cloudflare DNS`, `scripts/update_remnawave_cf.py`, `scripts/set_fp_chrome.py`, `scripts/disable_reality_in_remnawave.py`, `img/qr/qr_vless_cf_shield.png`, `SERVER_KEYS_AND_CONFIGS.md`, `SUBSCRIPTIONS_QR_CODES.md`):**
+  1) **Скрытие реального IP сервера за Cloudflare CDN (Стратегия 1):** Через Cloudflare API создан выделенный изолированный поддомен `cdn.shadowlinkapp.online` с включенным оранжевым облаком (Proxied: true). Основные домены проектов (`shadowlinkapp.online` и `stroikakras.ru`) не затронуты. Клиенты подключаются к Anycast IP Cloudflare (`188.114.97.0`), реальный IP `193.168.198.57` полностью скрыт от ТСПУ и РКН.
+  2) **Маршрутизация в Nginx и Wildcard SSL:** В Nginx на VPS подключен хост `cdn.shadowlinkapp.online` с действующим Let's Encrypt Wildcard-сертификатом `*.shadowlinkapp.online`. Путь `/sl-rw` проксируется во внутренний порт `127.0.0.1:10110` Xray-core.
+  3) **Обновление RemnaWave и отключение уязвимого REALITY (Стратегия 3):** В БД RemnaWave узел переведен на `cdn.shadowlinkapp.online` с отпечатком `fp=chrome`. Нестабильный/сканируемый инбаунд REALITY на порту 8443 отключен из подписки (`is_disabled = true`).
+  4) **Верификация через локальный тестер sing-box:** Автономный CLI-тестер успешно подтвердил работу узла `Helsinki Cloudflare Shield`: статус `[OK]`, задержка 715 мс, выходной финский IP `193.168.198.57`. Ни один сканер РКН не видит финский IP сервера.
+  5) **Генерация QR-кода:** Сгенерирован `img/qr/qr_vless_cf_shield.png`, обновлены все базы ключей и артефакты.
 - 2026-09-25 — **Диагностика ТСПУ/DPI, развертывание dual-inbound (VLESS-WS 443 + REALITY 8443) в RemnaWave, автономный CLI-тестер подписок с ПК (`scripts/test_subscription_cli.py`, `SERVER_KEYS_AND_CONFIGS.md`, `SUBSCRIPTIONS_QR_CODES.md`, `img/qr/`):**
   1) **Анализ фильтрации ТСПУ:** Выявлено, что российский ТСПУ/DPI сбрасывает TCP handshake (RST, WinError 10054) на нестандартных портах (8443) при несовпадении SNI с AS провайдера (Google/Apple SNI на финский IP). В то же время стандартный защищенный порт 443 (HTTPS) с валидным доменом и Let's Encrypt сертификатом пропускается без помех.
   2) **Dual-Inbound архитектура RemnaWave:** Добавлен и активирован инбаунд `VLESS_WS_MAIN` (порт `127.0.0.1:10110`, path `/sl-rw`) параллельно с `VLESS_REALITY` в профиле конфигурации Xray (`remnanode`). Nginx проксирует путь `/sl-rw` с публичного порта 443 на внутренний порт Xray.

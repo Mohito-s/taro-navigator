@@ -96,11 +96,6 @@ def parse_vless_link(link: str) -> dict | None:
 def test_outbound(name: str, outbound: dict) -> tuple[bool, str, float]:
     config = {
         "log": {"level": "warn"},
-        "dns": {
-            "servers": [
-                {"tag": "dns-yandex", "address": "77.88.8.8"}
-            ]
-        },
         "inbounds": [
             {
                 "type": "mixed",
