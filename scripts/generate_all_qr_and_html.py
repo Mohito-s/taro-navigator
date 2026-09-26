@@ -2,7 +2,6 @@ import io
 import os
 import base64
 import qrcode
-from qrcode.image.styledpil import StyledPilImage
 
 # Read Amnzeia configs
 awg_android_conf = ""
@@ -18,9 +17,10 @@ if os.path.exists(r"C:\Users\Furianec\Desktop\amnezia_helsinki_iphone.conf"):
 # Links
 sub_url = "https://sub.shadowlinkapp.online/api/sub/sMtET-VfUXYEdRTF"
 vless_xhttp = "vless://6993ed34-beba-4d5a-a9a5-f1b43874a743@cdn.shadowlinkapp.online:443?encryption=none&type=xhttp&path=%2Fsl-xh&host=cdn.shadowlinkapp.online&mode=auto&extra=%7B%22mode%22%3A%22auto%22%7D&security=tls&sni=cdn.shadowlinkapp.online&fp=chrome#Helsinki%20Cloudflare%20XHTTP%20Shield"
-vless_reality = "vless://6993ed34-beba-4d5a-a9a5-f1b43874a743@193.168.198.57:8443?encryption=none&flow=xtls-rprx-vision&type=tcp&security=reality&sni=gateway.icloud.com&fp=chrome&pbk=4cmjrzhLAVvPC5s7PcXfBSEF5PR4sEi00fR38OBjSyQ&sid=6ba85179e30d4fc2#Helsinki%20REALITY%20Direct"
-vless_ws_direct = "vless://6993ed34-beba-4d5a-a9a5-f1b43874a743@193.168.198.57:443?encryption=none&type=ws&path=%2Fsl-rw&host=shadowlinkapp.online&security=tls&sni=shadowlinkapp.online&fp=chrome#Helsinki%20Direct%20(Port%20443)"
+vless_cf_ws = "vless://6993ed34-beba-4d5a-a9a5-f1b43874a743@cdn.shadowlinkapp.online:443?encryption=none&type=ws&path=%2Fsl-rw&host=cdn.shadowlinkapp.online&security=tls&sni=cdn.shadowlinkapp.online&fp=chrome#Helsinki%20Cloudflare%20WS%20Shield"
+vless_ws_direct = "vless://6993ed34-beba-4d5a-a9a5-f1b43874a743@shadowlinkapp.online:443?encryption=none&type=ws&path=%2Fsl-rw&host=shadowlinkapp.online&security=tls&sni=shadowlinkapp.online&fp=chrome#Helsinki%20Direct%20(Port%20443)"
 olcrtc_telemost = "olcrtc://telemost?vp8&fps=60&batch=64@71384762492861#6797073265d03feb0f454e238c78d01aa52c48534c1772c44493bd718fb62be1$Helsinki_Telemost"
+olcrtc_jitsi = "olcrtc://jitsi?datachannel@https://meet.systemli.org/romario_taro_777#6797073265d03feb0f454e238c78d01aa52c48534c1772c44493bd718fb62be1$Helsinki_Jitsi"
 tg_proxy = "tg://proxy?server=proxy.shadowlinkapp.online&port=8444&secret=ee671a094e1a88bbaab8607d8cac67cc3270726f78792e736861646f776c696e6b6170702e6f6e6c696e65"
 sub_portal = "https://sub.shadowlinkapp.online/sMtET-VfUXYEdRTF"
 
@@ -44,9 +44,10 @@ qrs = {
     "awg_iphone": make_qr_base64(awg_iphone_conf or "AmneziaWG iPhone"),
     "sub_url": make_qr_base64(sub_url),
     "vless_xhttp": make_qr_base64(vless_xhttp),
-    "vless_reality": make_qr_base64(vless_reality),
+    "vless_cf_ws": make_qr_base64(vless_cf_ws),
     "vless_ws": make_qr_base64(vless_ws_direct),
     "olcrtc_telemost": make_qr_base64(olcrtc_telemost),
+    "olcrtc_jitsi": make_qr_base64(olcrtc_jitsi),
     "tg_proxy": make_qr_base64(tg_proxy),
     "sub_portal": make_qr_base64(sub_portal),
 }
@@ -75,14 +76,14 @@ html_content = f"""<!DOCTYPE html>
   .subtitle {{
     text-align: center;
     color: #8a857c;
-    margin-bottom: 32px;
+    margin-bottom: 24px;
     font-size: 15px;
   }}
   .grid {{
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 24px;
-    max-width: 1300px;
+    max-width: 1400px;
     margin: 0 auto;
   }}
   .card {{
@@ -112,6 +113,14 @@ html_content = f"""<!DOCTYPE html>
     text-transform: uppercase;
     letter-spacing: 0.5px;
   }}
+  .badge.orange {{
+    background: rgba(246, 130, 31, 0.2);
+    color: #f6821f;
+  }}
+  .badge.purple {{
+    background: rgba(155, 89, 182, 0.2);
+    color: #bb86fc;
+  }}
   .card h2 {{
     margin: 0 0 8px 0;
     font-size: 19px;
@@ -121,7 +130,8 @@ html_content = f"""<!DOCTYPE html>
     font-size: 13px;
     color: #8a857c;
     margin-bottom: 16px;
-    min-height: 38px;
+    min-height: 42px;
+    line-height: 1.4;
   }}
   .qr-box {{
     background: #ffffff;
@@ -173,7 +183,7 @@ html_content = f"""<!DOCTYPE html>
     color: #fff;
   }}
   .alert {{
-    max-width: 1300px;
+    max-width: 1400px;
     margin: 0 auto 24px auto;
     background: rgba(201,169,110,0.1);
     border-left: 4px solid #c9a96e;
@@ -192,8 +202,8 @@ html_content = f"""<!DOCTYPE html>
 <div class="alert">
   💡 <b>Как сканировать:</b><br>
   • <b>AmneziaWG</b> ➔ открой официальное приложение <b>Amnezia VPN</b> ➔ нажми «+» ➔ «Подключиться по QR-коду».<br>
-  • <b>Авто-подписка RemnaWave</b> ➔ в <b>Happ</b>, <b>v2raytun</b> или <b>Hiddify</b> нажми «+» ➔ «Сканировать QR». Приложение само загрузит все доступные ноды сервера!<br>
-  • <b>Telegram Прокси</b> ➔ наведи обычную камеру смартфона, он сразу предложит открыть Telegram.
+  • <b>Авто-подписка RemnaWave</b> ➔ в <b>Happ</b>, <b>v2raytun</b> или <b>Hiddify</b> нажми «+» ➔ «Сканировать QR». Подписка загрузит все 3 узла сервера!<br>
+  • <b>OlcRTC (Телемост / Jitsi)</b> ➔ отсканируй или вставь ссылку в приложение <b>Olcbox</b> (протокол v2 активен на сервере).
 </div>
 
 <div class="grid">
@@ -202,7 +212,7 @@ html_content = f"""<!DOCTYPE html>
   <div class="card">
     <div class="badge">Рекомендуется (Авто-обновление)</div>
     <h2>⚡ Авто-подписка RemnaWave</h2>
-    <div class="desc">Для Happ, v2raytun, Hiddify, Sing-box. Автоматически загружает и обновляет все протоколы (Direct, WS, XHTTP).</div>
+    <div class="desc">Для Happ, v2raytun, Hiddify, Sing-box. Автоматически загружает все протоколы (Direct, WS Cloudflare, XHTTP).</div>
     <div class="qr-box">
       <img src="{qrs['sub_url']}" alt="QR Авто-подписка">
     </div>
@@ -212,9 +222,9 @@ html_content = f"""<!DOCTYPE html>
 
   <!-- 2. VLESS XHTTP Cloudflare -->
   <div class="card">
-    <div class="badge">Новейший обход ТСПУ 2026</div>
+    <div class="badge orange">Новейший обход ТСПУ 2026</div>
     <h2>🟧 VLESS XHTTP Cloudflare</h2>
-    <div class="desc">Split HTTP через сеть Cloudflare. Защита реального IP сервера + обход блокировок WebSocket на мобильных сетях.</div>
+    <div class="desc">Split HTTP через CDN Cloudflare. Защита реального IP сервера + обход блокировок WebSocket на мобильных сетях.</div>
     <div class="qr-box">
       <img src="{qrs['vless_xhttp']}" alt="QR VLESS XHTTP">
     </div>
@@ -222,40 +232,40 @@ html_content = f"""<!DOCTYPE html>
     <button class="btn" onclick="copyText('{vless_xhttp}', this)">📋 Скопировать VLESS XHTTP</button>
   </div>
 
-  <!-- 3. AmneziaWG Android -->
+  <!-- 3. OlcRTC Telemost -->
   <div class="card">
-    <div class="badge">Amnezia VPN (Роман)</div>
-    <h2>📱 AmneziaWG (Android)</h2>
-    <div class="desc">Устойчивый к глушилкам протокол с обфускацией пакетов. Уникальный IP 10.8.1.2.</div>
-    <div class="qr-box">
-      <img src="{qrs['awg_android']}" alt="QR AmneziaWG Android">
-    </div>
-    <div class="code-preview">{awg_android_conf[:120]}...</div>
-    <button class="btn" onclick="copyText(window.rawAwgAndroid, this)">📋 Скопировать конфиг</button>
-  </div>
-
-  <!-- 4. AmneziaWG iPhone -->
-  <div class="card">
-    <div class="badge">Amnezia VPN (Жена)</div>
-    <h2>🍏 AmneziaWG (iPhone)</h2>
-    <div class="desc">Отдельный защищённый канал для второго устройства. Уникальный IP 10.8.1.3.</div>
-    <div class="qr-box">
-      <img src="{qrs['awg_iphone']}" alt="QR AmneziaWG iPhone">
-    </div>
-    <div class="code-preview">{awg_iphone_conf[:120]}...</div>
-    <button class="btn" onclick="copyText(window.rawAwgIphone, this)">📋 Скопировать конфиг</button>
-  </div>
-
-  <!-- 5. OlcRTC Telemost -->
-  <div class="card">
-    <div class="badge">Абсолютная маскировка WebRTC</div>
+    <div class="badge purple">Маскировка WebRTC v2</div>
     <h2>📞 OlcRTC Яндекс Телемост</h2>
     <div class="desc">Маскировка под официальную видеоконференцию Яндекс Телемоста (комната 71384762492861). Для приложения Olcbox.</div>
     <div class="qr-box">
       <img src="{qrs['olcrtc_telemost']}" alt="QR OlcRTC Telemost">
     </div>
     <div class="code-preview">{olcrtc_telemost}</div>
-    <button class="btn" onclick="copyText('{olcrtc_telemost}', this)">📋 Скопировать OlcRTC ключ</button>
+    <button class="btn" onclick="copyText('{olcrtc_telemost}', this)">📋 Скопировать ключ Телемост</button>
+  </div>
+
+  <!-- 4. OlcRTC Jitsi -->
+  <div class="card">
+    <div class="badge purple">Маскировка WebRTC v2</div>
+    <h2>🌐 OlcRTC Jitsi WebRTC</h2>
+    <div class="desc">Маскировка под видеосвязь Jitsi Meet (комната romario_taro_777). Резервный канал для приложения Olcbox.</div>
+    <div class="qr-box">
+      <img src="{qrs['olcrtc_jitsi']}" alt="QR OlcRTC Jitsi">
+    </div>
+    <div class="code-preview">{olcrtc_jitsi}</div>
+    <button class="btn" onclick="copyText('{olcrtc_jitsi}', this)">📋 Скопировать ключ Jitsi</button>
+  </div>
+
+  <!-- 5. VLESS WS Cloudflare Shield -->
+  <div class="card">
+    <div class="badge orange">Cloudflare CDN (WS)</div>
+    <h2>🛡️ VLESS WS Cloudflare</h2>
+    <div class="desc">VLESS WebSocket через Cloudflare CDN с защитой IP. Совместим со всеми клиентами (Hiddify, v2raytun).</div>
+    <div class="qr-box">
+      <img src="{qrs['vless_cf_ws']}" alt="QR VLESS CF WS">
+    </div>
+    <div class="code-preview">{vless_cf_ws}</div>
+    <button class="btn" onclick="copyText('{vless_cf_ws}', this)">📋 Скопировать VLESS CF WS</button>
   </div>
 
   <!-- 6. VLESS WS Direct -->
@@ -267,10 +277,34 @@ html_content = f"""<!DOCTYPE html>
       <img src="{qrs['vless_ws']}" alt="QR VLESS WS">
     </div>
     <div class="code-preview">{vless_ws_direct}</div>
-    <button class="btn" onclick="copyText('{vless_ws_direct}', this)">📋 Скопировать VLESS WS</button>
+    <button class="btn" onclick="copyText('{vless_ws_direct}', this)">📋 Скопировать VLESS Direct</button>
   </div>
 
-  <!-- 7. Telegram MTProto -->
+  <!-- 7. AmneziaWG Android -->
+  <div class="card">
+    <div class="badge">Amnezia VPN (Роман)</div>
+    <h2>📱 AmneziaWG (Android)</h2>
+    <div class="desc">Устойчивый к глушилкам протокол с обфускацией пакетов. Уникальный IP 10.8.1.2.</div>
+    <div class="qr-box">
+      <img src="{qrs['awg_android']}" alt="QR AmneziaWG Android">
+    </div>
+    <div class="code-preview">{awg_android_conf[:120]}...</div>
+    <button class="btn" onclick="copyText(window.rawAwgAndroid, this)">📋 Скопировать конфиг</button>
+  </div>
+
+  <!-- 8. AmneziaWG iPhone -->
+  <div class="card">
+    <div class="badge">Amnezia VPN (Жена)</div>
+    <h2>🍏 AmneziaWG (iPhone)</h2>
+    <div class="desc">Отдельный защищённый канал для второго устройства. Уникальный IP 10.8.1.3.</div>
+    <div class="qr-box">
+      <img src="{qrs['awg_iphone']}" alt="QR AmneziaWG iPhone">
+    </div>
+    <div class="code-preview">{awg_iphone_conf[:120]}...</div>
+    <button class="btn" onclick="copyText(window.rawAwgIphone, this)">📋 Скопировать конфиг</button>
+  </div>
+
+  <!-- 9. Telegram MTProto -->
   <div class="card">
     <div class="badge">1 Клик для Telegram</div>
     <h2>✈️ Telegram MTProto Proxy</h2>
@@ -282,7 +316,7 @@ html_content = f"""<!DOCTYPE html>
     <button class="btn" onclick="copyText('{tg_proxy}', this)">📋 Скопировать ссылку</button>
   </div>
 
-  <!-- 8. Web Portal -->
+  <!-- 10. Web Portal -->
   <div class="card">
     <div class="badge">Личный Кабинет</div>
     <h2>🌐 Веб-портал подписки</h2>
